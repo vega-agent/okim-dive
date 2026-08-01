@@ -1,64 +1,134 @@
-# Okim Dive 🤿
+# Okim Dive - Scuba Diving Website
 
-Website for Okim Dive — freelance dive instructor and trip planner based in Tioman, Malaysia.
+A multi-page website for Okim Dive, a freelance dive instructor and trip planner based in Tioman, Malaysia.
 
-## About
+## Project Structure
 
-Okim Dive is run by Iris, a freelance dive instructor and trip planner offering:
-- Dive courses (Open Water, Advanced, private lessons)
-- Fun dives in Tioman
-- Overseas dive trips
-
-## Tech Stack
-
-- Static HTML/CSS (no build process)
-- Free hosting: Vercel or GitHub Pages
-- Domain: Free subdomain for now (okimdive.vercel.app or okimdive.github.io)
+```
+okim-dive/
+├── index.html          # Homepage with hero, intro, and quick links
+├── about.html          # About Iris, our story, and why choose us
+├── courses.html        # Dive courses from beginner to professional
+├── trips.html          # Local and international dive trips
+├── gallery.html        # Photo gallery with placeholder watercolor images
+├── contact.html        # Contact methods, form, and FAQ
+├── styles.css          # Complete stylesheet with watercolor theme
+├── assets/
+│   └── watercolor/     # Folder for watercolor design elements
+│       ├── backgrounds/
+│       ├── hero-banners/
+│       ├── decorative/
+│       ├── frames/
+│       ├── dividers/
+│       ├── icons/
+│       ├── corners/
+│       └── overlays/
+├── PRD.md              # Product Requirements Document
+├── DESIGN-SYSTEM.md    # Design system specifications
+├── BRAND-GUIDE.md      # Brand guide with watercolor theme
+└── WATERCOLOR-DESIGN-ELEMENTS.md  # Prompts for generating watercolor assets
+```
 
 ## Pages
 
-- **Home** — Hero, intro, features, social links
-- **About** — Iris's story and background
-- **Courses** — Dive course offerings
-- **Trips** — Tioman and overseas trip information
-- **Contact** — How to reach Okim Dive
+### Homepage (index.html)
+- Hero section with underwater ocean background
+- Welcome introduction with feature cards
+- Quick links to courses, trips, gallery, and contact
+- Responsive navigation
+
+### About Us (about.html)
+- Meet Iris section with instructor profile
+- Our story and mission
+- Why choose us with 6 key benefits
+
+### Courses (courses.html)
+- 6 dive courses (Open Water to Discover Scuba)
+- Course details with duration, depth, prerequisites
+- How it works process
+- FAQ section
+
+### Trips (trips.html)
+- Local dive sites (Tioman, Perhentian, Redang)
+- International destinations (Sipadan, Raja Ampat, Similan, Maldives)
+- What's included in trips
+- Trip planning information
+
+### Gallery (gallery.html)
+- Masonry-style photo grid
+- 12 image placeholders ready for watercolor assets
+- Photo categories section
+- Call-to-action to start diving
+
+### Contact (contact.html)
+- Contact methods (WhatsApp, Instagram, Facebook, XiaoHongShu)
+- Contact form with interest selection
+- FAQ section
+- Location and transport information
+
+## Design Theme
+
+- **Style**: Watercolor ocean aesthetic
+- **Color Palette**: Ocean blues, corals, and sandy tones
+- **Typography**: Great Vibes (cursive), Playfair Display (headings), Lato (body)
+- **Features**:
+  - Fully responsive design
+  - Smooth animations
+  - Glass-morphism navigation
+  - Mobile-friendly hamburger menu
+
+## Current Status
+
+✅ Multi-page structure created  
+✅ Responsive CSS with mobile support  
+✅ All navigation links working  
+✅ Placeholder sections for content  
+
+## Next Steps
+
+1. Generate watercolor design elements using prompts in `WATERCOLOR-DESIGN-ELEMENTS.md`
+2. Replace placeholder images with actual watercolor assets
+3. Add real photography from Iris's Instagram/Facebook
+4. Update contact form to connect to backend service
+5. Deploy to hosting platform
 
 ## Development
 
+To view locally:
 ```bash
-# No build process needed — just open index.html in a browser
-open index.html
-
-# Or use a simple HTTP server
+# Open any HTML file in browser, or use a local server:
 python3 -m http.server 8000
+# Then visit http://localhost:8000
 ```
 
 ## Deployment
 
-### Option 1: Vercel (recommended)
-1. Push repo to GitHub
-2. Connect to Vercel
-3. Auto-deploys on every push
+Ready to deploy to:
+- Vercel (recommended)
+- Netlify
+- GitHub Pages
+- Any static hosting service
 
-### Option 2: GitHub Pages
-1. Push to GitHub
-2. Enable Pages in repo settings
-3. Site available at `username.github.io/okim-dive`
+## Color Palette
 
-## Future Enhancements
-
-- [ ] Bilingual support (EN + CN)
-- [ ] Photo gallery
-- [ ] Blog/tips section
-- [ ] CMS migration if Iris needs self-updates
-- [ ] Custom domain registration
+```css
+--ocean-deep: #0a2342;
+--ocean-mid: #1b4965;
+--ocean-light: #5fa8d3;
+--ocean-surface: #bee9e8;
+--ocean-foam: #cae9ff;
+--coral: #ff6b6b;
+--sand: #f4e4c1;
+```
 
 ## Contact
 
-- Instagram: [@okim_dive](https://www.instagram.com/okim_dive)
-- Facebook: [OKIM Dive](https://www.facebook.com/people/OKIM-Dive/61578882252925/)
-- XiaoHongShu: [小红书](https://xhslink.cn/m/9TfIoxN1yFp)
+- **Instructor**: Iris
+- **Location**: Tioman Island, Malaysia
+- **Instagram**: [@okim_dive](https://www.instagram.com/okim_dive)
+- **Facebook**: [OKIM Dive](https://www.facebook.com/people/OKIM-Dive/61578882252925/)
+- **小红书**: [Profile](https://xhslink.cn/m/9TfIoxN1yFp)
 
 ---
 
-Built with 🤿 by the Okim Dive team
+Built with 🤿 for Okim Dive

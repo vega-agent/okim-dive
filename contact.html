@@ -3,76 +3,237 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Contact — Okim Dive</title>
+    <title>Contact - Okim Dive</title>
     <link rel="stylesheet" href="styles.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Great+Vibes&family=Lato:wght@300;400;700&family=Playfair+Display:wght@400;600&display=swap" rel="stylesheet">
 </head>
 <body>
-    <nav class="nav">
-        <div class="nav-brand">
-            <a href="/">🤿 Okim Dive</a>
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="nav-logo">
+                <span class="logo-icon">🤿</span>
+                <span class="logo-text">Okim Dive</span>
+            </div>
+            <ul class="nav-menu">
+                <li><a href="index.html" class="nav-link">Home</a></li>
+                <li><a href="about.html" class="nav-link">About Us</a></li>
+                <li><a href="courses.html" class="nav-link">Courses</a></li>
+                <li><a href="trips.html" class="nav-link">Trips</a></li>
+                <li><a href="gallery.html" class="nav-link">Gallery</a></li>
+                <li><a href="contact.html" class="nav-link active">Contact</a></li>
+            </ul>
+            <div class="nav-toggle">
+                <span></span>
+                <span></span>
+                <span></span>
+            </div>
         </div>
-        <ul class="nav-links">
-            <li><a href="/">Home</a></li>
-            <li><a href="/about">About</a></li>
-            <li><a href="/courses">Courses</a></li>
-            <li><a href="/trips">Trips</a></li>
-            <li><a href="/contact">Contact</a></li>
-        </ul>
     </nav>
 
-    <main>
-        <section class="page-header">
-            <div class="container">
-                <h1>Contact Okim Dive</h1>
-                <p>Ready to dive? Get in touch!</p>
+    <!-- Hero Section -->
+    <section class="page-hero contact-hero">
+        <div class="hero-bg"></div>
+        <div class="hero-content">
+            <h1 class="hero-title">Contact Us</h1>
+            <p class="hero-subtitle">Let's start your diving adventure together</p>
+        </div>
+    </section>
+
+    <!-- Contact Introduction -->
+    <section class="contact-intro">
+        <div class="container">
+            <div class="intro-content">
+                <div class="watercolor-decoration top-left"></div>
+                <h2 class="section-title">Get in Touch</h2>
+                <p class="intro-text">
+                    Ready to dive in? Whether you have questions about courses, want to book a trip, 
+                    or just want to chat about diving, we're here to help. Reach out to us through 
+                    any of the channels below, and we'll get back to you as soon as possible.
+                </p>
             </div>
-        </section>
+        </div>
+    </section>
 
-        <section class="content-section">
-            <div class="container">
-                <div class="contact-grid">
-                    <div class="contact-method">
-                        <div class="contact-icon">💬</div>
-                        <h3>WhatsApp</h3>
-                        <p>[TO DO: Add WhatsApp number]</p>
-                        <a href="#" class="btn btn-primary">Message on WhatsApp</a>
-                    </div>
-
-                    <div class="contact-method">
-                        <div class="contact-icon">📧</div>
-                        <h3>Email</h3>
-                        <p>[TO DO: Add email address]</p>
-                        <a href="#" class="btn btn-primary">Send Email</a>
-                    </div>
-
-                    <div class="contact-method">
-                        <div class="contact-icon">📱</div>
-                        <h3>Instagram</h3>
-                        <p>@okim_dive</p>
-                        <a href="https://www.instagram.com/okim_dive" target="_blank" class="btn btn-primary">View Profile</a>
-                    </div>
+    <!-- Contact Methods -->
+    <section class="contact-methods">
+        <div class="container">
+            <div class="methods-grid">
+                <!-- WhatsApp -->
+                <div class="method-card">
+                    <div class="method-icon">💬</div>
+                    <h3>WhatsApp</h3>
+                    <p>Quick responses for course inquiries and trip bookings</p>
+                    <a href="https://wa.me/60123456789" class="btn btn-primary" target="_blank">
+                        Message Us
+                    </a>
+                    <p class="method-info">+60 12-345 6789</p>
                 </div>
 
-                <div class="content-block">
-                    <h2>Send a Message</h2>
-                    <p>[TO DO: Add contact form or inquiry instructions]</p>
-                    <p>For course bookings, trip inquiries, or general questions, reach out via WhatsApp or Instagram DM for the fastest response.</p>
+                <!-- Instagram -->
+                <div class="method-card">
+                    <div class="method-icon">📸</div>
+                    <h3>Instagram</h3>
+                    <p>Follow our dives and see our latest underwater adventures</p>
+                    <a href="https://www.instagram.com/okim_dive" class="btn btn-primary" target="_blank">
+                        @okim_dive
+                    </a>
+                    <p class="method-info">DM us anytime</p>
                 </div>
 
-                <div class="content-block">
-                    <h2>Location</h2>
-                    <p><strong>Based in:</strong> Tioman Island, Pahang, Malaysia</p>
-                    <p>[TO DO: Add more details about meeting point, how to get to Tioman, etc.]</p>
+                <!-- Facebook -->
+                <div class="method-card">
+                    <div class="method-icon">👥</div>
+                    <h3>Facebook</h3>
+                    <p>Connect with our diving community and get updates</p>
+                    <a href="https://www.facebook.com/people/OKIM-Dive/61578882252925/" class="btn btn-primary" target="_blank">
+                        Visit Page
+                    </a>
+                    <p class="method-info">Send us a message</p>
+                </div>
+
+                <!-- XiaoHongShu -->
+                <div class="method-card">
+                    <div class="method-icon">📕</div>
+                    <h3>小红书</h3>
+                    <p>关注我们的潜水旅程和精彩瞬间</p>
+                    <a href="https://xhslink.cn/m/9TfIoxN1yFp" class="btn btn-primary" target="_blank">
+                        查看主页
+                    </a>
+                    <p class="method-info">私信我们</p>
                 </div>
             </div>
-        </section>
-    </main>
+        </div>
+    </section>
 
+    <!-- Contact Form -->
+    <section class="contact-form-section">
+        <div class="container">
+            <div class="form-content">
+                <div class="watercolor-decoration bottom-right"></div>
+                <h2 class="section-title">Send Us a Message</h2>
+                <form class="contact-form">
+                    <div class="form-group">
+                        <label for="name">Name *</label>
+                        <input type="text" id="name" name="name" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="email">Email *</label>
+                        <input type="email" id="email" name="email" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="phone">Phone</label>
+                        <input type="tel" id="phone" name="phone">
+                    </div>
+                    <div class="form-group">
+                        <label for="interest">I'm Interested In</label>
+                        <select id="interest" name="interest">
+                            <option value="">Select an option</option>
+                            <option value="courses">Dive Courses</option>
+                            <option value="local-trips">Local Dive Trips</option>
+                            <option value="international-trips">International Trips</option>
+                            <option value="custom-trip">Custom Trip Planning</option>
+                            <option value="other">Other Questions</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="message">Message *</label>
+                        <textarea id="message" name="message" rows="5" required></textarea>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Send Message</button>
+                </form>
+            </div>
+        </div>
+    </section>
+
+    <!-- FAQ Section -->
+    <section class="faq-section">
+        <div class="container">
+            <h2 class="section-title">Frequently Asked Questions</h2>
+            <div class="faq-grid">
+                <div class="faq-item">
+                    <h3>How do I book a course?</h3>
+                    <p>Contact us via WhatsApp or Instagram DM with your preferred dates and course type. We'll confirm availability and send you booking details.</p>
+                </div>
+                <div class="faq-item">
+                    <h3>What's the best time to visit Tioman?</h3>
+                    <p>The diving season runs from March to October, with the best visibility typically from April to September. Contact us for current conditions.</p>
+                </div>
+                <div class="faq-item">
+                    <h3>Do you provide equipment?</h3>
+                    <p>Yes, all equipment is included in course fees. For certified divers, you can bring your own or rent from us.</p>
+                </div>
+                <div class="faq-item">
+                    <h3>Can I bring non-diving friends/family?</h3>
+                    <p>Absolutely! We can arrange snorkeling, island tours, and other activities for non-divers.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Location Info -->
+    <section class="location-section">
+        <div class="container">
+            <h2 class="section-title">Find Us</h2>
+            <div class="location-content">
+                <div class="location-info">
+                    <div class="watercolor-decoration top-left"></div>
+                    <h3>Okim Dive</h3>
+                    <p>📍 Tioman Island, Pahang, Malaysia</p>
+                    <p>Operating from multiple dive sites across Tioman</p>
+                    <div class="transport-info">
+                        <h4>Getting to Tioman:</h4>
+                        <ul>
+                            <li>Ferry from Mersing Jetty (2-2.5 hours)</li>
+                            <li>Ferry from Tanjung Gemuk (2 hours)</li>
+                            <li>Charter flights available from Singapore/KL</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
     <footer class="footer">
         <div class="container">
-            <p>&copy; 2026 Okim Dive. All rights reserved.</p>
-            <p>Tioman, Malaysia</p>
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h3>Okim Dive</h3>
+                    <p>Your gateway to underwater adventures in Tioman Island</p>
+                </div>
+                <div class="footer-section">
+                    <h3>Quick Links</h3>
+                    <ul class="footer-links">
+                        <li><a href="courses.html">Courses</a></li>
+                        <li><a href="trips.html">Trips</a></li>
+                        <li><a href="gallery.html">Gallery</a></li>
+                        <li><a href="contact.html">Contact</a></li>
+                    </ul>
+                </div>
+                <div class="footer-section">
+                    <h3>Connect</h3>
+                    <div class="social-links">
+                        <a href="https://www.instagram.com/okim_dive" class="social-link" target="_blank">Instagram</a>
+                        <a href="https://www.facebook.com/people/OKIM-Dive/61578882252925/" class="social-link" target="_blank">Facebook</a>
+                        <a href="https://xhslink.cn/m/9TfIoxN1yFp" class="social-link" target="_blank">小红书</a>
+                    </div>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2024 Okim Dive. All rights reserved.</p>
+            </div>
         </div>
     </footer>
+
+    <script>
+        const navToggle = document.querySelector('.nav-toggle');
+        const navMenu = document.querySelector('.nav-menu');
+        navToggle.addEventListener('click', () => {
+            navMenu.classList.toggle('active');
+        });
+    </script>
 </body>
 </html>

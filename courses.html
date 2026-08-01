@@ -3,105 +3,289 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Courses — Okim Dive</title>
+    <title>Dive Courses - Okim Dive</title>
     <link rel="stylesheet" href="styles.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Great+Vibes&family=Lato:wght@300;400;700&family=Playfair+Display:wght@400;600&display=swap" rel="stylesheet">
 </head>
 <body>
-    <nav class="nav">
-        <div class="nav-brand">
-            <a href="/">🤿 Okim Dive</a>
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="nav-logo">
+                <span class="logo-icon">🤿</span>
+                <span class="logo-text">Okim Dive</span>
+            </div>
+            <ul class="nav-menu">
+                <li><a href="index.html" class="nav-link">Home</a></li>
+                <li><a href="about.html" class="nav-link">About Us</a></li>
+                <li><a href="courses.html" class="nav-link active">Courses</a></li>
+                <li><a href="trips.html" class="nav-link">Trips</a></li>
+                <li><a href="gallery.html" class="nav-link">Gallery</a></li>
+                <li><a href="contact.html" class="nav-link">Contact</a></li>
+            </ul>
+            <div class="nav-toggle">
+                <span></span>
+                <span></span>
+                <span></span>
+            </div>
         </div>
-        <ul class="nav-links">
-            <li><a href="/">Home</a></li>
-            <li><a href="/about">About</a></li>
-            <li><a href="/courses">Courses</a></li>
-            <li><a href="/trips">Trips</a></li>
-            <li><a href="/contact">Contact</a></li>
-        </ul>
     </nav>
 
-    <main>
-        <section class="page-header">
-            <div class="container">
-                <h1>Dive Courses</h1>
-                <p>Learn to dive or advance your skills with personalized instruction</p>
-            </div>
-        </section>
+    <!-- Hero Section -->
+    <section class="page-hero courses-hero">
+        <div class="hero-bg"></div>
+        <div class="hero-content">
+            <h1 class="hero-title">Dive Courses</h1>
+            <p class="hero-subtitle">From beginner to professional - find your perfect course</p>
+        </div>
+    </section>
 
-        <section class="content-section">
-            <div class="container">
-                <div class="course-grid">
-                    <div class="course-card">
+    <!-- Courses Introduction -->
+    <section class="courses-intro">
+        <div class="container">
+            <div class="intro-content">
+                <div class="watercolor-decoration top-left"></div>
+                <h2 class="section-title">Your Diving Journey Starts Here</h2>
+                <p class="intro-text">
+                    Whether you're taking your first breath underwater or looking to advance your skills, 
+                    we offer comprehensive courses for all levels. Our PADI and SSI certified courses are 
+                    designed to build your confidence and knowledge while ensuring safety and fun.
+                </p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Course Levels -->
+    <section class="courses-section">
+        <div class="container">
+            <h2 class="section-title">Our Courses</h2>
+            <div class="courses-grid">
+                <!-- Open Water Course -->
+                <div class="course-card">
+                    <div class="course-header">
+                        <div class="course-icon">🎓</div>
                         <h3>Open Water Diver</h3>
-                        <p class="course-level">Beginner</p>
-                        <p>[TO DO: Course description]</p>
-                        <ul>
-                            <li>[Duration: X days]</li>
-                            <li>[Max depth: 18m]</li>
-                            <li>[What's included]</li>
-                            <li>[Price: TBD]</li>
-                        </ul>
-                        <a href="/contact" class="btn btn-primary">Inquire</a>
+                        <span class="course-level">Beginner</span>
                     </div>
+                    <div class="course-content">
+                        <p>Your first step into the underwater world. Learn the fundamentals of scuba diving 
+                        and earn your certification to dive independently.</p>
+                        <ul class="course-details">
+                            <li><strong>Duration:</strong> 3-4 days</li>
+                            <li><strong>Depth Limit:</strong> 18 meters</li>
+                            <li><strong>Prerequisites:</strong> Age 10+, swimming ability</li>
+                            <li><strong>Includes:</strong> Equipment, materials, certification</li>
+                        </ul>
+                        <a href="contact.html" class="btn btn-primary">Book Now</a>
+                    </div>
+                </div>
 
-                    <div class="course-card">
+                <!-- Advanced Open Water Course -->
+                <div class="course-card featured">
+                    <div class="course-badge">Popular</div>
+                    <div class="course-header">
+                        <div class="course-icon">🏊</div>
                         <h3>Advanced Open Water</h3>
-                        <p class="course-level">Intermediate</p>
-                        <p>[TO DO: Course description]</p>
-                        <ul>
-                            <li>[Duration: X days]</li>
-                            <li>[Max depth: 30m]</li>
-                            <li>[What's included]</li>
-                            <li>[Price: TBD]</li>
-                        </ul>
-                        <a href="/contact" class="btn btn-primary">Inquire</a>
+                        <span class="course-level">Intermediate</span>
                     </div>
-
-                    <div class="course-card">
-                        <h3>Try Scuba / Discover Scuba</h3>
-                        <p class="course-level">No certification needed</p>
-                        <p>[TO DO: Course description]</p>
-                        <ul>
-                            <li>[Duration: Half day]</li>
-                            <li>[Max depth: 12m]</li>
-                            <li>[What's included]</li>
-                            <li>[Price: TBD]</li>
+                    <div class="course-content">
+                        <p>Take your diving to the next level with specialty dives including deep diving, 
+                        navigation, and underwater photography.</p>
+                        <ul class="course-details">
+                            <li><strong>Duration:</strong> 2 days</li>
+                            <li><strong>Depth Limit:</strong> 30 meters</li>
+                            <li><strong>Prerequisites:</strong> Open Water certification</li>
+                            <li><strong>Includes:</strong> 5 adventure dives, certification</li>
                         </ul>
-                        <a href="/contact" class="btn btn-primary">Inquire</a>
-                    </div>
-
-                    <div class="course-card">
-                        <h3>Private Lessons</h3>
-                        <p class="course-level">All levels</p>
-                        <p>[TO DO: Course description]</p>
-                        <ul>
-                            <li>[Flexible schedule]</li>
-                            <li>[1-on-1 instruction]</li>
-                            <li>[Tailored to your goals]</li>
-                            <li>[Price: TBD]</li>
-                        </ul>
-                        <a href="/contact" class="btn btn-primary">Inquire</a>
+                        <a href="contact.html" class="btn btn-primary">Book Now</a>
                     </div>
                 </div>
 
-                <div class="content-block">
-                    <h2>What's Included?</h2>
-                    <p>[TO DO: Equipment, materials, certification, etc.]</p>
+                <!-- Rescue Diver Course -->
+                <div class="course-card">
+                    <div class="course-header">
+                        <div class="course-icon">🚑</div>
+                        <h3>Rescue Diver</h3>
+                        <span class="course-level">Advanced</span>
+                    </div>
+                    <div class="course-content">
+                        <p>Learn to prevent and manage dive emergencies. This challenging and rewarding 
+                        course builds your confidence and safety awareness.</p>
+                        <ul class="course-details">
+                            <li><strong>Duration:</strong> 4 days</li>
+                            <li><strong>Focus:</strong> Emergency management, rescue techniques</li>
+                            <li><strong>Prerequisites:</strong> Advanced Open Water, CPR certification</li>
+                            <li><strong>Includes:</strong> All training and certification</li>
+                        </ul>
+                        <a href="contact.html" class="btn btn-primary">Book Now</a>
+                    </div>
                 </div>
 
-                <div class="content-block">
-                    <h2>Prerequisites</h2>
-                    <p>[TO DO: Age requirements, swimming ability, medical considerations]</p>
+                <!-- Divemaster Course -->
+                <div class="course-card">
+                    <div class="course-header">
+                        <div class="course-icon">⭐</div>
+                        <h3>Divemaster</h3>
+                        <span class="course-level">Professional</span>
+                    </div>
+                    <div class="course-content">
+                        <p>Begin your professional diving career. Lead certified divers and assist 
+                        instructors with training programs.</p>
+                        <ul class="course-details">
+                            <li><strong>Duration:</strong> 4-8 weeks</li>
+                            <li><strong>Focus:</strong> Leadership, dive guiding, assisting</li>
+                            <li><strong>Prerequisites:</strong> Rescue Diver, 40 logged dives</li>
+                            <li><strong>Includes:</strong> Comprehensive training program</li>
+                        </ul>
+                        <a href="contact.html" class="btn btn-primary">Book Now</a>
+                    </div>
+                </div>
+
+                <!-- Specialty Courses -->
+                <div class="course-card">
+                    <div class="course-header">
+                        <div class="course-icon">📸</div>
+                        <h3>Specialty Courses</h3>
+                        <span class="course-level">Various</span>
+                    </div>
+                    <div class="course-content">
+                        <p>Enhance your skills with specialty courses including underwater photography, 
+                        night diving, wreck diving, and more.</p>
+                        <ul class="course-details">
+                            <li><strong>Options:</strong> Photography, Night Diver, Wreck Diver, etc.</li>
+                            <li><strong>Duration:</strong> 1-2 days per specialty</li>
+                            <li><strong>Prerequisites:</strong> Open Water (varies by specialty)</li>
+                            <li><strong>Includes:</strong> Specialty training and certification</li>
+                        </ul>
+                        <a href="contact.html" class="btn btn-primary">Learn More</a>
+                    </div>
+                </div>
+
+                <!-- Discover Scuba -->
+                <div class="course-card">
+                    <div class="course-header">
+                        <div class="course-icon">🏊‍♀️</div>
+                        <h3>Discover Scuba</h3>
+                        <span class="course-level">No Experience</span>
+                    </div>
+                    <div class="course-content">
+                        <p>Try scuba diving without commitment. Perfect for those curious about diving 
+                        but not ready for full certification.</p>
+                        <ul class="course-details">
+                            <li><strong>Duration:</strong> Half day</li>
+                            <li><strong>Depth Limit:</strong> 12 meters</li>
+                            <li><strong>Prerequisites:</strong> Age 10+, basic swimming</li>
+                            <li><strong>Includes:</strong> Equipment, instruction, dive</li>
+                        </ul>
+                        <a href="contact.html" class="btn btn-primary">Book Now</a>
+                    </div>
                 </div>
             </div>
-        </section>
-    </main>
+        </div>
+    </section>
 
+    <!-- Course Process -->
+    <section class="process-section">
+        <div class="container">
+            <div class="process-content">
+                <div class="watercolor-decoration bottom-right"></div>
+                <h2 class="section-title">How It Works</h2>
+                <div class="process-steps">
+                    <div class="step">
+                        <div class="step-number">1</div>
+                        <h3>Choose Your Course</h3>
+                        <p>Select the course that matches your experience level and goals</p>
+                    </div>
+                    <div class="step">
+                        <div class="step-number">2</div>
+                        <h3>Book Your Dates</h3>
+                        <p>Contact us to schedule your course dates and get details</p>
+                    </div>
+                    <div class="step">
+                        <div class="step-number">3</div>
+                        <h3>Learn & Practice</h3>
+                        <p>Complete theory sessions and pool/confined water training</p>
+                    </div>
+                    <div class="step">
+                        <div class="step-number">4</div>
+                        <h3>Open Water Dives</h3>
+                        <p>Apply your skills in real diving conditions with your instructor</p>
+                    </div>
+                    <div class="step">
+                        <div class="step-number">5</div>
+                        <h3>Get Certified</h3>
+                        <p>Receive your internationally recognized diving certification</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- FAQ Section -->
+    <section class="faq-section">
+        <div class="container">
+            <h2 class="section-title">Frequently Asked Questions</h2>
+            <div class="faq-grid">
+                <div class="faq-item">
+                    <h3>Do I need to be a good swimmer?</h3>
+                    <p>You need to be comfortable in water and able to swim 200 meters (or 300 meters with mask and fins). You don't need to be an expert swimmer.</p>
+                </div>
+                <div class="faq-item">
+                    <h3>What's included in the course fee?</h3>
+                    <p>All courses include equipment rental, learning materials, pool/confined water sessions, open water dives, and certification fees.</p>
+                </div>
+                <div class="faq-item">
+                    <h3>How long is the certification valid?</h3>
+                    <p>PADI and SSI certifications are valid for life. However, we recommend refresher courses if you haven't dived in over a year.</p>
+                </div>
+                <div class="faq-item">
+                    <h3>Can I take courses in different languages?</h3>
+                    <p>Yes, we offer instruction in English and Chinese (Mandarin). Please let us know your preference when booking.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
     <footer class="footer">
         <div class="container">
-            <p>&copy; 2026 Okim Dive. All rights reserved.</p>
-            <p>Tioman, Malaysia</p>
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h3>Okim Dive</h3>
+                    <p>Your gateway to underwater adventures in Tioman Island</p>
+                </div>
+                <div class="footer-section">
+                    <h3>Quick Links</h3>
+                    <ul class="footer-links">
+                        <li><a href="courses.html">Courses</a></li>
+                        <li><a href="trips.html">Trips</a></li>
+                        <li><a href="gallery.html">Gallery</a></li>
+                        <li><a href="contact.html">Contact</a></li>
+                    </ul>
+                </div>
+                <div class="footer-section">
+                    <h3>Connect</h3>
+                    <div class="social-links">
+                        <a href="https://www.instagram.com/okim_dive" class="social-link" target="_blank">Instagram</a>
+                        <a href="https://www.facebook.com/people/OKIM-Dive/61578882252925/" class="social-link" target="_blank">Facebook</a>
+                        <a href="https://xhslink.cn/m/9TfIoxN1yFp" class="social-link" target="_blank">小红书</a>
+                    </div>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2024 Okim Dive. All rights reserved.</p>
+            </div>
         </div>
     </footer>
+
+    <script>
+        const navToggle = document.querySelector('.nav-toggle');
+        const navMenu = document.querySelector('.nav-menu');
+        navToggle.addEventListener('click', () => {
+            navMenu.classList.toggle('active');
+        });
+    </script>
 </body>
 </html>

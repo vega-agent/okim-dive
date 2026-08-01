@@ -3,90 +3,305 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Trips — Okim Dive</title>
+    <title>Dive Trips - Okim Dive</title>
     <link rel="stylesheet" href="styles.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Great+Vibes&family=Lato:wght@300;400;700&family=Playfair+Display:wght@400;600&display=swap" rel="stylesheet">
 </head>
 <body>
-    <nav class="nav">
-        <div class="nav-brand">
-            <a href="/">🤿 Okim Dive</a>
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="nav-logo">
+                <span class="logo-icon">🤿</span>
+                <span class="logo-text">Okim Dive</span>
+            </div>
+            <ul class="nav-menu">
+                <li><a href="index.html" class="nav-link">Home</a></li>
+                <li><a href="about.html" class="nav-link">About Us</a></li>
+                <li><a href="courses.html" class="nav-link">Courses</a></li>
+                <li><a href="trips.html" class="nav-link active">Trips</a></li>
+                <li><a href="gallery.html" class="nav-link">Gallery</a></li>
+                <li><a href="contact.html" class="nav-link">Contact</a></li>
+            </ul>
+            <div class="nav-toggle">
+                <span></span>
+                <span></span>
+                <span></span>
+            </div>
         </div>
-        <ul class="nav-links">
-            <li><a href="/">Home</a></li>
-            <li><a href="/about">About</a></li>
-            <li><a href="/courses">Courses</a></li>
-            <li><a href="/trips">Trips</a></li>
-            <li><a href="/contact">Contact</a></li>
-        </ul>
     </nav>
 
-    <main>
-        <section class="page-header">
-            <div class="container">
-                <h1>Dive Trips</h1>
-                <p>Explore stunning dive destinations with Okim Dive</p>
-            </div>
-        </section>
+    <!-- Hero Section -->
+    <section class="page-hero trips-hero">
+        <div class="hero-bg"></div>
+        <div class="hero-content">
+            <h1 class="hero-title">Dive Trips</h1>
+            <p class="hero-subtitle">Explore underwater adventures locally and worldwide</p>
+        </div>
+    </section>
 
-        <section class="content-section">
-            <div class="container">
-                <div class="trip-grid">
-                    <div class="trip-card">
+    <!-- Trips Introduction -->
+    <section class="trips-intro">
+        <div class="container">
+            <div class="intro-content">
+                <div class="watercolor-decoration top-left"></div>
+                <h2 class="section-title">Adventure Awaits</h2>
+                <p class="intro-text">
+                    Join our organized dive trips to explore some of the world's most stunning underwater 
+                    destinations. From Tioman's local reefs to international dive sites, we plan every detail 
+                    so you can focus on the diving.
+                </p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Local Trips -->
+    <section class="trips-section">
+        <div class="container">
+            <h2 class="section-title">Local Dive Sites</h2>
+            <div class="trips-grid">
+                <!-- Tioman Island -->
+                <div class="trip-card">
+                    <div class="trip-header">
                         <h3>Tioman Island</h3>
-                        <p class="trip-location">📍 Malaysia</p>
-                        <p>[TO DO: Trip description — what makes Tioman special]</p>
-                        <ul>
-                            <li>[Duration: X days]</li>
-                            <li>[Dive sites: TBD]</li>
-                            <li>[Accommodation: TBD]</li>
-                            <li>[Price: TBD]</li>
-                        </ul>
-                        <a href="/contact" class="btn btn-primary">Inquire</a>
+                        <span class="trip-location">Malaysia</span>
                     </div>
-
-                    <div class="trip-card">
-                        <h3>Semporna / Sipadan</h3>
-                        <p class="trip-location">📍 Malaysia (Sabah)</p>
-                        <p>[TO DO: Trip description]</p>
-                        <ul>
-                            <li>[Duration: X days]</li>
-                            <li>[Dive sites: TBD]</li>
-                            <li>[Accommodation: TBD]</li>
-                            <li>[Price: TBD]</li>
+                    <div class="trip-content">
+                        <p>Explore Tioman's vibrant coral reefs and diverse marine life. Home to over 135 species 
+                        of hard coral and 300 species of fish.</p>
+                        <ul class="trip-details">
+                            <li><strong>Depth:</strong> 5-30 meters</li>
+                            <li><strong>Visibility:</strong> 10-25 meters</li>
+                            <li><strong>Sites:</strong> 20+ dive sites</li>
+                            <li><strong>Highlights:</strong> Sea turtles, reef sharks, coral gardens</li>
                         </ul>
-                        <a href="/contact" class="btn btn-primary">Inquire</a>
-                    </div>
-
-                    <div class="trip-card">
-                        <h3>[Overseas Destination]</h3>
-                        <p class="trip-location">📍 [Location]</p>
-                        <p>[TO DO: Add more destinations as needed]</p>
-                        <ul>
-                            <li>[Details TBD]</li>
-                        </ul>
-                        <a href="/contact" class="btn btn-primary">Inquire</a>
+                        <a href="contact.html" class="btn btn-primary">Book Trip</a>
                     </div>
                 </div>
 
-                <div class="content-block">
-                    <h2>What's Included?</h2>
-                    <p>[TO DO: Dives, equipment, accommodation, transfers, etc.]</p>
+                <!-- Perhentian Islands -->
+                <div class="trip-card">
+                    <div class="trip-header">
+                        <h3>Perhentian Islands</h3>
+                        <span class="trip-location">Malaysia</span>
+                    </div>
+                    <div class="trip-content">
+                        <p>Crystal clear waters and pristine coral reefs make this a paradise for divers 
+                        and snorkelers alike.</p>
+                        <ul class="trip-details">
+                            <li><strong>Depth:</strong> 5-25 meters</li>
+                            <li><strong>Visibility:</strong> 15-30 meters</li>
+                            <li><strong>Sites:</strong> 15+ dive sites</li>
+                            <li><strong>Highlights:</strong> Blacktip sharks, turtles, clownfish</li>
+                        </ul>
+                        <a href="contact.html" class="btn btn-primary">Book Trip</a>
+                    </div>
                 </div>
 
-                <div class="content-block">
-                    <h2>Trip Planning</h2>
-                    <p>[TO DO: How trips are organized, group size, skill level requirements]</p>
-                    <p>[TO DO: Custom trip planning available for groups]</p>
+                <!-- Redang Island -->
+                <div class="trip-card">
+                    <div class="trip-header">
+                        <h3>Redang Island</h3>
+                        <span class="trip-location">Malaysia</span>
+                    </div>
+                    <div class="trip-content">
+                        <p>One of Malaysia's most beautiful islands with excellent diving conditions 
+                        and abundant marine life.</p>
+                        <ul class="trip-details">
+                            <li><strong>Depth:</strong> 5-30 meters</li>
+                            <li><strong>Visibility:</strong> 15-35 meters</li>
+                            <li><strong>Sites:</strong> 12+ dive sites</li>
+                            <li><strong>Highlights:</strong> Whale sharks (seasonal), coral reefs</li>
+                        </ul>
+                        <a href="contact.html" class="btn btn-primary">Book Trip</a>
+                    </div>
                 </div>
             </div>
-        </section>
-    </main>
+        </div>
+    </section>
 
+    <!-- International Trips -->
+    <section class="trips-section international">
+        <div class="container">
+            <h2 class="section-title">International Destinations</h2>
+            <div class="trips-grid">
+                <!-- Sipadan -->
+                <div class="trip-card featured">
+                    <div class="trip-badge">Premium</div>
+                    <div class="trip-header">
+                        <h3>Sipadan Island</h3>
+                        <span class="trip-location">Malaysia</span>
+                    </div>
+                    <div class="trip-content">
+                        <p>One of the world's top dive destinations. Famous for its dramatic underwater 
+                        topography and incredible biodiversity.</p>
+                        <ul class="trip-details">
+                            <li><strong>Duration:</strong> 5-7 days</li>
+                            <li><strong>Depth:</strong> 5-40 meters</li>
+                            <li><strong>Group Size:</strong> 8-12 divers</li>
+                            <li><strong>Highlights:</strong> Barracuda tornado, turtle tomb, hammerheads</li>
+                        </ul>
+                        <a href="contact.html" class="btn btn-primary">Inquire Now</a>
+                    </div>
+                </div>
+
+                <!-- Raja Ampat -->
+                <div class="trip-card">
+                    <div class="trip-header">
+                        <h3>Raja Ampat</h3>
+                        <span class="trip-location">Indonesia</span>
+                    </div>
+                    <div class="trip-content">
+                        <p>The crown jewel of the Coral Triangle with the highest marine biodiversity 
+                        on Earth. A diver's ultimate dream destination.</p>
+                        <ul class="trip-details">
+                            <li><strong>Duration:</strong> 7-10 days</li>
+                            <li><strong>Depth:</strong> 5-40 meters</li>
+                            <li><strong>Group Size:</strong> 10-15 divers</li>
+                            <li><strong>Highlights:</strong> Manta rays, wobbegong sharks, pygmy seahorses</li>
+                        </ul>
+                        <a href="contact.html" class="btn btn-primary">Inquire Now</a>
+                    </div>
+                </div>
+
+                <!-- Similan Islands -->
+                <div class="trip-card">
+                    <div class="trip-header">
+                        <h3>Similan Islands</h3>
+                        <span class="trip-location">Thailand</span>
+                    </div>
+                    <div class="trip-content">
+                        <p>Thailand's premier diving destination with crystal clear waters and stunning 
+                        granite boulder formations underwater.</p>
+                        <ul class="trip-details">
+                            <li><strong>Duration:</strong> 5-7 days</li>
+                            <li><strong>Depth:</strong> 5-35 meters</li>
+                            <li><strong>Group Size:</strong> 10-12 divers</li>
+                            <li><strong>Highlights:</strong> Whale sharks, leopard sharks, vibrant reefs</li>
+                        </ul>
+                        <a href="contact.html" class="btn btn-primary">Inquire Now</a>
+                    </div>
+                </div>
+
+                <!-- Maldives -->
+                <div class="trip-card">
+                    <div class="trip-header">
+                        <h3>Maldives</h3>
+                        <span class="trip-location">Indian Ocean</span>
+                    </div>
+                    <div class="trip-content">
+                        <p>Pristine atolls and crystal clear waters teeming with marine life. The ultimate 
+                        luxury diving experience.</p>
+                        <ul class="trip-details">
+                            <li><strong>Duration:</strong> 7-10 days</li>
+                            <li><strong>Depth:</strong> 5-40 meters</li>
+                            <li><strong>Group Size:</strong> 8-12 divers</li>
+                            <li><strong>Highlights:</strong> Manta rays, whale sharks, reef sharks</li>
+                        </ul>
+                        <a href="contact.html" class="btn btn-primary">Inquire Now</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- What's Included -->
+    <section class="included-section">
+        <div class="container">
+            <div class="included-content">
+                <div class="watercolor-decoration bottom-right"></div>
+                <h2 class="section-title">What's Included</h2>
+                <div class="included-grid">
+                    <div class="included-item">
+                        <div class="included-icon">🤿</div>
+                        <h3>Equipment</h3>
+                        <p>All diving equipment provided including tanks, weights, and safety gear</p>
+                    </div>
+                    <div class="included-item">
+                        <div class="included-icon">🏨</div>
+                        <h3>Accommodation</h3>
+                        <p>Comfortable accommodations near dive sites (varies by destination)</p>
+                    </div>
+                    <div class="included-item">
+                        <div class="included-icon">🍽️</div>
+                        <h3>Meals</h3>
+                        <p>Full board meals during trip (except for some international destinations)</p>
+                    </div>
+                    <div class="included-item">
+                        <div class="included-icon">🚤</div>
+                        <h3>Transport</h3>
+                        <p>All local transport and dive boat transfers included</p>
+                    </div>
+                    <div class="included-item">
+                        <div class="included-icon">👨‍🏫</div>
+                        <h3>Guidance</h3>
+                        <p>Professional dive guide and instructor throughout the trip</p>
+                    </div>
+                    <div class="included-item">
+                        <div class="included-icon">📋</div>
+                        <h3>Planning</h3>
+                        <p>Complete trip planning, permits, and logistics handled for you</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Trip Calendar -->
+    <section class="calendar-section">
+        <div class="container">
+            <h2 class="section-title">Upcoming Trips</h2>
+            <div class="calendar-note">
+                <div class="watercolor-decoration top-left"></div>
+                <p>
+                    Trip dates are planned based on optimal diving conditions and group availability. 
+                    Contact us to join upcoming trips or to plan a custom trip for your group.
+                </p>
+                <a href="contact.html" class="btn btn-primary">Plan Your Trip</a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
     <footer class="footer">
         <div class="container">
-            <p>&copy; 2026 Okim Dive. All rights reserved.</p>
-            <p>Tioman, Malaysia</p>
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h3>Okim Dive</h3>
+                    <p>Your gateway to underwater adventures in Tioman Island</p>
+                </div>
+                <div class="footer-section">
+                    <h3>Quick Links</h3>
+                    <ul class="footer-links">
+                        <li><a href="courses.html">Courses</a></li>
+                        <li><a href="trips.html">Trips</a></li>
+                        <li><a href="gallery.html">Gallery</a></li>
+                        <li><a href="contact.html">Contact</a></li>
+                    </ul>
+                </div>
+                <div class="footer-section">
+                    <h3>Connect</h3>
+                    <div class="social-links">
+                        <a href="https://www.instagram.com/okim_dive" class="social-link" target="_blank">Instagram</a>
+                        <a href="https://www.facebook.com/people/OKIM-Dive/61578882252925/" class="social-link" target="_blank">Facebook</a>
+                        <a href="https://xhslink.cn/m/9TfIoxN1yFp" class="social-link" target="_blank">小红书</a>
+                    </div>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2024 Okim Dive. All rights reserved.</p>
+            </div>
         </div>
     </footer>
+
+    <script>
+        const navToggle = document.querySelector('.nav-toggle');
+        const navMenu = document.querySelector('.nav-menu');
+        navToggle.addEventListener('click', () => {
+            navMenu.classList.toggle('active');
+        });
+    </script>
 </body>
 </html>
