@@ -18,34 +18,58 @@
             <span class="logo-text">Okim Dive</span>
         </a>
         <ul class="nav-menu">
-            <li><a href="/">Home</a></li>
+            <li><a href="#home">Home</a></li>
             <li><a href="#about">About Diving</a></li>
             <li><a href="#courses">Courses</a></li>
             <li><a href="#trips">Dive Trips</a></li>
             <li><a href="#gallery">Gallery</a></li>
             <li><a href="#contact">Contact</a></li>
         </ul>
+        <button class="nav-toggle">☰</button>
     </nav>
 
-    <!-- Hero Section - Split Level -->
-    <section class="hero">
+    <!-- Hero Section - Split Level with Marine Life -->
+    <section class="hero" id="home">
         <div class="hero-sky"></div>
-        <div class="hero-water"></div>
+        <div class="hero-water">
+            <!-- Animated bubbles -->
+            <div class="hero-bubbles">
+                <span></span><span></span><span></span><span></span><span></span>
+                <span></span><span></span><span></span><span></span><span></span>
+            </div>
+            <!-- Floating jellyfish -->
+            <div class="jellyfish-container">
+                <div class="jellyfish jellyfish-1"></div>
+                <div class="jellyfish jellyfish-2"></div>
+                <div class="jellyfish jellyfish-3"></div>
+            </div>
+            <!-- Light rays -->
+            <div class="light-rays">
+                <div class="ray ray-1"></div>
+                <div class="ray ray-2"></div>
+                <div class="ray ray-3"></div>
+            </div>
+        </div>
         <div class="hero-content">
             <h1 class="hero-title">Create Diving Memories</h1>
+            <p class="hero-subtitle">Discover the magic beneath the waves</p>
             <a href="#courses" class="hero-btn">Dive Now</a>
         </div>
-        <div class="hero-bubbles">
-            <span></span>
-            <span></span>
-            <span></span>
-            <span></span>
-            <span></span>
+        <!-- Wave divider -->
+        <div class="wave-divider">
+            <svg viewBox="0 0 1200 120" preserveAspectRatio="none">
+                <path d="M321.39,56.44c58-10.79,114.16-30.13,172-41.86,82.39-16.72,168.19-17.73,250.45-.39C823.78,31,906.67,72,985.66,92.83c70.05,18.48,146.53,26.09,214.34,3V120H0V95.8C57.1,118.92,156.63,69.08,321.39,56.44Z"></path>
+            </svg>
         </div>
     </section>
 
-    <!-- About Section -->
+    <!-- About Section with Diver Silhouette -->
     <section id="about" class="about">
+        <!-- Background bubbles -->
+        <div class="section-bubbles">
+            <span></span><span></span><span></span><span></span><span></span>
+        </div>
+        
         <div class="about-content">
             <h2 class="section-title">About Us</h2>
             <p class="about-text">
@@ -56,19 +80,30 @@
             </p>
             <a href="#" class="btn btn-outline-white">Read More</a>
         </div>
+        
+        <!-- Tilted polaroid photos -->
         <div class="about-photos">
             <div class="polaroid polaroid-1">
-                <div class="polaroid-img"></div>
+                <div class="polaroid-img" style="background-image: url('https://images.unsplash.com/photo-1544551763-46a013bb70d5?w=600&q=80');"></div>
                 <div class="polaroid-caption">Coral Reef</div>
             </div>
             <div class="polaroid polaroid-2">
-                <div class="polaroid-img"></div>
+                <div class="polaroid-img" style="background-image: url('https://images.unsplash.com/photo-1583212292454-1fe6229603b7?w=600&q=80');"></div>
                 <div class="polaroid-caption">Marine Life</div>
             </div>
+            <!-- Diver silhouette -->
+            <div class="diver-silhouette"></div>
+        </div>
+        
+        <!-- Wave divider -->
+        <div class="wave-divider wave-divider-bottom">
+            <svg viewBox="0 0 1200 120" preserveAspectRatio="none">
+                <path d="M321.39,56.44c58-10.79,114.16-30.13,172-41.86,82.39-16.72,168.19-17.73,250.45-.39C823.78,31,906.67,72,985.66,92.83c70.05,18.48,146.53,26.09,214.34,3V120H0V95.8C57.1,118.92,156.63,69.08,321.39,56.44Z"></path>
+            </svg>
         </div>
     </section>
 
-    <!-- Courses Section -->
+    <!-- Courses Section with Carousel -->
     <section id="courses" class="courses">
         <div class="courses-content">
             <h2 class="section-title-light">Courses</h2>
@@ -77,34 +112,42 @@
             </p>
             <a href="#" class="btn btn-outline-white">View More</a>
         </div>
+        
         <div class="courses-carousel">
             <div class="carousel-track">
                 <div class="course-card">
-                    <div class="course-img"></div>
+                    <div class="course-img" style="background-image: url('https://images.unsplash.com/photo-1682687220742-aba13b6e50ba?w=600&q=80');"></div>
                     <div class="course-info">
                         <h3>Open Water</h3>
                         <p>Begin your diving journey</p>
                     </div>
                 </div>
                 <div class="course-card">
-                    <div class="course-img"></div>
+                    <div class="course-img" style="background-image: url('https://images.unsplash.com/photo-1559827260-dc66d52bef19?w=600&q=80');"></div>
                     <div class="course-info">
                         <h3>Advanced Diver</h3>
                         <p>Deepen your skills</p>
                     </div>
                 </div>
                 <div class="course-card">
-                    <div class="course-img"></div>
+                    <div class="course-img" style="background-image: url('https://images.unsplash.com/photo-1544551763-77ef2d0cfc6c?w=600&q=80');"></div>
                     <div class="course-info">
                         <h3>Rescue Diver</h3>
                         <p>Master emergency skills</p>
                     </div>
                 </div>
                 <div class="course-card">
-                    <div class="course-img"></div>
+                    <div class="course-img" style="background-image: url('https://images.unsplash.com/photo-1583212292454-1fe6229603b7?w=600&q=80');"></div>
                     <div class="course-info">
                         <h3>Divemaster</h3>
                         <p>Lead the dive</p>
+                    </div>
+                </div>
+                <div class="course-card">
+                    <div class="course-img" style="background-image: url('https://images.unsplash.com/photo-1544551763-46a013bb70d5?w=600&q=80');"></div>
+                    <div class="course-info">
+                        <h3>Night Diving</h3>
+                        <p>Explore after dark</p>
                     </div>
                 </div>
             </div>
@@ -113,7 +156,7 @@
         </div>
     </section>
 
-    <!-- Activities Section -->
+    <!-- Activities Section with Watercolor Effect -->
     <section id="activities" class="activities">
         <div class="activities-header">
             <h2 class="section-title">Activities</h2>
@@ -121,14 +164,17 @@
                 Discover the diverse underwater experiences waiting for you in Tioman and beyond.
             </p>
         </div>
+        
         <div class="activities-content">
             <div class="activities-visual">
+                <!-- Watercolor splash background -->
                 <div class="watercolor-bg"></div>
-                <div class="activities-overlay">
-                    <div class="turtle"></div>
-                    <div class="diver-silhouette"></div>
-                </div>
+                <!-- Turtle illustration -->
+                <div class="turtle"></div>
+                <!-- Diver silhouette swimming -->
+                <div class="swimming-diver"></div>
             </div>
+            
             <div class="activities-list">
                 <div class="activity-item">
                     <h3>Snorkeling</h3>
@@ -144,56 +190,76 @@
                 </div>
             </div>
         </div>
+        
         <a href="#" class="btn btn-outline-blue">Get More</a>
     </section>
 
-    <!-- Gallery Section -->
+    <!-- Gallery Section with Masonry Grid -->
     <section id="gallery" class="gallery">
         <h2 class="section-title">Gallery</h2>
         <div class="gallery-grid">
             <div class="gallery-item gallery-large">
-                <div class="gallery-img"></div>
+                <div class="gallery-img" style="background-image: url('https://images.unsplash.com/photo-1544551763-46a013bb70d5?w=800&q=80');"></div>
             </div>
             <div class="gallery-item gallery-medium">
-                <div class="gallery-img"></div>
+                <div class="gallery-img" style="background-image: url('https://images.unsplash.com/photo-1583212292454-1fe6229603b7?w=600&q=80');"></div>
             </div>
             <div class="gallery-item gallery-small">
-                <div class="gallery-img"></div>
+                <div class="gallery-img" style="background-image: url('https://images.unsplash.com/photo-1682687220742-aba13b6e50ba?w=600&q=80');"></div>
             </div>
             <div class="gallery-item gallery-small">
-                <div class="gallery-img"></div>
+                <div class="gallery-img" style="background-image: url('https://images.unsplash.com/photo-1559827260-dc66d52bef19?w=600&q=80');"></div>
             </div>
             <div class="gallery-item gallery-medium">
-                <div class="gallery-img"></div>
+                <div class="gallery-img" style="background-image: url('https://images.unsplash.com/photo-1544551763-77ef2d0cfc6c?w=600&q=80');"></div>
             </div>
             <div class="gallery-item gallery-large">
-                <div class="gallery-img"></div>
+                <div class="gallery-img" style="background-image: url('https://images.unsplash.com/photo-1682687220742-aba13b6e50ba?w=800&q=80');"></div>
             </div>
         </div>
     </section>
 
     <!-- Testimonials Section -->
     <section id="testimonials" class="testimonials">
+        <!-- Floating fish -->
+        <div class="school-of-fish">
+            <div class="fish fish-1"></div>
+            <div class="fish fish-2"></div>
+            <div class="fish fish-3"></div>
+            <div class="fish fish-4"></div>
+            <div class="fish fish-5"></div>
+        </div>
+        
         <h2 class="section-title-light">Testimonials</h2>
+        
         <div class="testimonials-grid">
             <div class="testimonial-card">
-                <div class="testimonial-avatar"></div>
+                <div class="testimonial-avatar" style="background-image: url('https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=200&q=80');"></div>
                 <div class="testimonial-content">
                     <p class="testimonial-text">
                         "Iris made my first dive experience absolutely magical. Her patience and expertise helped me overcome my fears and discover a whole new world beneath the waves."
                     </p>
                     <p class="testimonial-author">— Sarah Chen</p>
+                    <div class="testimonial-rating">★★★★★</div>
                 </div>
             </div>
             <div class="testimonial-card">
-                <div class="testimonial-avatar"></div>
+                <div class="testimonial-avatar" style="background-image: url('https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=200&q=80');"></div>
                 <div class="testimonial-content">
                     <p class="testimonial-text">
                         "The overseas dive trip to Sipadan was unforgettable. Everything was perfectly organized, and the diving was world-class. Highly recommend Okim Dive!"
                     </p>
                     <p class="testimonial-author">— Marcus Lim</p>
+                    <div class="testimonial-rating">★★★★★</div>
                 </div>
             </div>
+        </div>
+        
+        <!-- Wave divider -->
+        <div class="wave-divider wave-divider-top">
+            <svg viewBox="0 0 1200 120" preserveAspectRatio="none">
+                <path d="M321.39,56.44c58-10.79,114.16-30.13,172-41.86,82.39-16.72,168.19-17.73,250.45-.39C823.78,31,906.67,72,985.66,92.83c70.05,18.48,146.53,26.09,214.34,3V120H0V95.8C57.1,118.92,156.63,69.08,321.39,56.44Z"></path>
+            </svg>
         </div>
     </section>
 
@@ -237,5 +303,27 @@
             <p>© 2026 Okim Dive. All rights reserved. | Tioman, Malaysia</p>
         </div>
     </footer>
+
+    <script>
+        // Mobile menu toggle
+        document.querySelector('.nav-toggle').addEventListener('click', function() {
+            document.querySelector('.nav-menu').classList.toggle('active');
+        });
+
+        // Carousel functionality
+        const track = document.querySelector('.carousel-track');
+        const prevBtn = document.querySelector('.carousel-prev');
+        const nextBtn = document.querySelector('.carousel-next');
+        
+        if (prevBtn && nextBtn) {
+            prevBtn.addEventListener('click', () => {
+                track.scrollBy({ left: -320, behavior: 'smooth' });
+            });
+            
+            nextBtn.addEventListener('click', () => {
+                track.scrollBy({ left: 320, behavior: 'smooth' });
+            });
+        }
+    </script>
 </body>
 </html>
