@@ -3,10 +3,10 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev",
-    "build": "next build",
-    "start": "next start",
-    "lint": "next lint"
+    "dev": "python3 -m http.server 8000",
+    "build": "node scripts/verify-static.mjs",
+    "start": "python3 -m http.server 8000",
+    "lint": "node scripts/verify-static.mjs"
   },
   "dependencies": {
     "react": "^18",

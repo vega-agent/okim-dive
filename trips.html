@@ -7,17 +7,16 @@
     <link rel="stylesheet" href="styles.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Great+Vibes&family=Lato:wght@300;400;700&family=Playfair+Display:wght@400;600&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Great+Vibes&family=Lato:wght@300;400;700&family=Noto+Sans+SC:wght@400;500;700&family=Noto+Serif+SC:wght@500;600;700&family=Playfair+Display:wght@400;600&display=swap" rel="stylesheet">
 </head>
 <body>
     <!-- Navigation -->
     <nav class="navbar">
         <div class="nav-container">
-            <div class="nav-logo">
-                <span class="logo-icon">🤿</span>
-                <span class="logo-text">Okim Dive</span>
-            </div>
-            <ul class="nav-menu">
+            <a href="index.html" class="nav-logo">
+                <img src="assets/brand/okim-dive-logo.jpg" alt="OKIM Dive" class="logo-image">
+            </a>
+            <ul class="nav-menu" id="primary-navigation">
                 <li><a href="index.html" class="nav-link">Home</a></li>
                 <li><a href="about.html" class="nav-link">About Us</a></li>
                 <li><a href="courses.html" class="nav-link">Courses</a></li>
@@ -25,11 +24,12 @@
                 <li><a href="gallery.html" class="nav-link">Gallery</a></li>
                 <li><a href="contact.html" class="nav-link">Contact</a></li>
             </ul>
-            <div class="nav-toggle">
+            <button class="lang-toggle" type="button" data-lang-toggle aria-pressed="false" aria-label="切换到简体中文">中文</button>
+            <button class="nav-toggle" type="button" aria-controls="primary-navigation" aria-expanded="false" aria-label="Toggle navigation">
                 <span></span>
                 <span></span>
                 <span></span>
-            </div>
+            </button>
         </div>
     </nav>
 
@@ -38,7 +38,7 @@
         <div class="hero-bg"></div>
         <div class="hero-content">
             <h1 class="hero-title">Dive Trips</h1>
-            <p class="hero-subtitle">Explore underwater adventures locally and worldwide</p>
+            <p class="hero-subtitle">Explore unforgettable international dive destinations</p>
         </div>
     </section>
 
@@ -50,77 +50,12 @@
                 <h2 class="section-title">Adventure Awaits</h2>
                 <p class="intro-text">
                     Join our organized dive trips to explore some of the world's most stunning underwater 
-                    destinations. From Tioman's local reefs to international dive sites, we plan every detail 
-                    so you can focus on the diving.
+                    destinations. We plan every detail of international dive trips so you can focus on the diving, the marine life, and the experience.
                 </p>
             </div>
         </div>
     </section>
 
-    <!-- Local Trips -->
-    <section class="trips-section">
-        <div class="container">
-            <h2 class="section-title">Local Dive Sites</h2>
-            <div class="trips-grid">
-                <!-- Tioman Island -->
-                <div class="trip-card">
-                    <div class="trip-header">
-                        <h3>Tioman Island</h3>
-                        <span class="trip-location">Malaysia</span>
-                    </div>
-                    <div class="trip-content">
-                        <p>Explore Tioman's vibrant coral reefs and diverse marine life. Home to over 135 species 
-                        of hard coral and 300 species of fish.</p>
-                        <ul class="trip-details">
-                            <li><strong>Depth:</strong> 5-30 meters</li>
-                            <li><strong>Visibility:</strong> 10-25 meters</li>
-                            <li><strong>Sites:</strong> 20+ dive sites</li>
-                            <li><strong>Highlights:</strong> Sea turtles, reef sharks, coral gardens</li>
-                        </ul>
-                        <a href="contact.html" class="btn btn-primary">Book Trip</a>
-                    </div>
-                </div>
-
-                <!-- Perhentian Islands -->
-                <div class="trip-card">
-                    <div class="trip-header">
-                        <h3>Perhentian Islands</h3>
-                        <span class="trip-location">Malaysia</span>
-                    </div>
-                    <div class="trip-content">
-                        <p>Crystal clear waters and pristine coral reefs make this a paradise for divers 
-                        and snorkelers alike.</p>
-                        <ul class="trip-details">
-                            <li><strong>Depth:</strong> 5-25 meters</li>
-                            <li><strong>Visibility:</strong> 15-30 meters</li>
-                            <li><strong>Sites:</strong> 15+ dive sites</li>
-                            <li><strong>Highlights:</strong> Blacktip sharks, turtles, clownfish</li>
-                        </ul>
-                        <a href="contact.html" class="btn btn-primary">Book Trip</a>
-                    </div>
-                </div>
-
-                <!-- Redang Island -->
-                <div class="trip-card">
-                    <div class="trip-header">
-                        <h3>Redang Island</h3>
-                        <span class="trip-location">Malaysia</span>
-                    </div>
-                    <div class="trip-content">
-                        <p>One of Malaysia's most beautiful islands with excellent diving conditions 
-                        and abundant marine life.</p>
-                        <ul class="trip-details">
-                            <li><strong>Depth:</strong> 5-30 meters</li>
-                            <li><strong>Visibility:</strong> 15-35 meters</li>
-                            <li><strong>Sites:</strong> 12+ dive sites</li>
-                            <li><strong>Highlights:</strong> Whale sharks (seasonal), coral reefs</li>
-                        </ul>
-                        <a href="contact.html" class="btn btn-primary">Book Trip</a>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>
 
     <!-- International Trips -->
     <section class="trips-section international">
@@ -270,7 +205,7 @@
             <div class="footer-content">
                 <div class="footer-section">
                     <h3>Okim Dive</h3>
-                    <p>Your gateway to underwater adventures in Tioman Island</p>
+                    <p>Your gateway to international underwater adventures</p>
                 </div>
                 <div class="footer-section">
                     <h3>Quick Links</h3>
@@ -296,12 +231,6 @@
         </div>
     </footer>
 
-    <script>
-        const navToggle = document.querySelector('.nav-toggle');
-        const navMenu = document.querySelector('.nav-menu');
-        navToggle.addEventListener('click', () => {
-            navMenu.classList.toggle('active');
-        });
-    </script>
+    <script src="site-i18n.js"></script>
 </body>
 </html>

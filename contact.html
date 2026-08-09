@@ -7,17 +7,16 @@
     <link rel="stylesheet" href="styles.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Great+Vibes&family=Lato:wght@300;400;700&family=Playfair+Display:wght@400;600&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Great+Vibes&family=Lato:wght@300;400;700&family=Noto+Sans+SC:wght@400;500;700&family=Noto+Serif+SC:wght@500;600;700&family=Playfair+Display:wght@400;600&display=swap" rel="stylesheet">
 </head>
 <body>
     <!-- Navigation -->
     <nav class="navbar">
         <div class="nav-container">
-            <div class="nav-logo">
-                <span class="logo-icon">🤿</span>
-                <span class="logo-text">Okim Dive</span>
-            </div>
-            <ul class="nav-menu">
+            <a href="index.html" class="nav-logo">
+                <img src="assets/brand/okim-dive-logo.jpg" alt="OKIM Dive" class="logo-image">
+            </a>
+            <ul class="nav-menu" id="primary-navigation">
                 <li><a href="index.html" class="nav-link">Home</a></li>
                 <li><a href="about.html" class="nav-link">About Us</a></li>
                 <li><a href="courses.html" class="nav-link">Courses</a></li>
@@ -25,11 +24,12 @@
                 <li><a href="gallery.html" class="nav-link">Gallery</a></li>
                 <li><a href="contact.html" class="nav-link active">Contact</a></li>
             </ul>
-            <div class="nav-toggle">
+            <button class="lang-toggle" type="button" data-lang-toggle aria-pressed="false" aria-label="切换到简体中文">中文</button>
+            <button class="nav-toggle" type="button" aria-controls="primary-navigation" aria-expanded="false" aria-label="Toggle navigation">
                 <span></span>
                 <span></span>
                 <span></span>
-            </div>
+            </button>
         </div>
     </nav>
 
@@ -124,15 +124,10 @@
                         <input type="email" id="email" name="email" required>
                     </div>
                     <div class="form-group">
-                        <label for="phone">Phone</label>
-                        <input type="tel" id="phone" name="phone">
-                    </div>
-                    <div class="form-group">
                         <label for="interest">I'm Interested In</label>
                         <select id="interest" name="interest">
                             <option value="">Select an option</option>
                             <option value="courses">Dive Courses</option>
-                            <option value="local-trips">Local Dive Trips</option>
                             <option value="international-trips">International Trips</option>
                             <option value="custom-trip">Custom Trip Planning</option>
                             <option value="other">Other Questions</option>
@@ -148,53 +143,6 @@
         </div>
     </section>
 
-    <!-- FAQ Section -->
-    <section class="faq-section">
-        <div class="container">
-            <h2 class="section-title">Frequently Asked Questions</h2>
-            <div class="faq-grid">
-                <div class="faq-item">
-                    <h3>How do I book a course?</h3>
-                    <p>Contact us via WhatsApp or Instagram DM with your preferred dates and course type. We'll confirm availability and send you booking details.</p>
-                </div>
-                <div class="faq-item">
-                    <h3>What's the best time to visit Tioman?</h3>
-                    <p>The diving season runs from March to October, with the best visibility typically from April to September. Contact us for current conditions.</p>
-                </div>
-                <div class="faq-item">
-                    <h3>Do you provide equipment?</h3>
-                    <p>Yes, all equipment is included in course fees. For certified divers, you can bring your own or rent from us.</p>
-                </div>
-                <div class="faq-item">
-                    <h3>Can I bring non-diving friends/family?</h3>
-                    <p>Absolutely! We can arrange snorkeling, island tours, and other activities for non-divers.</p>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- Location Info -->
-    <section class="location-section">
-        <div class="container">
-            <h2 class="section-title">Find Us</h2>
-            <div class="location-content">
-                <div class="location-info">
-                    <div class="watercolor-decoration top-left"></div>
-                    <h3>Okim Dive</h3>
-                    <p>📍 Tioman Island, Pahang, Malaysia</p>
-                    <p>Operating from multiple dive sites across Tioman</p>
-                    <div class="transport-info">
-                        <h4>Getting to Tioman:</h4>
-                        <ul>
-                            <li>Ferry from Mersing Jetty (2-2.5 hours)</li>
-                            <li>Ferry from Tanjung Gemuk (2 hours)</li>
-                            <li>Charter flights available from Singapore/KL</li>
-                        </ul>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>
 
     <!-- Footer -->
     <footer class="footer">
@@ -228,12 +176,6 @@
         </div>
     </footer>
 
-    <script>
-        const navToggle = document.querySelector('.nav-toggle');
-        const navMenu = document.querySelector('.nav-menu');
-        navToggle.addEventListener('click', () => {
-            navMenu.classList.toggle('active');
-        });
-    </script>
+    <script src="site-i18n.js"></script>
 </body>
 </html>

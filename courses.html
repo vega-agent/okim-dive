@@ -7,17 +7,16 @@
     <link rel="stylesheet" href="styles.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Great+Vibes&family=Lato:wght@300;400;700&family=Playfair+Display:wght@400;600&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Great+Vibes&family=Lato:wght@300;400;700&family=Noto+Sans+SC:wght@400;500;700&family=Noto+Serif+SC:wght@500;600;700&family=Playfair+Display:wght@400;600&display=swap" rel="stylesheet">
 </head>
 <body>
     <!-- Navigation -->
     <nav class="navbar">
         <div class="nav-container">
-            <div class="nav-logo">
-                <span class="logo-icon">🤿</span>
-                <span class="logo-text">Okim Dive</span>
-            </div>
-            <ul class="nav-menu">
+            <a href="index.html" class="nav-logo">
+                <img src="assets/brand/okim-dive-logo.jpg" alt="OKIM Dive" class="logo-image">
+            </a>
+            <ul class="nav-menu" id="primary-navigation">
                 <li><a href="index.html" class="nav-link">Home</a></li>
                 <li><a href="about.html" class="nav-link">About Us</a></li>
                 <li><a href="courses.html" class="nav-link active">Courses</a></li>
@@ -25,11 +24,12 @@
                 <li><a href="gallery.html" class="nav-link">Gallery</a></li>
                 <li><a href="contact.html" class="nav-link">Contact</a></li>
             </ul>
-            <div class="nav-toggle">
+            <button class="lang-toggle" type="button" data-lang-toggle aria-pressed="false" aria-label="切换到简体中文">中文</button>
+            <button class="nav-toggle" type="button" aria-controls="primary-navigation" aria-expanded="false" aria-label="Toggle navigation">
                 <span></span>
                 <span></span>
                 <span></span>
-            </div>
+            </button>
         </div>
     </nav>
 
@@ -50,7 +50,7 @@
                 <h2 class="section-title">Your Diving Journey Starts Here</h2>
                 <p class="intro-text">
                     Whether you're taking your first breath underwater or looking to advance your skills, 
-                    we offer comprehensive courses for all levels. Our PADI and SSI certified courses are 
+                    we offer comprehensive PADI courses for all levels. Our PADI courses are
                     designed to build your confidence and knowledge while ensuring safety and fun.
                 </p>
             </div>
@@ -238,11 +238,11 @@
                 </div>
                 <div class="faq-item">
                     <h3>How long is the certification valid?</h3>
-                    <p>PADI and SSI certifications are valid for life. However, we recommend refresher courses if you haven't dived in over a year.</p>
+                    <p>PADI certifications are valid for life. However, we recommend refresher courses if you haven't dived in over a year.</p>
                 </div>
                 <div class="faq-item">
-                    <h3>Can I take courses in different languages?</h3>
-                    <p>Yes, we offer instruction in English and Chinese (Mandarin). Please let us know your preference when booking.</p>
+                    <h3>Are lessons conducted in Mandarin?</h3>
+                    <p>Yes, lessons are conducted in Mandarin. Please let us know your preference when booking.</p>
                 </div>
             </div>
         </div>
@@ -280,12 +280,6 @@
         </div>
     </footer>
 
-    <script>
-        const navToggle = document.querySelector('.nav-toggle');
-        const navMenu = document.querySelector('.nav-menu');
-        navToggle.addEventListener('click', () => {
-            navMenu.classList.toggle('active');
-        });
-    </script>
+    <script src="site-i18n.js"></script>
 </body>
 </html>
