@@ -50,7 +50,7 @@ html {
 
 body {
   font-family: var(--font-body);
-  font-weight: 300;
+  font-weight: 400;
   line-height: 1.6;
   color: var(--ocean-deep);
   overflow-x: hidden;
@@ -1878,9 +1878,9 @@ body {
    ============================================ */
 
 .motion-ready .motion-reveal {
-  opacity: 0;
+  opacity: 1;
   transform: translateY(1.25rem);
-  transition: opacity 600ms ease-out, transform 600ms ease-out;
+  transition: transform 600ms ease-out;
   transition-delay: var(--reveal-delay, 0ms);
 }
 
@@ -1939,6 +1939,288 @@ body {
   }
 }
 
+/* ============================================
+   PHASE 3 - SIGNATURE PAGE TREATMENTS
+   ============================================ */
+
+/* Home: surface-to-depth composition */
+.hero {
+  isolation: isolate;
+}
+
+.hero::after {
+  content: '';
+  position: absolute;
+  inset: auto 0 0;
+  height: 38%;
+  z-index: -1;
+  pointer-events: none;
+  background: linear-gradient(180deg, transparent, rgba(38, 70, 83, 0.22));
+  mix-blend-mode: multiply;
+}
+
+.hero .hero-content {
+  max-width: 48rem;
+}
+
+.hero .hero-title {
+  max-width: 11ch;
+  text-wrap: balance;
+}
+
+.hero .hero-subtitle {
+  max-width: 34rem;
+}
+
+.hero + .intro-section {
+  position: relative;
+  background: linear-gradient(180deg, var(--ocean-deep), var(--ocean-mid));
+  color: var(--paper-cloud);
+}
+
+.hero + .intro-section::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: url('./assets/watercolor/backgrounds/section-gallery.jpg') center / cover;
+  opacity: 0.18;
+  mix-blend-mode: screen;
+}
+
+/* About: convert the story points into a readable vertical narrative */
+.story-content {
+  position: relative;
+}
+
+.story-text {
+  max-width: 46rem;
+  margin-inline: auto;
+  text-align: center;
+}
+
+.story-points {
+  position: relative;
+  display: grid;
+  gap: 1.5rem;
+  max-width: 52rem;
+  margin: 3rem auto 0;
+}
+
+.story-points::before {
+  content: '';
+  position: absolute;
+  top: 1rem;
+  bottom: 1rem;
+  left: 1.1rem;
+  width: 1px;
+  background: linear-gradient(var(--coral), rgba(69, 123, 157, 0.12));
+}
+
+.story-point {
+  position: relative;
+  display: grid;
+  grid-template-columns: 2.25rem 1fr;
+  column-gap: 1rem;
+  padding: 0.25rem 1rem 0.75rem 0;
+  background: transparent;
+  text-align: left;
+}
+
+.story-point .highlight-icon {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  width: 2.25rem;
+  height: 2.25rem;
+  place-items: center;
+  border: 4px solid var(--sand);
+  border-radius: 50%;
+  background: var(--coral);
+  color: white;
+  font-size: 0;
+}
+
+.story-point .highlight-icon::after {
+  content: '';
+  width: 0.45rem;
+  height: 0.45rem;
+  border-radius: 50%;
+  background: currentColor;
+}
+
+.story-point h3,
+.story-point p {
+  grid-column: 2;
+}
+
+.story-point h3 {
+  margin: 0.2rem 0 0.3rem;
+  color: var(--ocean-deep);
+}
+
+.story-point p {
+  margin: 0;
+  color: var(--ink-soft);
+}
+
+/* Courses: make the beginner path visually obvious and details scannable */
+.courses-section {
+  background: linear-gradient(180deg, var(--paper-cloud), var(--sand));
+}
+
+.courses-section .section-title {
+  max-width: 48rem;
+  margin-inline: auto;
+  text-align: center;
+}
+
+.courses-grid {
+  align-items: stretch;
+}
+
+.course-card {
+  display: flex;
+  flex-direction: column;
+}
+
+.course-card.featured {
+  border-color: rgba(237, 111, 92, 0.65);
+  box-shadow: 0 18px 38px rgba(237, 111, 92, 0.14);
+}
+
+.course-card .course-content {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+}
+
+.course-card .course-details {
+  flex: 1;
+}
+
+.course-card .btn {
+  align-self: flex-start;
+}
+
+.course-level {
+  border-radius: 999px;
+  background: var(--sea-foam);
+  color: var(--ocean-deep);
+}
+
+/* Trips: destination journal hierarchy */
+.trips-section.international {
+  background: var(--paper-cloud);
+}
+
+.trips-grid {
+  align-items: stretch;
+}
+
+.trip-card {
+  display: flex;
+  flex-direction: column;
+  min-height: 100%;
+}
+
+.trip-card.featured {
+  background:
+    linear-gradient(135deg, rgba(38, 70, 83, 0.94), rgba(69, 123, 157, 0.88)),
+    url('./assets/watercolor/backgrounds/section-gallery.jpg') center / cover;
+  color: var(--paper-cloud);
+}
+
+.trip-card.featured h3,
+.trip-card.featured p,
+.trip-card.featured .trip-location,
+.trip-card.featured .trip-details {
+  color: inherit;
+}
+
+.trip-card .trip-content {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+}
+
+.trip-card .trip-details {
+  flex: 1;
+}
+
+.trip-card .btn {
+  align-self: flex-start;
+}
+
+.trip-location {
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+/* Gallery: editorial browsing without pretending placeholders are final assets */
+.gallery-section {
+  background: var(--paper-cloud);
+}
+
+.gallery-item:nth-child(3n + 1) {
+  transform: rotate(-0.35deg);
+}
+
+.gallery-item:nth-child(3n + 2) {
+  transform: rotate(0.25deg);
+}
+
+.gallery-item:nth-child(3n + 1):hover,
+.gallery-item:nth-child(3n + 2):hover {
+  transform: translateY(-4px) rotate(0deg);
+}
+
+/* Contact: keep the conversion path visually quiet and direct */
+.contact-section {
+  background: linear-gradient(180deg, var(--sand), var(--paper-cloud));
+}
+
+.contact-section .contact-content {
+  align-items: start;
+}
+
+.contact-form {
+  border-color: rgba(38, 70, 83, 0.14);
+  box-shadow: 0 20px 48px rgba(38, 70, 83, 0.1);
+}
+
+.contact-form .btn {
+  width: 100%;
+}
+
+@media (min-width: 800px) {
+  .story-point:nth-child(even) {
+    transform: translateX(2.5rem);
+  }
+
+  .trip-card.featured {
+    grid-row: span 2;
+  }
+}
+
+@media (max-width: 799px) {
+  .home-hero .hero-title {
+    max-width: 13ch;
+  }
+
+  .story-points {
+    margin-top: 2rem;
+  }
+
+  .story-point:nth-child(even) {
+    transform: none;
+  }
+
+  .gallery-item:nth-child(n) {
+    transform: none;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .motion-ready .motion-reveal,
   .motion-ready .motion-reveal.is-visible {
@@ -1949,6 +2231,11 @@ body {
 
   .hero-bg {
     animation: none;
+    transform: none;
+  }
+
+  .gallery-item:nth-child(n),
+  .story-point:nth-child(even) {
     transform: none;
   }
 }
