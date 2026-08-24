@@ -58,6 +58,38 @@
     elements.forEach((element) => observer.observe(element));
   }
 
+  function setupMobileMenu() {
+    const getElements = () => ({
+      toggle: document.querySelector('.nav-toggle'),
+      menu: document.getElementById('primary-navigation')
+    });
+
+    const closeMenu = () => {
+      const { toggle, menu } = getElements();
+      if (!toggle || !menu) return;
+      menu.classList.remove('active');
+      toggle.setAttribute('aria-expanded', 'false');
+    };
+
+    document.addEventListener('click', (event) => {
+      const { toggle, menu } = getElements();
+      if (!toggle || !menu) return;
+      if (event.target.closest('.nav-toggle')) {
+        const isOpen = menu.classList.toggle('active');
+        toggle.setAttribute('aria-expanded', String(isOpen));
+      } else if (event.target.closest('#primary-navigation a')) {
+        closeMenu();
+      }
+    });
+
+    document.addEventListener('keydown', (event) => {
+      if (event.key === 'Escape' && document.querySelector('#primary-navigation.active')) {
+        closeMenu();
+        document.querySelector('.nav-toggle')?.focus();
+      }
+    });
+  }
+
   function setupNavigation() {
     const navbar = document.querySelector('.navbar');
     if (!navbar) return;
@@ -73,6 +105,7 @@
   }
 
   setupNavigation();
+  setupMobileMenu();
   setupObserver();
   if (typeof reduceMotion.addEventListener === 'function') {
     reduceMotion.addEventListener('change', syncMotionPreference);

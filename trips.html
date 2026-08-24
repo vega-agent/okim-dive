@@ -14,7 +14,7 @@
     <nav class="navbar">
         <div class="nav-container">
             <a href="index.html" class="nav-logo">
-                <img src="assets/brand/okim-dive-logo.jpg" alt="OKIM Dive" class="logo-image">
+                <img src="assets/brand/okim-dive-logo.jpg" alt="OKIM Dive" class="logo-image" width="900" height="300" decoding="async">
             </a>
             <ul class="nav-menu" id="primary-navigation">
                 <li><a href="index.html" class="nav-link">Home</a></li>
@@ -25,7 +25,7 @@
                 <li><a href="contact.html" class="nav-link">Contact</a></li>
             </ul>
             <button class="lang-toggle" type="button" data-lang-toggle aria-pressed="false" aria-label="切换到简体中文">中文</button>
-            <button class="nav-toggle" type="button" aria-controls="primary-navigation" aria-expanded="false" aria-label="Toggle navigation">
+            <button class="nav-toggle" type="button" aria-controls="primary-navigation" aria-expanded="false" aria-label="Toggle navigation" onclick="const menu=document.getElementById('primary-navigation'); const open=menu.classList.toggle('active'); this.setAttribute('aria-expanded', String(open));" onkeydown="if(event.key==='Escape'){const menu=document.getElementById('primary-navigation'); menu.classList.remove('active'); this.setAttribute('aria-expanded','false');}">
                 <span></span>
                 <span></span>
                 <span></span>
@@ -232,6 +232,6 @@
     </footer>
 
     <script src="site-i18n.js"></script>
-    <script src="site-motion.js"></script>
+    <script src="site-motion.js?v=5"></script>
 </body>
 </html>
