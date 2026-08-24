@@ -2795,9 +2795,9 @@ body {
 
 .home .hero,
 body > .hero {
-  height: 78vh;
-  min-height: 600px;
-  max-height: 820px;
+  height: 70vh;
+  min-height: 520px;
+  max-height: 760px;
 }
 
 .why-us-section .container {
@@ -2839,6 +2839,13 @@ body > .hero {
 .ocean-journey .section-title {
   color: var(--ocean-deep);
   text-shadow: 0 1px 0 rgba(255, 255, 255, 0.55);
+}
+
+.faq-item,
+.gallery-empty-state,
+.contact-form,
+.contact-methods {
+  background: rgba(255, 255, 255, 0.92);
 }
 
 /* Give text-led sections a quiet editorial reading plane while preserving the ocean around it. */
@@ -2970,9 +2977,9 @@ body {
 
 .home .hero,
 body > .hero {
-  height: 78vh;
-  min-height: 600px;
-  max-height: 820px;
+  height: 70vh;
+  min-height: 520px;
+  max-height: 760px;
 }
 
 .why-us-section .container {
@@ -3014,6 +3021,13 @@ body > .hero {
 .ocean-journey .section-title {
   color: var(--ocean-deep);
   text-shadow: 0 1px 0 rgba(255, 255, 255, 0.55);
+}
+
+.faq-item,
+.gallery-empty-state,
+.contact-form,
+.contact-methods {
+  background: rgba(255, 255, 255, 0.92);
 }
 
 /* Give text-led sections a quiet editorial reading plane while preserving the ocean around it. */
