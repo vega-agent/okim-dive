@@ -45,6 +45,8 @@
   "Instagram": "Instagram",
   "Facebook": "Facebook",
   "小红书": "小红书",
+  "View Page": "查看主页",
+  "XiaoHongShu": "小红书",
   "© 2024 Okim Dive. All rights reserved.": "© 2024 奥金潜水。版权所有。",
   "Contact - Okim Dive": "联系方式 - Okim Dive",
   "Contact Us": "联系我们",

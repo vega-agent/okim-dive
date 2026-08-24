@@ -2138,6 +2138,16 @@ body {
   color: inherit;
 }
 
+.trip-card.featured .trip-content {
+  background: transparent;
+  color: var(--paper-cloud);
+}
+
+.trip-card.featured .trip-details li,
+.trip-card.featured .trip-details strong {
+  color: var(--paper-cloud);
+}
+
 .trip-card .trip-content {
   display: flex;
   flex: 1;
@@ -2199,7 +2209,7 @@ body {
   }
 
   .trip-card.featured {
-    grid-row: span 2;
+    grid-row: auto;
   }
 }
 
