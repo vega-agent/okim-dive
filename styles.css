@@ -2498,10 +2498,240 @@ body {
   box-shadow: var(--soft-shadow);
 }
 
+/* Adaptive ocean-depth environment */
+:root {
+  --ocean-shallow: #d9f4ed;
+  --ocean-mid-depth: #9dd6d1;
+  --ocean-deep-depth: #387f91;
+  --ocean-floor: #d7b987;
+}
+
+body {
+  position: relative;
+  background: linear-gradient(180deg, var(--ocean-shallow) 0%, #a7d9d2 25%, var(--ocean-mid-depth) 52%, var(--ocean-deep-depth) 82%, #123f5a 100%);
+  background-attachment: fixed;
+}
+
+body::before {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  content: "";
+  opacity: 0.3;
+  background-image:
+    radial-gradient(ellipse at 20% 10%, rgba(255,255,255,0.34) 0 1px, transparent 2px),
+    radial-gradient(ellipse at 80% 34%, rgba(255,255,255,0.2) 0 1px, transparent 2px),
+    radial-gradient(ellipse at 45% 70%, rgba(255,255,255,0.18) 0 1px, transparent 2px);
+  background-size: 190px 260px, 240px 310px, 280px 360px;
+  animation: ocean-particle-drift 26s linear infinite;
+}
+
+/* Content floats inside the same water column instead of switching to isolated flat panels. */
+.intro-section,
+.quick-links-section,
+.about-iris-section,
+.story-section,
+.why-us-section,
+.courses-intro,
+.courses-section,
+.process-section,
+.faq-section,
+.trips-intro,
+.trips-section.international,
+.included-section,
+.calendar-section,
+.gallery-intro,
+.gallery-section,
+.gallery-cta,
+.contact-intro,
+.contact-methods,
+.contact-form-section {
+  position: relative;
+  overflow: hidden;
+  background: transparent;
+}
+
+.intro-section::before,
+.quick-links-section::before,
+.about-iris-section::before,
+.story-section::before,
+.why-us-section::before,
+.courses-intro::before,
+.courses-section::before,
+.process-section::before,
+.faq-section::before,
+.trips-intro::before,
+.trips-section.international::before,
+.included-section::before,
+.calendar-section::before,
+.gallery-intro::before,
+.gallery-section::before,
+.gallery-cta::before,
+.contact-intro::before,
+.contact-methods::before,
+.contact-form-section::before {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  content: "";
+  opacity: 0.38;
+  background:
+    radial-gradient(ellipse at 18% 0%, rgba(255,255,255,0.42), transparent 34%),
+    linear-gradient(110deg, rgba(255,255,255,0.12), transparent 35%, rgba(8,67,96,0.1));
+  background-size: 150% 100%, 220% 100%;
+  animation: caustic-drift 18s ease-in-out infinite alternate;
+}
+
+.intro-section::before,
+.courses-intro::before,
+.trips-intro::before,
+.gallery-intro::before,
+.contact-intro::before {
+  opacity: 0.2;
+}
+
+.process-section::before,
+.included-section::before,
+.calendar-section::before,
+.contact-form-section::before {
+  opacity: 0.54;
+}
+
+body > section:last-of-type {
+  background:
+    radial-gradient(ellipse at 18% 110%, rgba(102, 69, 42, 0.34) 0 8%, transparent 28%),
+    radial-gradient(ellipse at 78% 105%, rgba(117, 79, 46, 0.28) 0 10%, transparent 30%),
+    linear-gradient(180deg, rgba(12, 77, 101, 0.12), rgba(211, 178, 126, 0.82));
+}
+
+body > section:last-of-type::after {
+  position: absolute;
+  right: -10%;
+  bottom: -12%;
+  left: -10%;
+  height: 42%;
+  z-index: 0;
+  pointer-events: none;
+  content: "";
+  opacity: 0.42;
+  background: repeating-radial-gradient(ellipse at 50% 100%, transparent 0 18px, rgba(113, 76, 44, 0.2) 19px 21px, transparent 22px 38px);
+  transform: rotate(-3deg);
+}
+
+.intro-section > *,
+.quick-links-section > *,
+.about-iris-section > *,
+.story-section > *,
+.why-us-section > *,
+.courses-intro > *,
+.courses-section > *,
+.process-section > *,
+.faq-section > *,
+.trips-intro > *,
+.trips-section.international > *,
+.included-section > *,
+.calendar-section > *,
+.gallery-intro > *,
+.gallery-section > *,
+.gallery-cta > *,
+.contact-intro > *,
+.contact-methods > *,
+.contact-form-section > * {
+  position: relative;
+  z-index: 1;
+}
+
+@keyframes caustic-drift {
+  from { background-position: 0% 0%, 0% 0%; transform: translate3d(-1%, 0, 0); }
+  to { background-position: 100% 0%, 30% 0%; transform: translate3d(1%, 1%, 0); }
+}
+
+@keyframes ocean-particle-drift {
+  from { transform: translate3d(0, 0, 0); }
+  to { transform: translate3d(-18px, -42px, 0); }
+}
+
+.motion-reveal {
+  will-change: transform, opacity;
+}
+
+.motion-ready .section-title {
+  animation: depth-float 7s ease-in-out infinite alternate;
+}
+
+@keyframes depth-float {
+  from { transform: translateY(0); }
+  to { transform: translateY(-5px); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  body::before,
+  .intro-section::before,
+  .quick-links-section::before,
+  .about-iris-section::before,
+  .story-section::before,
+  .why-us-section::before,
+  .courses-intro::before,
+  .courses-section::before,
+  .process-section::before,
+  .faq-section::before,
+  .trips-intro::before,
+  .trips-section.international::before,
+  .included-section::before,
+  .calendar-section::before,
+  .gallery-intro::before,
+  .gallery-section::before,
+  .gallery-cta::before,
+  .contact-intro::before,
+  .contact-methods::before,
+  .contact-form-section::before,
+  .motion-ready .section-title {
+    animation: none;
+    transform: none;
+  }
+}
+
 @media (max-width: 640px) {
   .trips-grid,
   .courses-grid,
   .included-grid {
     grid-template-columns: minmax(0, 1fr);
   }
+}
+
+/* Generated adaptive ocean artwork: shallow -> mid-depth -> seabed */
+.intro-section,
+.courses-intro,
+.trips-intro,
+.gallery-intro,
+.contact-intro,
+.about-iris-section {
+  background-image: linear-gradient(rgba(217, 244, 237, 0.32), rgba(217, 244, 237, 0.48)), url('./assets/backgrounds/ocean/ocean-shallow.webp');
+  background-size: cover;
+  background-position: center;
+}
+
+.quick-links-section,
+.story-section,
+.courses-section,
+.trips-section.international,
+.contact-methods,
+.gallery-section,
+.process-section,
+.included-section {
+  background-image: linear-gradient(rgba(92, 168, 170, 0.28), rgba(35, 111, 133, 0.42)), url('./assets/backgrounds/ocean/ocean-mid.webp');
+  background-size: cover;
+  background-position: center;
+}
+
+.why-us-section,
+.faq-section,
+.calendar-section,
+.gallery-cta,
+.contact-form-section {
+  background-image: linear-gradient(rgba(12, 70, 95, 0.2), rgba(8, 53, 77, 0.24)), url('./assets/backgrounds/ocean/ocean-seabed.webp');
+  background-size: cover;
+  background-position: center;
 }
