@@ -296,7 +296,7 @@ body {
   line-height: 1;
   color: var(--white);
   background-color: var(--ocean-light);
-  background-image: url('./assets/watercolor/components/cta-button.jpg');
+  background-image: url('./assets/watercolor/components/cta-button.webp');
   background-size: cover;
   background-position: center;
   transition: background-color 0.25s ease, background-image 0.25s ease, color 0.25s ease, transform 0.25s ease, box-shadow 0.25s ease;
@@ -322,7 +322,7 @@ body {
   color: var(--white);
   border-color: var(--ocean-light);
   background-color: var(--ocean-light);
-  background-image: url('./assets/watercolor/components/cta-button.jpg');
+  background-image: url('./assets/watercolor/components/cta-button.webp');
   background-size: cover;
   background-position: center;
 }
@@ -478,7 +478,7 @@ body {
   height: 80px;
   margin: 0 auto 1rem;
   border-radius: 50%;
-  background-image: url('./assets/watercolor/components/feature-icon-bg.jpg');
+  background-image: url('./assets/watercolor/components/feature-icon-bg.webp');
   background-size: cover;
   background-position: center;
   background-color: var(--ocean-light);
@@ -818,7 +818,7 @@ body {
    ============================================ */
 
 .testimonial-card {
-  background-image: url('./assets/watercolor/cards/testimonial.jpg');
+  background-image: url('./assets/watercolor/cards/testimonial.webp');
   background-size: cover;
   background-position: center;
   background-color: var(--ocean-foam);
@@ -1018,7 +1018,7 @@ body {
   width: 100%;
   height: 100%;
   object-fit: cover;
-  background-image: url('./assets/watercolor/cards/iris-portrait-frame.jpg');
+  background-image: url('./assets/watercolor/cards/iris-portrait-frame.webp');
   background-size: cover;
   background-position: center;
   background-color: var(--ocean-light);
@@ -1066,7 +1066,7 @@ body {
 .section-divider {
   width: 100%;
   height: 100px;
-  background-image: url('./assets/watercolor/dividers/wave-divider.jpg');
+  background-image: url('./assets/watercolor/dividers/wave-divider.webp');
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
@@ -1074,7 +1074,7 @@ body {
 
 .section-divider.coral {
   height: 150px;
-  background-image: url('./assets/watercolor/dividers/coral-divider.jpg');
+  background-image: url('./assets/watercolor/dividers/coral-divider.webp');
 }
 
 /* ============================================
@@ -1083,7 +1083,7 @@ body {
 
 .gallery-section {
   padding: 4rem 0;
-  background-image: url('./assets/watercolor/backgrounds/section-gallery.jpg');
+  background-image: url('./assets/watercolor/backgrounds/section-gallery.webp');
   background-size: cover;
   background-position: center;
   background-color: var(--white);
@@ -1159,7 +1159,7 @@ body {
   min-height: 12rem;
   background:
     linear-gradient(rgba(254, 250, 224, 0.78), rgba(254, 250, 224, 0.78)),
-    url('./assets/watercolor/backgrounds/section-gallery.jpg') center / cover;
+    url('./assets/watercolor/backgrounds/section-gallery.webp') center / cover;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -2009,7 +2009,7 @@ body {
   position: absolute;
   inset: 0;
   pointer-events: none;
-  background: url('./assets/watercolor/backgrounds/section-gallery.jpg') center / cover;
+  background: url('./assets/watercolor/backgrounds/section-gallery.webp') center / cover;
   opacity: 0.18;
   mix-blend-mode: screen;
 }
@@ -2153,7 +2153,7 @@ body {
 .trip-card.featured {
   background:
     linear-gradient(135deg, rgba(38, 70, 83, 0.94), rgba(69, 123, 157, 0.88)),
-    url('./assets/watercolor/backgrounds/section-gallery.jpg') center / cover;
+    url('./assets/watercolor/backgrounds/section-gallery.webp') center / cover;
   color: var(--paper-cloud);
 }
 
@@ -2295,7 +2295,7 @@ body {
 
 /* Phase 5.1: restore watercolor texture without repeating adjacent artwork */
 .quick-links-section {
-  background-image: linear-gradient(rgba(251, 250, 241, 0.78), rgba(241, 248, 244, 0.84)), url('./assets/watercolor/backgrounds/section-gallery.jpg');
+  background-image: linear-gradient(rgba(251, 250, 241, 0.78), rgba(241, 248, 244, 0.84)), url('./assets/watercolor/backgrounds/section-gallery.webp');
   background-size: cover;
   background-position: center;
 }
@@ -2319,7 +2319,7 @@ body {
 }
 
 .process-section {
-  background-image: linear-gradient(rgba(237, 248, 245, 0.82), rgba(220, 239, 240, 0.88)), url('./assets/watercolor/backgrounds/section-gallery.jpg');
+  background-image: linear-gradient(rgba(237, 248, 245, 0.82), rgba(220, 239, 240, 0.88)), url('./assets/watercolor/backgrounds/section-gallery.webp');
   background-size: cover;
   background-position: center;
 }
@@ -2337,7 +2337,7 @@ body {
 }
 
 .contact-methods {
-  background-image: linear-gradient(rgba(233, 246, 241, 0.82), rgba(220, 236, 239, 0.88)), url('./assets/watercolor/backgrounds/section-gallery.jpg');
+  background-image: linear-gradient(rgba(233, 246, 241, 0.82), rgba(220, 236, 239, 0.88)), url('./assets/watercolor/backgrounds/section-gallery.webp');
   background-size: cover;
   background-position: center;
 }
@@ -2440,7 +2440,7 @@ body {
 
 /* Final watercolor texture layer: each section uses a different crop/artwork */
 .quick-links-section {
-  background-image: linear-gradient(rgba(251, 250, 241, 0.78), rgba(241, 248, 244, 0.84)), url('./assets/watercolor/backgrounds/section-gallery.jpg');
+  background-image: linear-gradient(rgba(251, 250, 241, 0.78), rgba(241, 248, 244, 0.84)), url('./assets/watercolor/backgrounds/section-gallery.webp');
   background-size: cover;
   background-position: center;
 }
@@ -2464,7 +2464,7 @@ body {
 }
 
 .process-section {
-  background-image: linear-gradient(rgba(237, 248, 245, 0.82), rgba(220, 239, 240, 0.88)), url('./assets/watercolor/backgrounds/section-gallery.jpg');
+  background-image: linear-gradient(rgba(237, 248, 245, 0.82), rgba(220, 239, 240, 0.88)), url('./assets/watercolor/backgrounds/section-gallery.webp');
   background-size: cover;
   background-position: center;
 }
@@ -2482,7 +2482,7 @@ body {
 }
 
 .contact-methods {
-  background-image: linear-gradient(rgba(233, 246, 241, 0.82), rgba(220, 236, 239, 0.88)), url('./assets/watercolor/backgrounds/section-gallery.jpg');
+  background-image: linear-gradient(rgba(233, 246, 241, 0.82), rgba(220, 236, 239, 0.88)), url('./assets/watercolor/backgrounds/section-gallery.webp');
   background-size: cover;
   background-position: center;
 }
