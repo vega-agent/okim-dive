@@ -2293,7 +2293,78 @@ body {
   background: rgba(255, 255, 255, 0.92);
 }
 
-/* Phase 5 background rhythm: watercolor intro -> quiet content -> contrasting close */
+/* Phase 5.1: restore watercolor texture without repeating adjacent artwork */
+.quick-links-section {
+  background-image: linear-gradient(rgba(251, 250, 241, 0.78), rgba(241, 248, 244, 0.84)), url('./assets/watercolor/backgrounds/section-gallery.jpg');
+  background-size: cover;
+  background-position: center;
+}
+
+.why-us-section {
+  background-image: linear-gradient(rgba(251, 250, 241, 0.76), rgba(241, 248, 244, 0.86)), url('./assets/backgrounds/generated/section-intro-watercolor.webp');
+  background-size: cover;
+  background-position: center;
+}
+
+.story-section {
+  background-image: linear-gradient(135deg, rgba(238, 249, 245, 0.86), rgba(255, 249, 226, 0.82)), url('./assets/backgrounds/generated/section-contact-watercolor.webp');
+  background-size: cover;
+  background-position: center;
+}
+
+.courses-section {
+  background-image: linear-gradient(rgba(255, 251, 234, 0.82), rgba(247, 244, 223, 0.86)), url('./assets/backgrounds/generated/section-about-watercolor.webp');
+  background-size: cover;
+  background-position: center;
+}
+
+.process-section {
+  background-image: linear-gradient(rgba(237, 248, 245, 0.82), rgba(220, 239, 240, 0.88)), url('./assets/watercolor/backgrounds/section-gallery.jpg');
+  background-size: cover;
+  background-position: center;
+}
+
+.included-section {
+  background-image: linear-gradient(rgba(237, 248, 245, 0.8), rgba(220, 239, 240, 0.88)), url('./assets/backgrounds/generated/section-contact-watercolor.webp');
+  background-size: cover;
+  background-position: center;
+}
+
+.calendar-section {
+  background-image: linear-gradient(rgba(248, 251, 249, 0.84), rgba(232, 241, 239, 0.9)), url('./assets/backgrounds/generated/section-about-watercolor.webp');
+  background-size: cover;
+  background-position: center;
+}
+
+.contact-methods {
+  background-image: linear-gradient(rgba(233, 246, 241, 0.82), rgba(220, 236, 239, 0.88)), url('./assets/watercolor/backgrounds/section-gallery.jpg');
+  background-size: cover;
+  background-position: center;
+}
+
+.contact-form-section {
+  background-image: linear-gradient(rgba(248, 251, 249, 0.78), rgba(232, 241, 239, 0.88)), url('./assets/backgrounds/generated/section-contact-watercolor.webp');
+  background-size: cover;
+  background-position: center;
+}
+
+/* Trips: featured status is a label only; geometry and surface remain identical */
+.trip-card,
+.trip-card.featured {
+  border: 1px solid rgba(38, 70, 83, 0.28);
+  box-shadow: var(--soft-shadow);
+}
+
+.trip-card.featured {
+  transform: none;
+}
+
+.trip-card.featured:hover,
+.trip-card.featured:focus-within {
+  transform: translateY(-4px);
+  box-shadow: 0 14px 30px rgba(38, 70, 83, 0.14);
+}
+
 .intro-section,
 .courses-intro,
 .trips-intro,
@@ -2366,4 +2437,72 @@ body {
 .trip-card.featured p,
 .trip-card.featured .trip-location {
   color: var(--ocean-deep);
+}
+
+/* Final watercolor texture layer: each section uses a different crop/artwork */
+.quick-links-section {
+  background-image: linear-gradient(rgba(251, 250, 241, 0.78), rgba(241, 248, 244, 0.84)), url('./assets/watercolor/backgrounds/section-gallery.jpg');
+  background-size: cover;
+  background-position: center;
+}
+
+.why-us-section {
+  background-image: linear-gradient(rgba(251, 250, 241, 0.76), rgba(241, 248, 244, 0.86)), url('./assets/backgrounds/generated/section-intro-watercolor.webp');
+  background-size: cover;
+  background-position: center;
+}
+
+.story-section {
+  background-image: linear-gradient(135deg, rgba(238, 249, 245, 0.86), rgba(255, 249, 226, 0.82)), url('./assets/backgrounds/generated/section-contact-watercolor.webp');
+  background-size: cover;
+  background-position: center;
+}
+
+.courses-section {
+  background-image: linear-gradient(rgba(255, 251, 234, 0.82), rgba(247, 244, 223, 0.86)), url('./assets/backgrounds/generated/section-about-watercolor.webp');
+  background-size: cover;
+  background-position: center;
+}
+
+.process-section {
+  background-image: linear-gradient(rgba(237, 248, 245, 0.82), rgba(220, 239, 240, 0.88)), url('./assets/watercolor/backgrounds/section-gallery.jpg');
+  background-size: cover;
+  background-position: center;
+}
+
+.included-section {
+  background-image: linear-gradient(rgba(237, 248, 245, 0.8), rgba(220, 239, 240, 0.88)), url('./assets/backgrounds/generated/section-contact-watercolor.webp');
+  background-size: cover;
+  background-position: center;
+}
+
+.calendar-section {
+  background-image: linear-gradient(rgba(248, 251, 249, 0.84), rgba(232, 241, 239, 0.9)), url('./assets/backgrounds/generated/section-about-watercolor.webp');
+  background-size: cover;
+  background-position: center;
+}
+
+.contact-methods {
+  background-image: linear-gradient(rgba(233, 246, 241, 0.82), rgba(220, 236, 239, 0.88)), url('./assets/watercolor/backgrounds/section-gallery.jpg');
+  background-size: cover;
+  background-position: center;
+}
+
+.contact-form-section {
+  background-image: linear-gradient(rgba(248, 251, 249, 0.78), rgba(232, 241, 239, 0.88)), url('./assets/backgrounds/generated/section-contact-watercolor.webp');
+  background-size: cover;
+  background-position: center;
+}
+
+.trip-card.featured {
+  border: 1px solid rgba(38, 70, 83, 0.28);
+  box-shadow: var(--soft-shadow);
+}
+
+@media (max-width: 640px) {
+  .trips-grid,
+  .courses-grid,
+  .included-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
 }
