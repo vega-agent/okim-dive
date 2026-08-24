@@ -1869,3 +1869,86 @@ body {
     animation-iteration-count: 1 !important;
   }
 }
+
+/* ============================================
+   PHASE 2 - LIGHTWEIGHT MOTION
+   Progressive enhancement: content is visible
+   by default and motion is added only when JS
+   has initialized successfully.
+   ============================================ */
+
+.motion-ready .motion-reveal {
+  opacity: 0;
+  transform: translateY(1.25rem);
+  transition: opacity 600ms ease-out, transform 600ms ease-out;
+  transition-delay: var(--reveal-delay, 0ms);
+}
+
+.motion-ready .motion-reveal.is-visible {
+  opacity: 1;
+  transform: none;
+}
+
+.motion-ready .hero-content.motion-reveal {
+  transform: translateY(0.75rem);
+}
+
+.motion-ready .hero-content.motion-reveal.is-visible {
+  transform: none;
+}
+
+.navbar {
+  transition: background-color var(--motion-medium) ease, box-shadow var(--motion-medium) ease, border-color var(--motion-medium) ease;
+}
+
+.navbar.is-scrolled {
+  background: rgba(254, 250, 224, 0.98);
+  border-bottom-color: rgba(38, 70, 83, 0.18);
+  box-shadow: 0 8px 24px rgba(38, 70, 83, 0.12);
+}
+
+.nav-toggle span {
+  transition: transform var(--motion-fast) ease, opacity var(--motion-fast) ease;
+}
+
+.nav-menu.active ~ .nav-toggle span:nth-child(1) {
+  transform: translateY(7px) rotate(45deg);
+}
+
+.nav-menu.active ~ .nav-toggle span:nth-child(2) {
+  opacity: 0;
+}
+
+.nav-menu.active ~ .nav-toggle span:nth-child(3) {
+  transform: translateY(-7px) rotate(-45deg);
+}
+
+.hero-bg {
+  animation: watercolor-drift 22s ease-in-out infinite alternate;
+  transform-origin: center;
+}
+
+@keyframes watercolor-drift {
+  from { transform: scale(1.01) translate3d(0, 0, 0); }
+  to { transform: scale(1.035) translate3d(0, -0.5%, 0); }
+}
+
+@media (max-width: 768px) {
+  .hero-bg {
+    animation-duration: 30s;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .motion-ready .motion-reveal,
+  .motion-ready .motion-reveal.is-visible {
+    opacity: 1;
+    transform: none;
+    transition: none;
+  }
+
+  .hero-bg {
+    animation: none;
+    transform: none;
+  }
+}
