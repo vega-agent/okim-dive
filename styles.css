@@ -2701,7 +2701,96 @@ body > section:last-of-type::after {
   }
 }
 
-/* Generated adaptive ocean artwork: shallow -> mid-depth -> seabed */
+/* One continuous underwater journey across the entire document */
+html,
+body {
+  background-color: #1b7186;
+}
+
+body {
+  background-image: url('./assets/backgrounds/ocean/ocean-journey.webp');
+  background-repeat: no-repeat;
+  background-position: top center;
+  background-size: 100% 92%;
+}
+
+.intro-section,
+.quick-links-section,
+.about-iris-section,
+.story-section,
+.why-us-section,
+.courses-intro,
+.courses-section,
+.process-section,
+.faq-section,
+.trips-intro,
+.trips-section.international,
+.included-section,
+.calendar-section,
+.gallery-intro,
+.gallery-section,
+.gallery-cta,
+.contact-intro,
+.contact-methods,
+.contact-form-section {
+  background: transparent;
+}
+
+/* The artwork itself provides the surface-to-seabed journey; keep overlays atmospheric only. */
+.intro-section::before,
+.quick-links-section::before,
+.about-iris-section::before,
+.story-section::before,
+.why-us-section::before,
+.courses-intro::before,
+.courses-section::before,
+.process-section::before,
+.faq-section::before,
+.trips-intro::before,
+.trips-section.international::before,
+.included-section::before,
+.calendar-section::before,
+.gallery-intro::before,
+.gallery-section::before,
+.gallery-cta::before,
+.contact-intro::before,
+.contact-methods::before,
+.contact-form-section::before {
+  opacity: 0.12;
+}
+
+body > section:last-of-type {
+  background: transparent;
+}
+
+body > section:last-of-type::after {
+  display: none;
+}
+
+.footer {
+  background: rgba(24, 60, 76, 0.92);
+}
+
+/* The main content owns the full continuous ocean canvas; the footer remains outside it. */
+body {
+  background-image: none;
+  background-color: #174f67;
+}
+
+.ocean-journey {
+  position: relative;
+  isolation: isolate;
+  background-image: url('./assets/backgrounds/ocean/ocean-journey.webp');
+  background-repeat: no-repeat;
+  background-position: top center;
+  background-size: 100% 100%;
+}
+
+.ocean-journey::before {
+  z-index: -1;
+  opacity: 0.08;
+}
+
 .intro-section,
 .courses-intro,
 .trips-intro,
@@ -2734,4 +2823,72 @@ body > section:last-of-type::after {
   background-image: linear-gradient(rgba(12, 70, 95, 0.2), rgba(8, 53, 77, 0.24)), url('./assets/backgrounds/ocean/ocean-seabed.webp');
   background-size: cover;
   background-position: center;
+}
+
+/* Final cascade: one continuous page artwork, not section-by-section panels */
+html,
+body {
+  background-color: #1b7186;
+}
+
+body {
+  background-image: url('./assets/backgrounds/ocean/ocean-journey.webp');
+  background-repeat: no-repeat;
+  background-position: top center;
+  background-size: 100% 92%;
+}
+
+.intro-section,
+.quick-links-section,
+.about-iris-section,
+.story-section,
+.why-us-section,
+.courses-intro,
+.courses-section,
+.process-section,
+.faq-section,
+.trips-intro,
+.trips-section.international,
+.included-section,
+.calendar-section,
+.gallery-intro,
+.gallery-section,
+.gallery-cta,
+.contact-intro,
+.contact-methods,
+.contact-form-section {
+  background: transparent;
+}
+
+body > section:last-of-type,
+body > section:last-of-type::after {
+  background: transparent;
+}
+
+body > section:last-of-type::after {
+  display: none;
+}
+
+.footer {
+  background: rgba(24, 60, 76, 0.92);
+}
+
+/* The main content owns the full continuous ocean canvas; the footer remains outside it. */
+body {
+  background-image: none;
+  background-color: #174f67;
+}
+
+.ocean-journey {
+  position: relative;
+  isolation: isolate;
+  background-image: url('./assets/backgrounds/ocean/ocean-journey.webp');
+  background-repeat: no-repeat;
+  background-position: top center;
+  background-size: 100% 100%;
+}
+
+.ocean-journey::before {
+  z-index: -1;
+  opacity: 0.08;
 }
