@@ -2777,13 +2777,33 @@ body {
   background-color: #174f67;
 }
 
+.hero,
+.page-hero {
+  height: clamp(320px, 42vh, 520px);
+}
+
+.hero {
+  min-height: 480px;
+}
+
+.page-hero {
+  min-height: 320px;
+  margin-top: 70px;
+}
+
 .ocean-journey {
   position: relative;
   isolation: isolate;
-  background-image: url('./assets/backgrounds/ocean/ocean-journey.webp');
+  background-image: linear-gradient(rgba(239, 249, 246, 0.34), rgba(235, 247, 244, 0.38)), url('./assets/backgrounds/ocean/ocean-journey.webp');
   background-repeat: no-repeat;
   background-position: top center;
   background-size: 100% 100%;
+}
+
+.faq-section .faq-item {
+  background: rgba(255, 255, 255, 0.94);
+  border: 1px solid rgba(69, 123, 157, 0.16);
+  box-shadow: 0 12px 30px rgba(8, 53, 77, 0.08);
 }
 
 .ocean-journey::before {
@@ -2879,13 +2899,33 @@ body {
   background-color: #174f67;
 }
 
+.hero,
+.page-hero {
+  height: clamp(320px, 42vh, 520px);
+}
+
+.hero {
+  min-height: 480px;
+}
+
+.page-hero {
+  min-height: 320px;
+  margin-top: 70px;
+}
+
 .ocean-journey {
   position: relative;
   isolation: isolate;
-  background-image: url('./assets/backgrounds/ocean/ocean-journey.webp');
+  background-image: linear-gradient(rgba(239, 249, 246, 0.34), rgba(235, 247, 244, 0.38)), url('./assets/backgrounds/ocean/ocean-journey.webp');
   background-repeat: no-repeat;
   background-position: top center;
   background-size: 100% 100%;
+}
+
+.faq-section .faq-item {
+  background: rgba(255, 255, 255, 0.94);
+  border: 1px solid rgba(69, 123, 157, 0.16);
+  box-shadow: 0 12px 30px rgba(8, 53, 77, 0.08);
 }
 
 .ocean-journey::before {
