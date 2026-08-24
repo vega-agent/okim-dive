@@ -2165,13 +2165,13 @@ body {
 }
 
 .trip-card.featured .trip-content {
-  background: transparent;
-  color: var(--paper-cloud);
+  background: var(--white);
+  color: var(--ocean-deep);
 }
 
 .trip-card.featured .trip-details li,
 .trip-card.featured .trip-details strong {
-  color: var(--paper-cloud);
+  color: var(--ocean-deep);
 }
 
 .trip-card .trip-content {
@@ -2426,9 +2426,8 @@ body {
   box-shadow: 0 18px 36px rgba(38, 70, 83, 0.16);
 }
 
-.trip-card.featured .trip-content {
-  background: transparent;
-  color: var(--ocean-deep);
+.trip-content {
+  background: var(--white);
 }
 
 .trip-card.featured .trip-details li,
