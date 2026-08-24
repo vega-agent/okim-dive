@@ -3,27 +3,39 @@
    ============================================ */
 
 :root {
-  /* Ocean Palette */
-  --ocean-deep: #0a2342;
-  --ocean-mid: #1b4965;
+  /* Okim Dive watercolor palette */
+  --ocean-deep: #264653;
+  --ocean-mid: #457b9d;
   --ocean-light: #5fa8d3;
-  --ocean-surface: #bee9e8;
+  --ocean-mist: #a8dadc;
+  --sea-foam: #b8e0d2;
   --ocean-foam: #cae9ff;
-  --coral: #ff6b6b;
-  --sand: #f4e4c1;
+  --paper-sand: #f1faee;
+  --paper-cloud: #fefae0;
+  --coral: #e63946;
+  --sunset: #f4a261;
+  --kelp: #2a9d8f;
+  --sand: #f1faee;
   --white: #ffffff;
-  
+  --ink-soft: #6c757d;
+  --whisper-border: rgba(38, 70, 83, 0.12);
+  --soft-shadow: 0 10px 30px rgba(69, 123, 157, 0.12), 0 2px 6px rgba(38, 70, 83, 0.06);
+  --content-max: 1200px;
+
   /* Typography */
   --font-cursive: 'Great Vibes', cursive;
   --font-heading: 'Playfair Display', Georgia, serif;
-  --font-body: 'Lato', -apple-system, BlinkMacSystemFont, sans-serif;
-  
-  /* Spacing */
+  --font-body: 'Lato', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  --font-chinese: 'Noto Sans SC', 'PingFang SC', sans-serif;
+
+  /* Spacing and motion */
   --space-xs: 0.5rem;
   --space-sm: 1rem;
   --space-md: 2rem;
   --space-lg: 4rem;
   --space-xl: 6rem;
+  --motion-fast: 180ms;
+  --motion-medium: 320ms;
 }
 
 * {
@@ -1086,15 +1098,19 @@ body {
 }
 
 .gallery-item {
-  border-radius: 15px;
+  border: 1px solid var(--whisper-border);
+  border-radius: 16px;
   overflow: hidden;
-  transition: all 0.3s;
-  background-color: var(--ocean-foam);
+  transition: transform var(--motion-medium) ease, box-shadow var(--motion-medium) ease;
+  background: var(--paper-cloud);
+  box-shadow: var(--soft-shadow);
 }
 
-.gallery-item:hover {
-  transform: scale(1.05);
+.gallery-item:hover,
+.gallery-item:focus-within {
+  transform: translateY(-4px);
   z-index: 10;
+  box-shadow: 0 16px 34px rgba(69, 123, 157, 0.16);
 }
 
 .gallery-item.large {
@@ -1114,26 +1130,54 @@ body {
 .image-placeholder {
   width: 100%;
   height: 100%;
-  background: linear-gradient(135deg, var(--ocean-surface) 0%, var(--ocean-light) 100%);
+  min-height: 12rem;
+  background:
+    linear-gradient(rgba(254, 250, 224, 0.78), rgba(254, 250, 224, 0.78)),
+    url('./assets/watercolor/backgrounds/section-gallery.jpg') center / cover;
   display: flex;
   align-items: center;
   justify-content: center;
+  position: relative;
+}
+
+.image-placeholder::before {
+  content: 'OKIM DIVE / TIOMAN';
+  position: absolute;
+  top: 1rem;
+  left: 1rem;
+  color: rgba(38, 70, 83, 0.48);
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
 }
 
 .placeholder-content {
+  max-width: 16rem;
+  padding: 1.25rem;
   text-align: center;
   color: var(--ocean-deep);
 }
 
 .placeholder-icon {
-  font-size: 3rem;
-  display: block;
-  margin-bottom: 0.5rem;
+  display: none;
 }
 
 .placeholder-content p {
-  font-size: 0.9rem;
   margin: 0;
+  color: var(--ocean-mid);
+  font-family: var(--font-heading);
+  font-size: 1.2rem;
+}
+
+.placeholder-content p::after {
+  content: ' · PHOTO TO BE ADDED';
+  display: block;
+  margin-top: 0.6rem;
+  color: var(--ink-soft);
+  font-family: var(--font-body);
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
 }
 
 /* ============================================
@@ -1606,5 +1650,222 @@ html[lang="zh-CN"] .hero-subtitle {
 
   .contact-form {
     padding: 2rem 1rem;
+  }
+}
+
+/* ============================================
+   PHASE 1 - VISUAL FOUNDATION
+   Shared paper surfaces, editorial rhythm, and
+   restrained image treatment. Keep this layer
+   dependency-free and usable without JS.
+   ============================================ */
+
+body {
+  background: var(--paper-sand);
+  color: var(--ocean-deep);
+}
+
+.navbar {
+  background: rgba(254, 250, 224, 0.94);
+  border-bottom: 1px solid var(--whisper-border);
+  box-shadow: 0 4px 18px rgba(38, 70, 83, 0.08);
+}
+
+.nav-link,
+.footer-links a,
+.social-link {
+  transition: color var(--motion-fast) ease, opacity var(--motion-fast) ease;
+}
+
+.nav-link:hover,
+.nav-link:focus-visible,
+.footer-links a:hover,
+.footer-links a:focus-visible,
+.social-link:hover,
+.social-link:focus-visible {
+  color: var(--coral);
+}
+
+.nav-link.active {
+  color: var(--coral);
+}
+
+.nav-link.active::after {
+  background: var(--coral);
+  border-radius: 999px;
+}
+
+.container {
+  max-width: var(--content-max);
+}
+
+.hero,
+.page-hero {
+  isolation: isolate;
+}
+
+.hero-bg,
+.page-hero .hero-bg {
+  background-color: var(--ocean-mid);
+}
+
+.hero-bg::before,
+.page-hero .hero-bg::before {
+  background: linear-gradient(180deg, rgba(38, 70, 83, 0.16), rgba(38, 70, 83, 0.48));
+}
+
+.hero-content {
+  max-width: 760px;
+}
+
+.hero-title {
+  font-family: var(--font-heading);
+  font-weight: 400;
+  letter-spacing: -0.04em;
+  text-wrap: balance;
+}
+
+.page-hero .hero-title {
+  font-size: clamp(2.75rem, 7vw, 4.5rem);
+}
+
+.hero-subtitle {
+  max-width: 38rem;
+  margin-inline: auto;
+  font-size: clamp(1.05rem, 2vw, 1.35rem);
+  text-wrap: balance;
+}
+
+.section-title {
+  font-family: var(--font-heading);
+  font-weight: 400;
+  letter-spacing: -0.035em;
+  text-wrap: balance;
+}
+
+.intro-section,
+.courses-intro,
+.trips-intro,
+.gallery-intro,
+.contact-intro {
+  background-color: var(--paper-cloud);
+}
+
+.intro-content,
+.included-content,
+.form-content,
+.calendar-note,
+.process-content {
+  border: 1px solid var(--whisper-border);
+  box-shadow: var(--soft-shadow);
+}
+
+.intro-content,
+.quick-link-card,
+.feature-card,
+.course-card,
+.trip-card,
+.method-card {
+  border-radius: 16px;
+}
+
+.intro-content {
+  background: rgba(254, 250, 224, 0.78);
+  backdrop-filter: blur(3px);
+}
+
+.feature-card,
+.quick-link-card,
+.method-card {
+  border: 1px solid var(--whisper-border);
+  box-shadow: var(--soft-shadow);
+  transition: transform var(--motion-medium) ease, box-shadow var(--motion-medium) ease, border-color var(--motion-medium) ease;
+}
+
+.feature-card:hover,
+.feature-card:focus-within,
+.quick-link-card:hover,
+.quick-link-card:focus-visible,
+.method-card:hover,
+.method-card:focus-within {
+  border-color: rgba(42, 157, 143, 0.36);
+  box-shadow: 0 16px 34px rgba(69, 123, 157, 0.16), 0 3px 8px rgba(38, 70, 83, 0.08);
+}
+
+.quick-link-card {
+  min-height: 190px;
+  display: flex;
+  align-items: flex-end;
+  background: var(--paper-cloud);
+}
+
+.quick-link-card .card-content {
+  width: 100%;
+}
+
+.quick-link-card h3,
+.feature-card h3,
+.course-header h3,
+.trip-header h3 {
+  font-family: var(--font-heading);
+  font-weight: 400;
+  letter-spacing: -0.02em;
+}
+
+.quick-link-card p,
+.feature-card p,
+.intro-text,
+.card-content p {
+  color: var(--ink-soft);
+}
+
+.btn {
+  min-height: 48px;
+  border-radius: 10px;
+  font-family: var(--font-body);
+  font-weight: 700;
+  letter-spacing: 0.01em;
+  box-shadow: 0 4px 12px rgba(69, 123, 157, 0.16);
+}
+
+.btn-primary {
+  border-color: var(--coral);
+  background-color: var(--coral);
+  background-image: none;
+}
+
+.btn-primary:hover,
+.btn-primary:focus-visible {
+  background-color: #c92f3b;
+  border-color: #c92f3b;
+}
+
+.btn-secondary {
+  color: var(--ocean-deep);
+  border-color: var(--ocean-mid);
+  background-color: rgba(254, 250, 224, 0.84);
+  background-image: none;
+}
+
+.btn-secondary:hover,
+.btn-secondary:focus-visible {
+  color: var(--white);
+  background-color: var(--ocean-mid);
+  border-color: var(--ocean-mid);
+}
+
+:focus-visible {
+  outline: 3px solid var(--coral);
+  outline-offset: 4px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    scroll-behavior: auto !important;
+    transition-duration: 0.01ms !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
   }
 }
