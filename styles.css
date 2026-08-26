@@ -307,9 +307,9 @@ body {
 .btn:focus-visible {
   color: var(--white);
   background-image: none;
-  background-color: var(--ocean-light);
+  background-color: var(--ocean-deep);
   transform: translateY(-2px);
-  box-shadow: 0 5px 20px rgba(95, 168, 211, 0.35);
+  box-shadow: 0 5px 20px rgba(38, 70, 83, 0.25);
 }
 
 .btn:active {
@@ -333,7 +333,7 @@ body {
 .btn-secondary:focus-visible {
   color: var(--white);
   background-image: none;
-  background-color: var(--ocean-light);
+  background-color: var(--ocean-deep);
   opacity: 1;
 }
 
@@ -1862,8 +1862,9 @@ body {
 
 .btn-primary:hover,
 .btn-primary:focus-visible {
-  background-color: #c92f3b;
-  border-color: #c92f3b;
+  color: var(--white);
+  background-color: var(--ocean-deep);
+  border-color: var(--ocean-deep);
 }
 
 .btn-secondary {
