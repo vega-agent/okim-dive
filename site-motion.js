@@ -69,6 +69,7 @@
       if (!toggle || !menu) return;
       menu.classList.remove('active');
       toggle.setAttribute('aria-expanded', 'false');
+      document.body.classList.remove('menu-open');
     };
 
     document.addEventListener('click', (event) => {
@@ -77,6 +78,7 @@
       if (event.target.closest('.nav-toggle')) {
         const isOpen = menu.classList.toggle('active');
         toggle.setAttribute('aria-expanded', String(isOpen));
+        document.body.classList.toggle('menu-open', isOpen);
       } else if (event.target.closest('#primary-navigation a')) {
         closeMenu();
       }

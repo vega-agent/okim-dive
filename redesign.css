@@ -1,0 +1,19 @@
+/* EXPERIMENTAL REDESIGN: EDITORIAL DIVE JOURNAL */
+:root { --journal-line: rgba(23, 59, 74, .16); }
+.site-header { border-bottom: 1px solid var(--journal-line); box-shadow: none; }
+.hero-content, .page-hero-content { max-width: 1200px; margin: 0 auto; text-align: left; }
+.hero-content h1, .page-hero-content h1 { max-width: 760px; font-size: clamp(3.2rem, 7vw, 6.8rem); line-height: .98; letter-spacing: -.045em; }
+.hero-content p, .page-hero-content p { max-width: 520px; margin-left: 0; font-size: clamp(1.05rem, 1.5vw, 1.35rem); }
+.hero-cta { justify-content: flex-start; }
+.section-title { max-width: 760px; margin-left: 0; text-align: left; font-size: clamp(2.1rem, 4vw, 3.4rem); letter-spacing: -.035em; }
+.section-subtitle { max-width: 620px; margin-left: 0; text-align: left; }
+.container { max-width: 1180px; }
+.card, .course-card, .trip-card, .feature-card, .contact-card, .faq-item, .form-content { border: 1px solid var(--journal-line); border-radius: 14px; box-shadow: 0 14px 36px rgba(23, 59, 74, .08); }
+.course-card, .trip-card, .feature-card, .contact-card { text-align: left; }
+.process-section, .why-us-section, .contact-form-section { border-top: 1px solid var(--journal-line); }
+.process-steps { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 0; border-top: 1px solid var(--journal-line); border-bottom: 1px solid var(--journal-line); }
+.step { min-height: 190px; padding: 2rem 1.5rem; border-right: 1px solid var(--journal-line); }
+.step:last-child { border-right: 0; }
+.step-number { width: 2.75rem; height: 2.75rem; display: grid; place-items: center; border: 1px solid currentColor; border-radius: 50%; background: transparent; }
+@media (max-width: 968px) { .hero-content, .page-hero-content { text-align: left; } .process-steps { grid-template-columns: repeat(2, minmax(0, 1fr)); border-bottom: 0; } .step { border-right: 0; border-bottom: 1px solid var(--journal-line); } .step:last-child { border-bottom: 0; } .nav-toggle, [data-lang-toggle] { min-height: 44px; min-width: 44px; } body.menu-open { overflow: hidden; } }
+@media (max-width: 640px) { .hero-content h1, .page-hero-content h1 { font-size: clamp(2.8rem, 13vw, 4.5rem); } .section-title { font-size: clamp(2rem, 10vw, 2.8rem); } .process-steps { grid-template-columns: 1fr; } .card, .course-card, .trip-card, .feature-card, .contact-card, .faq-item, .form-content { border-radius: 10px; } }

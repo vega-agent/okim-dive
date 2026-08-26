@@ -345,6 +345,7 @@
     toggle.addEventListener('click', () => {
       const isOpen = menu.classList.toggle('active');
       toggle.setAttribute('aria-expanded', String(isOpen));
+      document.body.classList.toggle('menu-open', isOpen);
     });
   });
   document.querySelectorAll('[data-lang-toggle]').forEach((button) => {
