@@ -14,6 +14,21 @@
 .process-steps { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 0; border-top: 1px solid var(--journal-line); border-bottom: 1px solid var(--journal-line); }
 .step { min-height: 190px; padding: 2rem 1.5rem; border-right: 1px solid var(--journal-line); }
 .step:last-child { border-right: 0; }
-.step-number { width: 2.75rem; height: 2.75rem; display: grid; place-items: center; border: 1px solid currentColor; border-radius: 50%; background: transparent; }
+.step-number { width: 2.75rem; height: 2.75rem; display: grid; place-items: center; border: 1px solid var(--journal-line); border-radius: 50%; background: var(--paper-cloud); color: var(--ocean-deep); }
+
+/* Readability gate: watercolor remains environmental, never behind primary copy. */
+.process-section .process-content,
+.contact-form-section .form-content,
+.faq-section .faq-item { background: rgba(255, 253, 247, .98); }
+.why-us-section {
+  background-color: rgba(255, 253, 247, .62);
+  background-image: linear-gradient(rgba(239, 249, 246, .62), rgba(235, 247, 244, .68)), url('./assets/backgrounds/ocean/ocean-journey.webp');
+  background-position: bottom center;
+  background-size: cover;
+}
+.process-section .step h3, .process-section .step p,
+.why-us-section .why-item h3, .why-us-section .why-item p { color: var(--ocean-deep); }
+.why-us-section .why-item .why-icon { color: var(--ocean-deep); }
+
 @media (max-width: 968px) { .hero-content, .page-hero-content { text-align: left; } .process-steps { grid-template-columns: repeat(2, minmax(0, 1fr)); border-bottom: 0; } .step { border-right: 0; border-bottom: 1px solid var(--journal-line); } .step:last-child { border-bottom: 0; } .nav-toggle, [data-lang-toggle] { min-height: 44px; min-width: 44px; } body.menu-open { overflow: hidden; } }
 @media (max-width: 640px) { .hero-content h1, .page-hero-content h1 { font-size: clamp(2.8rem, 13vw, 4.5rem); } .section-title { font-size: clamp(2rem, 10vw, 2.8rem); } .process-steps { grid-template-columns: 1fr; } .card, .course-card, .trip-card, .feature-card, .contact-card, .faq-item, .form-content { border-radius: 10px; } }

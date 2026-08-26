@@ -340,14 +340,6 @@
     localStorage.setItem('okim-language', language);
   }
 
-  document.querySelectorAll('.nav-toggle').forEach((toggle) => {
-    const menu = document.getElementById(toggle.getAttribute('aria-controls'));
-    toggle.addEventListener('click', () => {
-      const isOpen = menu.classList.toggle('active');
-      toggle.setAttribute('aria-expanded', String(isOpen));
-      document.body.classList.toggle('menu-open', isOpen);
-    });
-  });
   document.querySelectorAll('[data-lang-toggle]').forEach((button) => {
     button.addEventListener('click', () => applyLanguage(document.documentElement.lang === 'zh-CN' ? 'en' : 'zh'));
   });

@@ -26,6 +26,11 @@ test('mobile navigation opens and closes with Escape', async ({ page }, testInfo
   await expect(toggle).toHaveAttribute('aria-expanded', 'false');
   await toggle.click();
   await expect(toggle).toHaveAttribute('aria-expanded', 'true');
+  await expect(page.locator('.nav-menu')).toBeVisible();
+  await page.waitForTimeout(400);
+  const menuBox = await page.locator('.nav-menu').boundingBox();
+  expect(menuBox?.x).toBeGreaterThanOrEqual(0);
+  expect((menuBox?.x ?? 0) + (menuBox?.width ?? 0)).toBeLessThanOrEqual(390);
   await page.keyboard.press('Escape');
   await expect(toggle).toHaveAttribute('aria-expanded', 'false');
 });
