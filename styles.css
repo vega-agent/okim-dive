@@ -1366,14 +1366,18 @@ body {
 .form-content {
   max-width: 600px;
   margin: 0 auto;
+  padding: 3rem;
+  background: rgba(255, 255, 255, 0.95);
+  border-radius: 15px;
+  box-shadow: 0 20px 48px rgba(38, 70, 83, 0.1);
   position: relative;
 }
 
 .contact-form {
-  background: rgba(255, 255, 255, 0.95);
-  padding: 3rem;
-  border-radius: 15px;
-  box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
+  background: transparent;
+  padding: 0;
+  border-radius: 0;
+  box-shadow: none;
   margin-top: 2rem;
 }
 
@@ -1674,7 +1678,8 @@ html[lang="zh-CN"] .hero-subtitle {
     padding: 2rem 1.25rem;
   }
 
-  .contact-form {
+  .contact-form,
+  .form-content {
     padding: 2rem 1rem;
   }
 }
