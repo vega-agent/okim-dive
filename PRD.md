@@ -2,7 +2,7 @@
 
 **Version:** 0.1 (Draft)  
 **Created:** 2026-01-XX  
-**Last Updated:** 2026-01-XX  
+**Last Updated:** 2026-08-27
 **Owner:** Jeff  
 **Developer:** Vega
 
@@ -86,8 +86,11 @@ A static website that provides:
 /about               About Iris & Okim Dive
 /courses             Dive courses offered
 /trips               Dive trips (Tioman + overseas)
+/gallery             Verified Okim Dive photography and visual stories
 /contact             Contact information
 ```
+
+The current implementation uses six static route files: `index.html`, `about.html`, `courses.html`, `trips.html`, `gallery.html`, and `contact.html`. Future routes should be added only when they support a clear user journey or substantial content; do not create pages solely to add navigation items.
 
 ### 4.2 Page Requirements
 
@@ -211,20 +214,25 @@ A static website that provides:
 
 ## 6. Design Requirements
 
-### 6.1 Visual Style
-- **Theme:** Ocean-inspired, professional, trustworthy
-- **Colors:** Blues, whites, natural tones (currently using `#0066cc` → `#00a8cc` gradient)
-- **Typography:** Clean, readable sans-serif
-- **Imagery:** High-quality underwater and travel photos
-- **Mood:** Adventurous but safe, professional but approachable
+### 6.1 Visual Style — Approved Direction
+- **Theme:** Continuous underwater editorial / dive journal
+- **Composition:** Distinct hero followed by one continuous underwater canvas: surface light at the top, open mid-sea content in the middle, seabed only at the final content section
+- **Colors:** Light watercolor ocean blues, seafoam, warm paper, sand, and restrained coral accents; avoid heavy dark surfaces
+- **Typography:** Playfair Display for expressive headings and Lato for readable body text; use Chinese-compatible heading and UI fallbacks for translated content
+- **Surfaces:** Light editorial reading surfaces only where needed for contrast; no dark glassmorphism
+- **Imagery:** Real, approved Okim Dive photography first; generated watercolor artwork only as atmosphere or illustration, never as verified photography
+- **Mood:** Calm, immersive, personal, adventurous, and trustworthy
 
 ### 6.2 Layout Principles
 - Mobile-first responsive design
+- Preserve the continuous underwater environment across page sections
+- Use generous whitespace and clear hierarchy
+- Prefer editorial composition and fewer stronger content groupings over repetitive card grids
+- Keep hero and post-hero content visually distinct
+- Keep ocean artwork secondary to copy, navigation, forms, and calls to action
 - Fast load times (static site)
-- Easy navigation
-- Clear hierarchy
-- Accessible contrast ratios
-- Touch-friendly on mobile
+- Accessible contrast ratios, semantic HTML, keyboard navigation, and touch-friendly controls
+- Preserve `prefers-reduced-motion`; essential content must remain usable without motion JavaScript
 
 ### 6.3 Brand Elements
 - **Logo:** Text-based "🤿 Okim Dive" (emoji + text)

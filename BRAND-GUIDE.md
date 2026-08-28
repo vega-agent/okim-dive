@@ -2,7 +2,19 @@
 
 **Version:** 1.0  
 **Created:** 2026-01-XX  
-**Last Updated:** 2026-01-XX
+**Last Updated:** 2026-08-27
+**Approved Web Direction:** Continuous Underwater Editorial / Dive Journal
+
+> The current website style is the reference point for all future pages. New work should feel like another chapter of the same underwater journey, not a separate template.
+
+### Web expression
+
+- Calm, light, spacious, and immersive
+- A continuous ocean environment with changing depth and natural transitions
+- Editorial layouts with clear hierarchy and occasional asymmetry
+- Warm paper/readability surfaces over atmospheric artwork
+- Real Okim Dive photography whenever available; generated artwork must never be presented as verified photography
+- No dark glassmorphism, generic SaaS panels, noisy decorations, or repetitive three-card sections
 
 ---
 

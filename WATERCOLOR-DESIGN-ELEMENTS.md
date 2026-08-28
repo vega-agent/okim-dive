@@ -2,12 +2,23 @@
 
 **Important:** These prompts are designed for tools that CANNOT generate transparent PNGs. All elements are designed as complete backgrounds or self-contained elements that can be used directly without removing backgrounds.
 
+## Approved implementation direction
+
+The live site uses a **single continuous underwater journey** after each page hero. New assets must support that environment rather than create a collection of unrelated page backgrounds.
+
+- Backgrounds should be broad, quiet, and atmospheric: surface light at the top, open water through the middle, seabed only at the final content section.
+- Keep artwork visually secondary to copy, navigation, forms, and calls to action.
+- Use light opaque paper/readability surfaces when needed; do not design dark glass panels.
+- Prefer one coherent full-bleed environment per page over many competing section images.
+- Generated artwork is an illustration or atmosphere asset, never verified Okim Dive photography.
+- Do not create decorative assets merely to fill empty space. Every asset must support hierarchy, wayfinding, or storytelling.
+
 ## Generation Strategy
 
-1. **Backgrounds** - Full-bleed watercolor backgrounds for each page/section
-2. **Cards** - Complete card backgrounds with watercolor textures
-3. **Accents** - Decorative elements with intentional backgrounds (not meant to be transparent)
-4. **Dividers** - Section dividers that can be used as-is
+1. **Journey backgrounds** - Full-bleed watercolor environments with controlled depth and negative space
+2. **Self-contained content surfaces** - Quiet backgrounds for reading panels or feature areas
+3. **Accents** - Minimal organic details that reinforce the environment
+4. **Dividers** - Subtle transitions that preserve the continuous journey
 
 ## Color Palette
 

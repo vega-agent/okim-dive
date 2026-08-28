@@ -3,8 +3,20 @@
 **Version:** 1.0  
 **Created:** 2026-01-XX  
 **Inspired by:** Stripe, Notion, Airbnb design systems
+**Approved Direction:** Continuous Underwater Editorial / Dive Journal
+**Last Updated:** 2026-08-27
 
----
+> This document describes the approved implementation direction, not an aspirational alternative. Future pages must extend the current underwater environment rather than introducing a new visual language.
+
+### Non-negotiable visual rules
+
+- Use one continuous underwater canvas after the hero: bright surface/light rays at the top, open mid-sea content in the middle, and seabed only at the final content section.
+- Keep hero banners visually distinct from the post-hero journey.
+- Let the background create atmosphere, but keep content and controls in the foreground with strong contrast.
+- Use light editorial reading surfaces only where text needs protection; do not add dark glass panels.
+- Prefer asymmetrical editorial composition, generous whitespace, restrained borders, and photography-led storytelling over repeated card grids.
+- Treat watercolor artwork as a quiet environmental layer, never as a collection of unrelated decorative stickers.
+- Preserve the dependency-free HTML/CSS/JavaScript architecture and `prefers-reduced-motion` behavior.
 
 ## 1. Visual Theme & Atmosphere
 
