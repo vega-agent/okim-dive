@@ -10,6 +10,7 @@
     '.feature-card',
     '.quick-link-card',
     '.course-card',
+    '.journey-node',
     '.trip-card',
     '.method-card',
     '.included-item',
@@ -96,9 +97,14 @@
     const navbar = document.querySelector('.navbar');
     if (!navbar) return;
 
-    const updateNav = () => navbar.classList.toggle('is-scrolled', window.scrollY > 16);
+    const updateNav = () => {
+      navbar.classList.toggle('is-scrolled', window.scrollY > 16);
+      document.documentElement.style.setProperty('--nav-height', `${navbar.getBoundingClientRect().height}px`);
+    };
     updateNav();
     window.addEventListener('scroll', updateNav, { passive: true });
+    window.addEventListener('resize', updateNav, { passive: true });
+    if ('ResizeObserver' in window) new ResizeObserver(updateNav).observe(navbar);
   }
 
   function syncMotionPreference(event) {

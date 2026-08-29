@@ -3,8 +3,20 @@
 **Version:** 1.0  
 **Created:** 2026-01-XX  
 **Inspired by:** Stripe, Notion, Airbnb design systems
+**Approved Direction:** Continuous Underwater Editorial / Dive Journal
+**Last Updated:** 2026-08-27
 
----
+> This document describes the approved implementation direction, not an aspirational alternative. Future pages must extend the current underwater environment rather than introducing a new visual language.
+
+### Non-negotiable visual rules
+
+- Use one continuous underwater canvas after the hero: bright surface/light rays at the top, open mid-sea content in the middle, and seabed only at the final content section.
+- Keep hero banners visually distinct from the post-hero journey.
+- Let the background create atmosphere, but keep content and controls in the foreground with strong contrast.
+- Use light editorial reading surfaces only where text needs protection; do not add dark glass panels.
+- Prefer asymmetrical editorial composition, generous whitespace, restrained borders, and photography-led storytelling over repeated card grids.
+- Treat watercolor artwork as a quiet environmental layer, never as a collection of unrelated decorative stickers.
+- Preserve the dependency-free HTML/CSS/JavaScript architecture and `prefers-reduced-motion` behavior.
 
 ## 1. Visual Theme & Atmosphere
 
@@ -240,7 +252,29 @@ letter-spacing: 0.5px;
 - Large (16px): Hero cards, large containers
 - Full Pill (999px): Badges, tags
 
+### Visual storytelling patterns
+
+- **Journey track:** Use for ordered progress such as course levels or booking steps. Keep labels short and pair each stage with a restrained numbered marker.
+- **Icon-led scanning:** Use consistent inline SVG icons for equipment, experience level, safety, duration, and destinations. Icons must clarify content, not decorate empty space.
+- **Progressive reveal:** Use the shared `site-motion.js` reveal behavior for section and node entrances. Content remains visible without JavaScript and all motion yields to `prefers-reduced-motion`.
+- **Page-specific rhythm:** Home uses depth, About uses story, Courses uses progression, Trips uses destination flow, Gallery uses image chapters, and Contact uses calm conversion.
+- **Mobile fallback:** Horizontal journeys stack vertically with directional markers; never require horizontal scrolling or scroll hijacking.
+
 ---
+
+---
+
+## Current web typography implementation
+
+The live static site uses a role-based bilingual type system:
+
+- **English display:** Fraunces 500 for hero and major section headings.
+- **English body/UI:** Lato 400/700 for reading copy, navigation, cards, forms, metadata, and buttons.
+- **Simplified Chinese display:** Noto Serif SC 600 for hero and editorial section headings.
+- **Simplified Chinese body/UI:** Noto Sans SC 400/600 for reading copy and controls.
+- **Decorative script:** Great Vibes is not part of content hierarchy and must not be used for Han text.
+
+This separation keeps the calm editorial voice while giving compact UI elements a clearer, more energetic rhythm.
 
 ## 6. Depth & Elevation
 

@@ -49,3 +49,13 @@
 .trip-facts dd { margin: .3rem 0 0; font-weight: 700; }
 .trip-note { padding: 1rem; background: rgba(190,233,232,.35); border-left: 3px solid var(--coral); }
 @media (max-width: 640px) { .trip-facts { grid-template-columns: 1fr; } }
+
+/* Immersive branch integration: adaptive homepage hero. */
+.hero {
+  height: 100dvh;
+  min-height: 0;
+}
+.hero .hero-content { max-width: 900px; }
+@media (max-width: 968px) {
+  .hero { height: max(620px, 100svh); }
+}

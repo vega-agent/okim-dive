@@ -47,7 +47,7 @@
   "小红书": "小红书",
   "View Page": "查看主页",
   "XiaoHongShu": "小红书",
-  "© 2024 Okim Dive. All rights reserved.": "© 2024 奥金潜水。版权所有。",
+  "© 2026 Okim Dive. All rights reserved.": "© 2026 奥金潜水。版权所有。",
   "Contact - Okim Dive": "联系方式 - Okim Dive",
   "Contact Us": "联系我们",
   "Let's start your diving adventure together": "让我们一起开始你的潜水冒险吧",
