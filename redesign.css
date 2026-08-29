@@ -143,6 +143,11 @@ html[lang="zh-CN"] h3, html[lang="zh-CN"] .btn, html[lang="zh-CN"] .nav-link, ht
 html[lang="zh-CN"] .hero-title { max-width: 12em; font-size: clamp(2.65rem, 10vw, 5.4rem); }
 html[lang="zh-CN"] .signature, html[lang="zh-CN"] .hero-script { font-family: 'Noto Serif SC', 'Songti SC', serif; font-style: normal; }
 
-/* Homepage hero: give the opening message a calmer, more balanced canvas. */
-.hero { height: clamp(560px, 68vh, 700px); min-height: 560px; }
-@media (max-width: 640px) { .hero { height: 560px; min-height: 560px; } }
+/* Homepage hero: fill the visible viewport below the navigation on every device. */
+.hero {
+  height: calc(100svh - 70px);
+  min-height: 0;
+}
+@media (max-width: 640px) {
+  .hero { height: calc(100svh - 64px); min-height: 0; }
+}
