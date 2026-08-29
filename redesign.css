@@ -71,8 +71,6 @@ html, body { overflow-x: hidden; }
 .intro-content,
 .feature-card,
 .quick-link-card,
-.course-card,
-.trip-card,
 .method-card,
 .included-content,
 .calendar-note,
@@ -85,7 +83,7 @@ html, body { overflow-x: hidden; }
 }
 .intro-content, .process-content, .form-content, .included-content { width: 100%; }
 .courses-grid, .trips-grid, .features-grid, .quick-links-grid, .methods-grid { width: 100%; }
-.course-card, .trip-card, .feature-card, .quick-link-card, .method-card { min-width: 0; width: 100%; }
+.feature-card, .quick-link-card, .contact-card, .method-card, .faq-item { min-width: 0; width: 100%; background-color: rgba(254, 250, 224, .94); background-image: none !important; }
 .course-header h3, .trip-header h3, .feature-card h3, .quick-link-card h3, .method-card h3 { font-family: var(--font-body); font-weight: 700; letter-spacing: -.01em; }
 
 /* Final composition guardrails: one surface per card, controlled hero display scale. */
@@ -97,15 +95,22 @@ html, body { overflow-x: hidden; }
   text-wrap: balance;
 }
 .hero .hero-content { max-width: 900px; }
-.course-card > .course-header,
-.course-card > .course-content,
-.trip-card > .trip-header,
-.trip-card > .trip-content,
 .feature-card > .card-content,
 .quick-link-card > .card-content,
 .contact-card > .card-content,
 .method-card > .method-content { background: transparent; }
-.course-card, .trip-card, .feature-card, .quick-link-card, .contact-card, .method-card, .faq-item { background-color: rgba(254, 250, 224, .94); }
+.feature-card, .quick-link-card, .contact-card, .method-card, .faq-item { background-color: rgba(254, 250, 224, .94); }
+
+/* Section reading surfaces: one neutral, opaque paper treatment across the editorial flow. */
+.intro-content, .about-content, .story-content, .process-content, .form-content, .included-content, .calendar-note, .cta-content, .course-journey > .container {
+  background: rgba(255, 253, 247, .94);
+  background-image: none;
+  width: min(1040px, calc(100% - 2rem));
+  max-width: 1040px !important;
+  margin-left: auto;
+  margin-right: auto;
+}
+.course-journey > .container { border-radius: 24px; }
 
 :root {
   --font-display: 'Fraunces', Georgia, serif;
