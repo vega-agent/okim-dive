@@ -8,6 +8,22 @@
 .section-title { max-width: 760px; margin-left: 0; text-align: left; font-size: clamp(2.1rem, 4vw, 3.4rem); letter-spacing: -.035em; }
 .section-subtitle { max-width: 620px; margin-left: 0; text-align: left; }
 .container { max-width: 1180px; }
+
+/* Contrast system: preserve the artwork while giving text a dependable reading plane. */
+.ocean-journey > section > .container > .section-title,
+.ocean-journey > section > .container > .section-subtitle,
+.journey-heading .section-title,
+.journey-heading .section-subtitle {
+  position: relative;
+  z-index: 1;
+  background: rgba(255, 253, 247, .82);
+  box-decoration-break: clone;
+  -webkit-box-decoration-break: clone;
+  padding: .2rem .6rem;
+  margin-right: auto;
+}
+.ocean-journey > section > .container > .section-subtitle,
+.journey-heading .section-subtitle { color: var(--ocean-deep); font-weight: 400; }
 .card, .course-card, .trip-card, .feature-card, .contact-card, .faq-item, .form-content { border: 1px solid var(--journal-line); border-radius: 14px; box-shadow: 0 14px 36px rgba(23, 59, 74, .08); }
 .course-card, .trip-card, .feature-card, .contact-card { text-align: left; }
 .process-section, .why-us-section, .contact-form-section { border-top: 1px solid var(--journal-line); }
@@ -17,8 +33,8 @@
 .course-journey { padding: 3.5rem 0 2rem; }
 .journey-heading { display: grid; gap: .65rem; margin-bottom: 2.25rem; }
 .eyebrow { margin: 0; color: var(--ocean-mid); font-size: .72rem; font-weight: 700; letter-spacing: .16em; }
-.journey-track { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); border-top: 1px solid var(--journal-line); border-bottom: 1px solid var(--journal-line); }
-.journey-node { position: relative; display: grid; grid-template-columns: auto 1fr; gap: .85rem; align-items: center; min-height: 112px; padding: 1rem 1.25rem; border-right: 1px solid var(--journal-line); }
+.journey-track { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); border: 1px solid rgba(23, 59, 74, .28); background: rgba(255, 253, 247, .78); box-shadow: 0 10px 28px rgba(23, 59, 74, .06); }
+.journey-node { position: relative; display: grid; grid-template-columns: auto 1fr; gap: .85rem; align-items: center; min-height: 112px; padding: 1rem 1.25rem; border-right: 1px solid rgba(23, 59, 74, .24); }
 .journey-node:last-child { border-right: 0; }
 .journey-node::after { content: '→'; position: absolute; right: -.55rem; top: 50%; transform: translateY(-50%); z-index: 1; color: var(--ocean-mid); background: var(--paper-cloud); padding: .1rem .25rem; }
 .journey-node:last-child::after { display: none; }
