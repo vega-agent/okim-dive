@@ -4,12 +4,15 @@
   "location": "Raja Ampat, Indonesia",
   "status": "Sample trip",
   "summary": "A sample expedition concept for exploring Raja Ampat’s reefs, bays, and exceptional marine biodiversity.",
+  "travelDates": "November 4–10, 2027",
   "duration": "7 days / 6 nights",
   "difficulty": "Intermediate to advanced",
   "groupSize": "10–12 divers",
+  "cost": { "amount": "USD 3,900", "basis": "per diver" },
+  "bookingRules": { "deposit": "30% deposit required to reserve a place.", "balanceDue": "Remaining balance due 75 days before departure.", "cancellation": "Sample cancellation terms: deposit is non-refundable after confirmation; final policy requires approval.", "requirements": "Advanced certification recommended, recent dive experience, and travel insurance required." },
   "highlights": ["Manta ray sites", "Coral gardens", "Remote reef exploration"],
   "itinerary": ["Day 1: Arrival and trip briefing", "Days 2–6: Guided dives and surface excursions", "Day 7: Departure after breakfast"],
   "included": ["Professional dive guidance", "Local transfers", "Trip planning support"],
-  "notes": "Sample content only. Dates, pricing, liveaboard details, and booking rules are not yet confirmed.",
+  "notes": "SAMPLE CONTENT ONLY. Dates, pricing, liveaboard details, and booking rules are placeholders for product design review.",
   "inquiryLabel": "Inquire about Raja Ampat"
 }

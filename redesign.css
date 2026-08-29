@@ -33,9 +33,12 @@
 @media (max-width: 968px) { .hero-content, .page-hero-content { text-align: left; } .process-steps { grid-template-columns: repeat(2, minmax(0, 1fr)); border-bottom: 0; } .step { border-right: 0; border-bottom: 1px solid var(--journal-line); } .step:last-child { border-bottom: 0; } .nav-toggle, [data-lang-toggle] { min-height: 44px; min-width: 44px; } body.menu-open { overflow: hidden; } }
 @media (max-width: 640px) { .hero-content h1, .page-hero-content h1 { font-size: clamp(2.8rem, 13vw, 4.5rem); } .section-title { font-size: clamp(2rem, 10vw, 2.8rem); } .process-steps { grid-template-columns: 1fr; } .card, .course-card, .trip-card, .feature-card, .contact-card, .faq-item, .form-content { border-radius: 10px; } }
 
-.trip-dialog { width: min(720px, calc(100% - 2rem)); max-height: min(720px, calc(100vh - 2rem)); border: 1px solid var(--journal-line); border-radius: 16px; padding: 0; color: var(--ocean-deep); background: var(--paper-cloud); box-shadow: 0 24px 80px rgba(10,35,66,.28); }
+.trip-dialog { margin: auto; width: min(720px, calc(100% - 2rem)); max-height: min(720px, calc(100vh - 2rem)); border: 1px solid var(--journal-line); border-radius: 16px; padding: 0; color: var(--ocean-deep); background: var(--paper-cloud); box-shadow: 0 24px 80px rgba(10,35,66,.28); }
 .trip-dialog::backdrop { background: rgba(10,35,66,.52); }
-.trip-dialog-body { padding: clamp(1.5rem, 4vw, 3rem); overflow-y: auto; }
+.trip-dialog-body { padding: clamp(1.5rem, 4vw, 3rem); overflow-y: scroll; scrollbar-width: auto; scrollbar-color: var(--ocean-mid) rgba(190,233,232,.35); }
+.trip-dialog-body::-webkit-scrollbar { width: 14px; }
+.trip-dialog-body::-webkit-scrollbar-track { background: rgba(190,233,232,.35); border-radius: 8px; }
+.trip-dialog-body::-webkit-scrollbar-thumb { background: var(--ocean-mid); border: 3px solid rgba(190,233,232,.35); border-radius: 8px; }
 .trip-dialog-body h2 { margin: .25rem 0 1rem; font-size: clamp(2rem, 5vw, 3.25rem); }
 .trip-dialog-body h3 { margin-top: 1.5rem; }
 .trip-dialog-body li { margin: .45rem 0; }
