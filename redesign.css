@@ -32,3 +32,17 @@
 
 @media (max-width: 968px) { .hero-content, .page-hero-content { text-align: left; } .process-steps { grid-template-columns: repeat(2, minmax(0, 1fr)); border-bottom: 0; } .step { border-right: 0; border-bottom: 1px solid var(--journal-line); } .step:last-child { border-bottom: 0; } .nav-toggle, [data-lang-toggle] { min-height: 44px; min-width: 44px; } body.menu-open { overflow: hidden; } }
 @media (max-width: 640px) { .hero-content h1, .page-hero-content h1 { font-size: clamp(2.8rem, 13vw, 4.5rem); } .section-title { font-size: clamp(2rem, 10vw, 2.8rem); } .process-steps { grid-template-columns: 1fr; } .card, .course-card, .trip-card, .feature-card, .contact-card, .faq-item, .form-content { border-radius: 10px; } }
+
+.trip-dialog { width: min(720px, calc(100% - 2rem)); max-height: min(720px, calc(100vh - 2rem)); border: 1px solid var(--journal-line); border-radius: 16px; padding: 0; color: var(--ocean-deep); background: var(--paper-cloud); box-shadow: 0 24px 80px rgba(10,35,66,.28); }
+.trip-dialog::backdrop { background: rgba(10,35,66,.52); }
+.trip-dialog-body { padding: clamp(1.5rem, 4vw, 3rem); overflow-y: auto; }
+.trip-dialog-body h2 { margin: .25rem 0 1rem; font-size: clamp(2rem, 5vw, 3.25rem); }
+.trip-dialog-body h3 { margin-top: 1.5rem; }
+.trip-dialog-body li { margin: .45rem 0; }
+.trip-dialog-close { position: absolute; top: .75rem; right: .9rem; width: 2.75rem; height: 2.75rem; border: 1px solid var(--journal-line); border-radius: 50%; background: var(--white); color: var(--ocean-deep); font-size: 1.6rem; cursor: pointer; }
+.trip-facts { display: grid; grid-template-columns: repeat(3, 1fr); gap: .75rem; margin: 1.5rem 0; }
+.trip-facts div { padding: .9rem; border: 1px solid var(--journal-line); border-radius: 10px; }
+.trip-facts dt { font-size: .78rem; text-transform: uppercase; letter-spacing: .08em; }
+.trip-facts dd { margin: .3rem 0 0; font-weight: 700; }
+.trip-note { padding: 1rem; background: rgba(190,233,232,.35); border-left: 3px solid var(--coral); }
+@media (max-width: 640px) { .trip-facts { grid-template-columns: 1fr; } }

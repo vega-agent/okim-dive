@@ -1,0 +1,15 @@
+{
+  "id": "sipadan-sample",
+  "title": "Sipadan Blue Current Week",
+  "location": "Sipadan Island, Malaysia",
+  "status": "Sample trip",
+  "summary": "A sample small-group itinerary built around Sipadan’s famous walls, turtles, and schooling fish.",
+  "duration": "5 days / 4 nights",
+  "difficulty": "Advanced",
+  "groupSize": "8–10 divers",
+  "highlights": ["Barracuda Point", "Turtle encounters", "Guided wall dives"],
+  "itinerary": ["Day 1: Arrival, check-in, and orientation", "Days 2–4: Morning and afternoon guided dives", "Day 5: Departure after breakfast"],
+  "included": ["Professional dive guidance", "Local boat transfers", "Trip planning support"],
+  "notes": "Sample content only. Dates, pricing, permits, accommodation, and booking rules are not yet confirmed.",
+  "inquiryLabel": "Inquire about Sipadan"
+}
