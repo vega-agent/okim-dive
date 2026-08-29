@@ -5,10 +5,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dive Courses - Okim Dive</title>
     <link rel="stylesheet" href="styles.css?v=11">
-    <link rel="stylesheet" href="redesign.css?v=1">
+    <link rel="stylesheet" href="redesign.css?v=12">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Great+Vibes&family=Lato:wght@300;400;700&family=Noto+Sans+SC:wght@400;500;700&family=Noto+Serif+SC:wght@500;600;700&family=Playfair+Display:wght@400;600&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&family=Great+Vibes&family=Lato:wght@400;700&family=Noto+Sans+SC:wght@400;500;600;700&family=Noto+Serif+SC:wght@400;500;600;700&family=Playfair+Display:wght@400;600&display=swap" rel="stylesheet">
 </head>
 <body>
     <!-- Navigation -->
@@ -44,17 +44,25 @@
     </section>
 
     <main class="ocean-journey">
-    <!-- Courses Introduction -->
-    <section class="courses-intro">
+    <!-- Course journey -->
+    <section class="course-journey" aria-labelledby="course-journey-title">
         <div class="container">
-            <div class="intro-content">
+            <div class="journey-heading">
                 <div class="watercolor-decoration top-left"></div>
-                <h2 class="section-title">Your Diving Journey Starts Here</h2>
+                <p class="eyebrow">YOUR DIVING JOURNEY</p>
+                <h2 class="section-title" id="course-journey-title">Your Diving Journey Starts Here</h2>
                 <p class="intro-text">
-                    Whether you're taking your first breath underwater or looking to advance your skills, 
-                    we offer comprehensive PADI courses for all levels. Our PADI courses are
-                    designed to build your confidence and knowledge while ensuring safety and fun.
+                    Whether you're taking your first breath underwater or looking to advance your skills,
+                    we offer comprehensive PADI courses for all levels. Our PADI courses are designed to
+                    build your confidence and knowledge while ensuring safety and fun.
                 </p>
+                <p class="journey-kicker">Find your starting point — then follow the path further.</p>
+            </div>
+            <div class="journey-track" role="list" aria-label="Diving course progression">
+                <div class="journey-node" role="listitem"><span class="journey-node-mark" aria-hidden="true">01</span><div><strong>Curious</strong><span>Try the water</span></div></div>
+                <div class="journey-node" role="listitem"><span class="journey-node-mark" aria-hidden="true">02</span><div><strong>Learning</strong><span>Build your basics</span></div></div>
+                <div class="journey-node" role="listitem"><span class="journey-node-mark" aria-hidden="true">03</span><div><strong>Certified</strong><span>Dive independently</span></div></div>
+                <div class="journey-node" role="listitem"><span class="journey-node-mark" aria-hidden="true">04</span><div><strong>Exploring</strong><span>Go further</span></div></div>
             </div>
         </div>
     </section>
@@ -67,7 +75,7 @@
                 <!-- Open Water Course -->
                 <div class="course-card">
                     <div class="course-header">
-                        <div class="course-icon">🎓</div>
+                        <div class="course-icon" aria-hidden="true"><svg viewBox="0 0 48 48" focusable="false"><path d="M6 19 24 9l18 10-18 10L6 19Z"/><path d="M14 24v8c5 4 15 4 20 0v-8M42 20v11"/></svg></div>
                         <h3>Open Water Diver</h3>
                         <span class="course-level">Beginner</span>
                     </div>
@@ -88,7 +96,7 @@
                 <div class="course-card featured">
                     <div class="course-badge">Popular</div>
                     <div class="course-header">
-                        <div class="course-icon">🏊</div>
+                        <div class="course-icon" aria-hidden="true"><svg viewBox="0 0 48 48" focusable="false"><circle cx="24" cy="10" r="4"/><path d="M14 24c4-5 8-7 12-7s8 2 12 7M10 31c5-4 10-4 14 0s9 4 14 0M7 39c5-4 10-4 15 0s10 4 19-1"/></svg></div>
                         <h3>Advanced Open Water</h3>
                         <span class="course-level">Intermediate</span>
                     </div>
@@ -108,7 +116,7 @@
                 <!-- Rescue Diver Course -->
                 <div class="course-card">
                     <div class="course-header">
-                        <div class="course-icon">🚑</div>
+                        <div class="course-icon" aria-hidden="true"><svg viewBox="0 0 48 48" focusable="false"><path d="M24 7a17 17 0 1 0 17 17"/><path d="M24 15v16M16 23h16M34 8v8M30 12h8"/></svg></div>
                         <h3>Rescue Diver</h3>
                         <span class="course-level">Advanced</span>
                     </div>
@@ -128,7 +136,7 @@
                 <!-- Divemaster Course -->
                 <div class="course-card">
                     <div class="course-header">
-                        <div class="course-icon">⭐</div>
+                        <div class="course-icon" aria-hidden="true"><svg viewBox="0 0 48 48" focusable="false"><path d="m24 6 4.8 10 11 1.6-8 7.8 1.9 11-9.7-5.2-9.7 5.2 1.9-11-8-7.8 11-1.6L24 6Z"/></svg></div>
                         <h3>Divemaster</h3>
                         <span class="course-level">Professional</span>
                     </div>
@@ -148,7 +156,7 @@
                 <!-- Specialty Courses -->
                 <div class="course-card">
                     <div class="course-header">
-                        <div class="course-icon">📸</div>
+                        <div class="course-icon" aria-hidden="true"><svg viewBox="0 0 48 48" focusable="false"><path d="M8 16h32v24H8zM16 16l3-5h10l3 5"/><circle cx="24" cy="28" r="7"/></svg></div>
                         <h3>Specialty Courses</h3>
                         <span class="course-level">Various</span>
                     </div>
@@ -168,7 +176,7 @@
                 <!-- Discover Scuba -->
                 <div class="course-card">
                     <div class="course-header">
-                        <div class="course-icon">🏊‍♀️</div>
+                        <div class="course-icon" aria-hidden="true"><svg viewBox="0 0 48 48" focusable="false"><circle cx="25" cy="11" r="4"/><path d="M16 25c3-5 7-8 11-8 5 0 8 4 10 8M9 34c5-3 10-3 15 0s10 3 15 0M8 40c5-2 10-2 15 0s10 2 17-1"/></svg></div>
                         <h3>Discover Scuba</h3>
                         <span class="course-level">No Experience</span>
                     </div>
@@ -279,12 +287,12 @@
                 </div>
             </div>
             <div class="footer-bottom">
-                <p>&copy; 2024 Okim Dive. All rights reserved.</p>
+                <p>&copy; 2026 Okim Dive. All rights reserved.</p>
             </div>
         </div>
     </footer>
 
     <script src="site-i18n.js"></script>
-    <script src="site-motion.js?v=5"></script>
+    <script src="site-motion.js?v=8"></script>
 </body>
 </html>

@@ -66,23 +66,27 @@ okim-dive/
 - FAQ section
 - Location and transport information
 
-## Design Theme
+## Design Theme — Approved Direction
 
-- **Style**: Watercolor ocean aesthetic
-- **Color Palette**: Ocean blues, corals, and sandy tones
-- **Typography**: Great Vibes (cursive), Playfair Display (headings), Lato (body)
-- **Features**:
-  - Fully responsive design
-  - Smooth animations
-  - Glass-morphism navigation
-  - Mobile-friendly hamburger menu
+- **Style**: Continuous underwater editorial / dive journal
+- **Composition**: Distinct hero followed by one continuous underwater canvas; surface light at the top, open mid-sea content, seabed only at the final content section
+- **Palette**: Light watercolor ocean blues, seafoam, warm paper, sand, and restrained coral accents
+- **Typography**: Fraunces for expressive English display headings, Lato for readable body/UI copy; Simplified Chinese uses Noto Serif SC for editorial headings and Noto Sans SC for body/UI
+- **Surfaces**: Light editorial reading surfaces only where required for contrast; no dark glass panels
+- **Imagery**: Photography-led, with generated watercolor artwork used only as atmosphere or illustration and never labeled as verified Okim Dive photography
+- **Layout**: Generous whitespace, clear hierarchy, restrained borders, occasional asymmetry, and fewer stronger content groupings instead of repetitive card grids
+- **Interaction**: Lightweight native CSS/JavaScript, accessible focus states, keyboard-friendly navigation, mobile touch targets, and reduced-motion support
+
+Future pages must extend this visual system rather than introduce a new page-specific theme.
 
 ## Current Status
 
 ✅ Multi-page structure created  
 ✅ Responsive CSS with mobile support  
 ✅ All navigation links working  
-✅ Placeholder sections for content  
+✅ Placeholder sections for content
+✅ Courses visual journey proof-of-concept with inline SVG icons
+✅ Shared progressive-reveal motion with reduced-motion fallback
 
 ## Next Steps
 
