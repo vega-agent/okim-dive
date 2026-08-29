@@ -1,0 +1,18 @@
+{
+  "id": "destination-year",
+  "title": "Trip title",
+  "location": "Country or region",
+  "status": "Planned",
+  "summary": "Short overview for the trip card.",
+  "travelDates": "Month DD–DD, YYYY",
+  "duration": "5–7 days",
+  "difficulty": "Intermediate",
+  "groupSize": "Up to 12 divers",
+  "cost": { "amount": "USD 0,000", "basis": "per diver" },
+  "bookingRules": { "deposit": "30% deposit required to reserve a place.", "balanceDue": "Remaining balance due 60 days before departure.", "cancellation": "Sample cancellation terms pending confirmation.", "requirements": "Valid certification and travel insurance required." },
+  "highlights": ["Highlight one", "Highlight two"],
+  "itinerary": ["Day 1: Arrival and briefing", "Day 2: Guided dives"],
+  "included": ["Guided dives", "Local transfers"],
+  "notes": "Additional planning notes.",
+  "inquiryLabel": "Inquire about this trip"
+}
