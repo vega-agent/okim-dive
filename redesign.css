@@ -143,8 +143,8 @@ html[lang="zh-CN"] h3, html[lang="zh-CN"] .btn, html[lang="zh-CN"] .nav-link, ht
 html[lang="zh-CN"] .hero-title { max-width: 12em; font-size: clamp(2.65rem, 10vw, 5.4rem); }
 html[lang="zh-CN"] .signature, html[lang="zh-CN"] .hero-script { font-family: 'Noto Serif SC', 'Songti SC', serif; font-style: normal; }
 
-/* Homepage hero: fill the visible viewport below the measured navigation. */
+/* Homepage hero: full browser viewport, with the fixed navigation layered above it. */
 .hero {
-  height: calc(100dvh - var(--nav-height, 0px));
+  height: 100dvh;
   min-height: 0;
 }
