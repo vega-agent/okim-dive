@@ -24,7 +24,7 @@ html, body { overflow-x: hidden; }
 .ocean-journey > section > .container > .section-subtitle,
 .journey-heading .section-subtitle { color: var(--ocean-deep); font-weight: 400; }
 .journey-heading { position: relative; isolation: isolate; max-width: 820px; }
-.journey-heading::before { content: ''; position: absolute; z-index: -1; inset: -2rem -4rem -1.5rem -3rem; background: radial-gradient(ellipse at 20% 45%, rgba(255, 253, 247, .52), rgba(255, 253, 247, .18) 46%, transparent 74%); pointer-events: none; }
+.journey-heading::before { display: none; }
 .card, .course-card, .trip-card, .feature-card, .contact-card, .faq-item, .form-content { border: 1px solid var(--journal-line); border-radius: 14px; box-shadow: 0 14px 36px rgba(23, 59, 74, .08); }
 .course-card, .trip-card, .feature-card, .contact-card { text-align: left; }
 .process-section, .why-us-section, .contact-form-section { border-top: 1px solid var(--journal-line); }
@@ -114,6 +114,8 @@ html, body { overflow-x: hidden; }
 }
 .course-journey > .container { border-radius: 0; }
 .form-content { background-image: radial-gradient(ellipse at center, rgba(255, 253, 247, .76) 0%, rgba(255, 253, 247, .56) 62%, rgba(255, 253, 247, .18) 88%, transparent 100%); }
+.process-section .process-content { background: transparent; background-image: radial-gradient(ellipse at center, rgba(255, 253, 247, .62) 0%, rgba(255, 253, 247, .42) 56%, rgba(255, 253, 247, .12) 82%, transparent 100%); }
+.contact-form-section .form-content { background: transparent; background-image: radial-gradient(ellipse at center, rgba(255, 253, 247, .76) 0%, rgba(255, 253, 247, .56) 62%, rgba(255, 253, 247, .18) 88%, transparent 100%); }
 
 :root {
   --font-display: 'Fraunces', Georgia, serif;
