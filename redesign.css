@@ -82,7 +82,9 @@ html, body { overflow-x: hidden; }
   backdrop-filter: none;
 }
 .intro-content, .process-content, .form-content, .included-content { width: 100%; }
-.courses-grid, .trips-grid, .features-grid, .quick-links-grid, .methods-grid { width: 100%; }
+.courses-grid, .trips-grid { width: 100%; }
+.features-grid, .quick-links-grid, .methods-grid { width: 100%; }
+.trips-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
 .feature-card, .quick-link-card, .contact-card, .method-card, .faq-item { min-width: 0; width: 100%; background-color: rgba(254, 250, 224, .94); background-image: none !important; }
 .course-header h3, .trip-header h3, .feature-card h3, .quick-link-card h3, .method-card h3 { font-family: var(--font-body); font-weight: 700; letter-spacing: -.01em; }
 
@@ -113,6 +115,8 @@ html, body { overflow-x: hidden; }
   box-shadow: none;
 }
 .course-journey > .container { border-radius: 0; }
+@media (max-width: 968px) { .trips-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (max-width: 640px) { .trips-grid { grid-template-columns: 1fr; } }
 .form-content { background-image: radial-gradient(ellipse at center, rgba(255, 253, 247, .76) 0%, rgba(255, 253, 247, .56) 62%, rgba(255, 253, 247, .18) 88%, transparent 100%); }
 .process-section .process-content { background: transparent; background-image: radial-gradient(ellipse at center, rgba(255, 253, 247, .62) 0%, rgba(255, 253, 247, .42) 56%, rgba(255, 253, 247, .12) 82%, transparent 100%); }
 .contact-form-section .form-content { background: transparent; background-image: radial-gradient(ellipse at center, rgba(255, 253, 247, .76) 0%, rgba(255, 253, 247, .56) 62%, rgba(255, 253, 247, .18) 88%, transparent 100%); }
