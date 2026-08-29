@@ -252,6 +252,14 @@ letter-spacing: 0.5px;
 - Large (16px): Hero cards, large containers
 - Full Pill (999px): Badges, tags
 
+### Visual storytelling patterns
+
+- **Journey track:** Use for ordered progress such as course levels or booking steps. Keep labels short and pair each stage with a restrained numbered marker.
+- **Icon-led scanning:** Use consistent inline SVG icons for equipment, experience level, safety, duration, and destinations. Icons must clarify content, not decorate empty space.
+- **Progressive reveal:** Use the shared `site-motion.js` reveal behavior for section and node entrances. Content remains visible without JavaScript and all motion yields to `prefers-reduced-motion`.
+- **Page-specific rhythm:** Home uses depth, About uses story, Courses uses progression, Trips uses destination flow, Gallery uses image chapters, and Contact uses calm conversion.
+- **Mobile fallback:** Horizontal journeys stack vertically with directional markers; never require horizontal scrolling or scroll hijacking.
+
 ---
 
 ## 6. Depth & Elevation

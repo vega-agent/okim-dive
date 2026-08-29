@@ -84,7 +84,9 @@ Future pages must extend this visual system rather than introduce a new page-spe
 ✅ Multi-page structure created  
 ✅ Responsive CSS with mobile support  
 ✅ All navigation links working  
-✅ Placeholder sections for content  
+✅ Placeholder sections for content
+✅ Courses visual journey proof-of-concept with inline SVG icons
+✅ Shared progressive-reveal motion with reduced-motion fallback
 
 ## Next Steps
 

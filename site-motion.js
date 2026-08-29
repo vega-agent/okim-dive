@@ -10,6 +10,7 @@
     '.feature-card',
     '.quick-link-card',
     '.course-card',
+    '.journey-node',
     '.trip-card',
     '.method-card',
     '.included-item',
