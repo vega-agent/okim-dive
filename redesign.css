@@ -101,16 +101,19 @@ html, body { overflow-x: hidden; }
 .method-card > .method-content { background: transparent; }
 .feature-card, .quick-link-card, .contact-card, .method-card, .faq-item { background-color: rgba(254, 250, 224, .94); }
 
-/* Section reading surfaces: one neutral, opaque paper treatment across the editorial flow. */
+/* Section reading surfaces: transparent watercolor wash, not rigid white boxes. */
 .intro-content, .about-content, .story-content, .process-content, .form-content, .included-content, .calendar-note, .cta-content, .course-journey > .container {
-  background: rgba(255, 253, 247, .94);
-  background-image: none;
+  background-color: transparent;
+  background-image: radial-gradient(ellipse at center, rgba(255, 253, 247, .62) 0%, rgba(255, 253, 247, .42) 56%, rgba(255, 253, 247, .12) 82%, transparent 100%);
   width: min(1040px, calc(100% - 2rem));
   max-width: 1040px !important;
   margin-left: auto;
   margin-right: auto;
+  border: 0;
+  box-shadow: none;
 }
-.course-journey > .container { border-radius: 24px; }
+.course-journey > .container { border-radius: 0; }
+.form-content { background-image: radial-gradient(ellipse at center, rgba(255, 253, 247, .76) 0%, rgba(255, 253, 247, .56) 62%, rgba(255, 253, 247, .18) 88%, transparent 100%); }
 
 :root {
   --font-display: 'Fraunces', Georgia, serif;
