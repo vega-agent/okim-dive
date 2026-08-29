@@ -67,7 +67,27 @@ html, body { overflow-x: hidden; }
 @media (max-width: 968px) { .hero-content, .page-hero-content { text-align: left; } .process-steps { grid-template-columns: repeat(2, minmax(0, 1fr)); border-bottom: 0; } .step { border-right: 0; border-bottom: 1px solid var(--journal-line); } .step:last-child { border-bottom: 0; } .nav-toggle, [data-lang-toggle] { min-height: 44px; min-width: 44px; } body.menu-open { overflow: hidden; } }
 @media (max-width: 640px) { .hero-content h1, .page-hero-content h1 { font-size: clamp(2.8rem, 13vw, 4.5rem); } .section-title { font-size: clamp(2rem, 10vw, 2.8rem); } .process-steps { grid-template-columns: 1fr; } .journey-track { grid-template-columns: 1fr; } .journey-track::before { left: 1.3rem; right: auto; top: 1.3rem; bottom: 1.3rem; width: 1px; height: auto; } .journey-node { min-height: 82px; border-right: 0; } .journey-node::after { content: '↓'; top: auto; right: auto; left: 1rem; bottom: -.35rem; transform: none; } .journey-node:last-child::after { display: none; } .card, .course-card, .trip-card, .feature-card, .contact-card, .faq-item, .form-content { border-radius: 10px; } }
 
-/* Typography system: calm editorial display + energetic humanist UI. */
+/* Shared paper surface: opaque enough for reading, still warmer than pure white. */
+.intro-content,
+.feature-card,
+.quick-link-card,
+.course-card,
+.trip-card,
+.method-card,
+.included-content,
+.calendar-note,
+.process-content,
+.form-content,
+.faq-item {
+  background-color: rgba(254, 250, 224, .92);
+  background-image: none;
+  backdrop-filter: none;
+}
+.intro-content, .process-content, .form-content, .included-content { width: 100%; }
+.courses-grid, .trips-grid, .features-grid, .quick-links-grid, .methods-grid { width: 100%; }
+.course-card, .trip-card, .feature-card, .quick-link-card, .method-card { min-width: 0; width: 100%; }
+.course-header h3, .trip-header h3, .feature-card h3, .quick-link-card h3, .method-card h3 { font-family: var(--font-body); font-weight: 700; letter-spacing: -.01em; }
+
 :root {
   --font-display: 'Fraunces', Georgia, serif;
   --font-heading: 'Fraunces', Georgia, serif;
