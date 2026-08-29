@@ -88,6 +88,25 @@ html, body { overflow-x: hidden; }
 .course-card, .trip-card, .feature-card, .quick-link-card, .method-card { min-width: 0; width: 100%; }
 .course-header h3, .trip-header h3, .feature-card h3, .quick-link-card h3, .method-card h3 { font-family: var(--font-body); font-weight: 700; letter-spacing: -.01em; }
 
+/* Final composition guardrails: one surface per card, controlled hero display scale. */
+.hero .hero-content h1 {
+  max-width: 13ch;
+  font-size: clamp(2.75rem, 5.4vw, 5.25rem);
+  line-height: 1.02;
+  letter-spacing: -.018em;
+  text-wrap: balance;
+}
+.hero .hero-content { max-width: 900px; }
+.course-card > .course-header,
+.course-card > .course-content,
+.trip-card > .trip-header,
+.trip-card > .trip-content,
+.feature-card > .card-content,
+.quick-link-card > .card-content,
+.contact-card > .card-content,
+.method-card > .method-content { background: transparent; }
+.course-card, .trip-card, .feature-card, .quick-link-card, .contact-card, .method-card, .faq-item { background-color: rgba(254, 250, 224, .94); }
+
 :root {
   --font-display: 'Fraunces', Georgia, serif;
   --font-heading: 'Fraunces', Georgia, serif;
