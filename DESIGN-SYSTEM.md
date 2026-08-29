@@ -262,6 +262,20 @@ letter-spacing: 0.5px;
 
 ---
 
+---
+
+## Current web typography implementation
+
+The live static site uses a role-based bilingual type system:
+
+- **English display:** Fraunces 500 for hero and major section headings.
+- **English body/UI:** Lato 400/700 for reading copy, navigation, cards, forms, metadata, and buttons.
+- **Simplified Chinese display:** Noto Serif SC 600 for hero and editorial section headings.
+- **Simplified Chinese body/UI:** Noto Sans SC 400/600 for reading copy and controls.
+- **Decorative script:** Great Vibes is not part of content hierarchy and must not be used for Han text.
+
+This separation keeps the calm editorial voice while giving compact UI elements a clearer, more energetic rhythm.
+
 ## 6. Depth & Elevation
 
 | Level | Treatment | Use |

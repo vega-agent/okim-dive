@@ -64,3 +64,26 @@ html, body { overflow-x: hidden; }
 
 @media (max-width: 968px) { .hero-content, .page-hero-content { text-align: left; } .process-steps { grid-template-columns: repeat(2, minmax(0, 1fr)); border-bottom: 0; } .step { border-right: 0; border-bottom: 1px solid var(--journal-line); } .step:last-child { border-bottom: 0; } .nav-toggle, [data-lang-toggle] { min-height: 44px; min-width: 44px; } body.menu-open { overflow: hidden; } }
 @media (max-width: 640px) { .hero-content h1, .page-hero-content h1 { font-size: clamp(2.8rem, 13vw, 4.5rem); } .section-title { font-size: clamp(2rem, 10vw, 2.8rem); } .process-steps { grid-template-columns: 1fr; } .journey-track { grid-template-columns: 1fr; } .journey-track::before { left: 1.3rem; right: auto; top: 1.3rem; bottom: 1.3rem; width: 1px; height: auto; } .journey-node { min-height: 82px; border-right: 0; } .journey-node::after { content: '↓'; top: auto; right: auto; left: 1rem; bottom: -.35rem; transform: none; } .journey-node:last-child::after { display: none; } .card, .course-card, .trip-card, .feature-card, .contact-card, .faq-item, .form-content { border-radius: 10px; } }
+
+/* Typography system: calm editorial display + energetic humanist UI. */
+:root {
+  --font-display: 'Fraunces', Georgia, serif;
+  --font-heading: 'Fraunces', Georgia, serif;
+  --font-body: 'Lato', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  --type-display-tracking: -.022em;
+  --type-section-tracking: -.012em;
+}
+body { font-family: var(--font-body); font-weight: 400; line-height: 1.68; }
+.hero-title, .page-hero .hero-title { font-family: var(--font-display); font-weight: 500; letter-spacing: var(--type-display-tracking); font-optical-sizing: auto; }
+.hero-content h1, .page-hero-content h1 { font-family: var(--font-display); font-weight: 500; letter-spacing: var(--type-display-tracking); }
+.section-title { font-family: var(--font-heading); font-weight: 500; letter-spacing: var(--type-section-tracking); line-height: 1.08; }
+.course-header h3, .trip-header h3, .quick-link-card h3, .feature-card h3, .contact-card h3, .faq-item h3 { font-family: var(--font-body); font-weight: 700; letter-spacing: -.01em; }
+.footer-section h3 { font-family: var(--font-body); font-size: .78rem; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; }
+.card-content p, .course-card p, .trip-card p, .step p, .faq-item p, .form-group { font-weight: 400; }
+.eyebrow, .trip-badge, .course-badge, .meta-label { font-family: var(--font-body); font-weight: 700; letter-spacing: .1em; }
+.hero-title { max-width: 11ch; }
+html[lang="zh-CN"] body { font-family: 'Noto Sans SC', 'PingFang SC', 'Microsoft YaHei', sans-serif; letter-spacing: 0; line-height: 1.8; }
+html[lang="zh-CN"] h1, html[lang="zh-CN"] h2, html[lang="zh-CN"] .hero-title, html[lang="zh-CN"] .page-hero .hero-title { font-family: 'Noto Serif SC', 'Songti SC', 'STSong', serif; font-weight: 600; letter-spacing: 0; line-height: 1.24; }
+html[lang="zh-CN"] h3, html[lang="zh-CN"] .btn, html[lang="zh-CN"] .nav-link, html[lang="zh-CN"] label, html[lang="zh-CN"] .footer-section h3 { font-family: 'Noto Sans SC', 'PingFang SC', 'Microsoft YaHei', sans-serif; font-weight: 600; letter-spacing: 0; }
+html[lang="zh-CN"] .hero-title { max-width: 12em; font-size: clamp(2.65rem, 10vw, 5.4rem); }
+html[lang="zh-CN"] .signature, html[lang="zh-CN"] .hero-script { font-family: 'Noto Serif SC', 'Songti SC', serif; font-style: normal; }

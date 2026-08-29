@@ -71,7 +71,7 @@ okim-dive/
 - **Style**: Continuous underwater editorial / dive journal
 - **Composition**: Distinct hero followed by one continuous underwater canvas; surface light at the top, open mid-sea content, seabed only at the final content section
 - **Palette**: Light watercolor ocean blues, seafoam, warm paper, sand, and restrained coral accents
-- **Typography**: Playfair Display for expressive headings, Lato for readable body copy; Chinese mode uses appropriate Chinese UI/heading fallbacks
+- **Typography**: Fraunces for expressive English display headings, Lato for readable body/UI copy; Simplified Chinese uses Noto Serif SC for editorial headings and Noto Sans SC for body/UI
 - **Surfaces**: Light editorial reading surfaces only where required for contrast; no dark glass panels
 - **Imagery**: Photography-led, with generated watercolor artwork used only as atmosphere or illustration and never labeled as verified Okim Dive photography
 - **Layout**: Generous whitespace, clear hierarchy, restrained borders, occasional asymmetry, and fewer stronger content groupings instead of repetitive card grids
