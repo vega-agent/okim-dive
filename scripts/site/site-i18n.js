@@ -462,6 +462,27 @@
     "Keep practising and explore new underwater worlds through Okim Dive’s international dive trips.": "继续练习，并通过奥金潜水的国际潜水之旅探索更多水下世界。",
     "Discover dive trips →": "了解潜水旅行 →",
   });
+  Object.assign(translations, {
+    "Small-group package": "小团体配套",
+    "View package pricing": "查看配套价格",
+    "Course retake — RM 150 / dive": "课程重考 — RM 150 / 潜水",
+    "Nitrox add-on — RM 450": "高氧附加费 — RM 450",
+    "Nitrox add-on for Ori — RM 550": "Ori 的高氧附加费 — RM 550",
+    "Tioman Island": "刁曼岛",
+    "Already certified? Join us for relaxed local diving around Tioman Island, with options for shore dives, boat dives, and night dives.": "已经完成认证了吗？欢迎来刁曼岛进行轻松的本地潜水体验，可选择岸潜、船潜或夜潜。",
+    "Shore Diving": "岸潜",
+    "A simple way to get back in the water and explore Tioman at your own pace.": "以轻松的方式重新下水，按照自己的节奏探索刁曼岛。",
+    "Shore Dive:": "岸潜：",
+    "Night Shore Dive:": "夜间岸潜：",
+    "Gear rental: BCD and regulator RM 50 / day": "装备租赁：BCD 和调节器 RM 50 / 天",
+    "Plan a Dive": "计划潜水",
+    "Boat Diving": "船潜",
+    "Discover more of Tioman’s reefs by boat, with flexible options for your dive plan.": "乘船探索更多刁曼岛珊瑚礁，并灵活安排你的潜水计划。",
+    "Dives 1–5:": "第 1–5 次潜水：",
+    "Dive 6 onwards:": "第 6 次起：",
+    "Night Boat Dive:": "夜间船潜：",
+    "Prices are for certified recreational divers. Contact us to confirm availability, equipment needs, and the best sites for the day.": "价格适用于持证休闲潜水员。欢迎联系我们确认潜水安排、装备需求及当天适合的潜点。",
+  });
   document.body.dataset.enTitle = document.title;
   applyLanguage(localStorage.getItem('okim-language') || 'en');
 })();
