@@ -287,6 +287,19 @@ html[lang="zh-CN"] .section-title { font-family: var(--font-chinese-heading); }
 .home-journey-step h3 { margin: 0 0 .6rem; color: var(--ocean-deep); }
 .home-journey-step p { margin: 0 0 1rem; }
 .text-link { color: var(--ocean-deep); font-weight: 700; text-decoration: underline; text-underline-offset: .2em; }
+
+/* Contact is a form-led page; contact channels stay secondary and compact. */
+.contact-form-section { padding-top: clamp(2rem, 5vw, 4rem); }
+.contact-form-section .form-content { padding: clamp(1.5rem, 4vw, 3rem); }
+.contact-methods { padding-top: clamp(1.5rem, 4vw, 3rem); }
+.contact-methods > .container > .section-title { font-size: clamp(1.6rem, 3vw, 2.2rem); margin-bottom: 1.5rem; }
+.contact-methods .methods-grid { gap: 1rem; }
+.contact-methods .method-card { padding: 1.25rem; box-shadow: none; }
+.contact-methods .method-card p { margin: .4rem 0; font-size: .9rem; }
+.contact-methods .method-card .method-icon { font-size: 1.35rem; }
+.contact-methods .method-card .btn { padding: .55rem .85rem; font-size: .8rem; }
+.form-consent label { display: flex; align-items: flex-start; gap: .55rem; font-size: .85rem; line-height: 1.45; }
+.form-consent input { flex: 0 0 auto; margin-top: .2rem; }
 @media (max-width: 640px) { .home-journey-grid { grid-template-columns: 1fr; gap: .5rem; } .home-journey-step { padding: 1.25rem 0; } }
 
 /* Package pricing and Tioman local diving */
