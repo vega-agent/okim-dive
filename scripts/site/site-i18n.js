@@ -422,6 +422,30 @@
   document.querySelectorAll('[data-lang-toggle]').forEach((button) => {
     button.addEventListener('click', () => applyLanguage(document.documentElement.lang === 'zh-CN' ? 'en' : 'zh'));
   });
+  Object.assign(translations, {
+    "Core Courses": "核心课程",
+    "Returning divers": "曾经潜水的学员",
+    "Ask About Refresher": "咨询复习课程",
+    "Looking for something else?": "想了解其他选择？",
+    "Other courses are available on request.": "其他课程可按需咨询。",
+    "Contact us for more information": "联系我们了解更多",
+    "Questions are welcome": "有疑问，尽管问",
+    "Starting something new can feel uncertain. Here are a few answers to help you arrive with more confidence.": "开始学习新事物时感到不确定很正常。以下回答希望能帮助你更安心地开始潜水。",
+    "Can I learn to dive if I’m not a strong swimmer?": "如果我不擅长游泳，也可以学习潜水吗？",
+    "Will the course be too difficult for me?": "课程会不会太难？",
+    "Can older participants learn to dive?": "年纪大了，还可以学习潜水吗？",
+    "Why can instructors seem serious sometimes?": "为什么教练有时看起来比较严肃？",
+    "How can I protect myself from the sun?": "如何做好防晒？",
+    "What if my ears feel uncomfortable while descending?": "下潜时耳朵不舒服怎么办？",
+    "Which certification organisation should I choose?": "应该选择哪一种潜水认证？",
+    "How many days does a diving course take?": "潜水课程需要多少天？",
+    "Do I need to buy diving equipment?": "需要购买潜水装备吗？",
+    "Still have questions? Tell us about your experience and we’ll be happy to help.": "还有疑问吗？告诉我们你的情况，我们很乐意为你解答。",
+    "Talk to Us": "联系我们",
+    "Enjoy the Water": "享受水下世界",
+    "Build your skills with guidance from your instructor.": "在教练指导下逐步建立你的潜水技能。",
+    "Complete your dives and take your next step underwater.": "完成潜水训练，迈出探索水下世界的下一步。",
+  });
   document.body.dataset.enTitle = document.title;
   applyLanguage(localStorage.getItem('okim-language') || 'en');
 })();

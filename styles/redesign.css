@@ -266,3 +266,14 @@ html[lang="zh-CN"] .section-title { font-family: var(--font-chinese-heading); }
   .journey-track::before { top: 1.15rem; bottom: 1.15rem; left: 1.15rem; right: auto; width: 1px; height: auto; }
   .journey-node { display: grid; grid-template-columns: 2.35rem 1fr; align-items: start; gap: .9rem; }
 }
+
+/* Courses priority flow */
+.core-courses-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+.courses-inquiry-panel { max-width: 760px; margin: 3rem auto 0; padding: clamp(1.5rem, 4vw, 2.75rem); text-align: center; background: rgba(239, 249, 246, .86); border: 1px solid var(--journal-line); border-radius: 14px; }
+.courses-inquiry-panel h3 { margin: .35rem 0 .8rem; color: var(--ocean-deep); }
+.courses-inquiry-panel p { max-width: 58ch; margin-inline: auto; }
+.faq-intro { max-width: 720px; margin: 0 auto 2.5rem; text-align: center; }
+.faq-intro .section-title { margin-bottom: 1rem; }
+.faq-cta { max-width: 720px; margin: 3rem auto 0; padding-top: 2rem; border-top: 1px solid var(--journal-line); text-align: center; }
+@media (max-width: 900px) { .core-courses-grid { grid-template-columns: 1fr; max-width: 620px; margin-inline: auto; } }
+@media (max-width: 640px) { .courses-inquiry-panel { margin-top: 2rem; padding: 1.4rem 1rem; } .faq-intro { margin-bottom: 1.75rem; } .faq-cta { margin-top: 2rem; } }
