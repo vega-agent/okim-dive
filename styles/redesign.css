@@ -298,8 +298,8 @@ html[lang="zh-CN"] .section-title { font-family: var(--font-chinese-heading); }
 .contact-methods .method-card p { margin: .4rem 0; font-size: .9rem; }
 .contact-methods .method-card .method-icon { font-size: 1.35rem; }
 .contact-methods .method-card .btn { padding: .55rem .85rem; font-size: .8rem; }
-.form-consent label { display: flex; align-items: flex-start; gap: .55rem; font-size: .85rem; line-height: 1.45; }
-.form-consent input { flex: 0 0 auto; margin-top: .2rem; }
+.contact-form .form-group.form-consent label { display: flex; align-items: flex-start; gap: .55rem; font-size: .85rem; line-height: 1.45; }
+.contact-form .form-group.form-consent input[type="checkbox"] { width: auto; flex: 0 0 auto; margin: .2rem 0 0; }
 @media (max-width: 640px) { .home-journey-grid { grid-template-columns: 1fr; gap: .5rem; } .home-journey-step { padding: 1.25rem 0; } }
 
 /* Package pricing and Tioman local diving */
