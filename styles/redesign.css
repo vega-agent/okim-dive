@@ -288,3 +288,14 @@ html[lang="zh-CN"] .section-title { font-family: var(--font-chinese-heading); }
 .home-journey-step p { margin: 0 0 1rem; }
 .text-link { color: var(--ocean-deep); font-weight: 700; text-decoration: underline; text-underline-offset: .2em; }
 @media (max-width: 640px) { .home-journey-grid { grid-template-columns: 1fr; gap: .5rem; } .home-journey-step { padding: 1.25rem 0; } }
+
+/* Package pricing and Tioman local diving */
+.course-pricing { margin: 1.25rem 0; padding: .9rem 1rem; border-top: 1px solid var(--journal-line); border-bottom: 1px solid var(--journal-line); }
+.course-pricing strong, .course-pricing span { display: block; }
+.course-pricing strong { color: var(--ocean-deep); font-size: 1.15rem; }
+.course-pricing span, .pricing-note { color: var(--ocean-mid); font-size: .9rem; }
+.course-pricing details { margin-top: .65rem; }
+.course-pricing summary { cursor: pointer; color: var(--ocean-deep); font-weight: 700; }
+.course-pricing details ul { margin: .55rem 0 0; padding-left: 1.1rem; }
+.section-lede { max-width: 680px; margin: -1rem auto 2rem; text-align: center; }
+.pricing-note { max-width: 700px; margin: 1.5rem auto 0; text-align: center; }
