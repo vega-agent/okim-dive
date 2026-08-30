@@ -466,8 +466,7 @@
     "Small-group package": "小团体配套",
     "View package pricing": "查看配套价格",
     "Course retake — RM 150 / dive": "课程重考 — RM 150 / 潜水",
-    "Nitrox add-on — RM 450": "高氧附加费 — RM 450",
-    "Nitrox add-on for Ori — RM 550": "Ori 的高氧附加费 — RM 550",
+    "Nitrox add-on — RM 450 (Ori RM 550)": "高氧附加费 — RM 450（Ori RM 550）",
     "Tioman Island": "刁曼岛",
     "Already certified? Join us for relaxed local diving around Tioman Island, with options for shore dives, boat dives, and night dives.": "已经完成认证了吗？欢迎来刁曼岛进行轻松的本地潜水体验，可选择岸潜、船潜或夜潜。",
     "Shore Diving": "岸潜",
@@ -482,6 +481,12 @@
     "Dive 6 onwards:": "第 6 次起：",
     "Night Boat Dive:": "夜间船潜：",
     "Prices are for certified recreational divers. Contact us to confirm availability, equipment needs, and the best sites for the day.": "价格适用于持证休闲潜水员。欢迎联系我们确认潜水安排、装备需求及当天适合的潜点。",
+  });
+  Object.assign(translations, {
+    "Course Material, Diving Equipments and Certification.": "课程材料、潜水装备和认证。",
+    "Exclude:": "不包括：",
+    "Accommodation, Transportation, Ferry Ticket, Marine Park Fee, Travel Insurance.": "住宿、交通、渡轮票、海洋公园费用、旅游保险。",
+    "Exclude: Accommodation, Transportation, Ferry Ticket, Marine Park Fee, Travel Insurance, Dive Equipment (available for rent).": "不包括：住宿、交通、渡轮票、海洋公园费用、旅游保险、潜水装备（可租赁）。"
   });
   document.body.dataset.enTitle = document.title;
   applyLanguage(localStorage.getItem('okim-language') || 'en');

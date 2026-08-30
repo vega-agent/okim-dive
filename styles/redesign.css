@@ -299,3 +299,17 @@ html[lang="zh-CN"] .section-title { font-family: var(--font-chinese-heading); }
 .course-pricing details ul { margin: .55rem 0 0; padding-left: 1.1rem; }
 .section-lede { max-width: 680px; margin: -1rem auto 2rem; text-align: center; }
 .pricing-note { max-width: 700px; margin: 1.5rem auto 0; text-align: center; }
+
+/* Compact course-card rhythm */
+.core-courses-grid { align-items: stretch; }
+.core-courses-grid .course-card { display: flex; flex-direction: column; }
+.core-courses-grid .course-content { display: flex; flex: 1; flex-direction: column; gap: .9rem; padding: 1.35rem; }
+.core-courses-grid .course-content > p { min-height: 4.8em; margin: 0; line-height: 1.55; }
+.core-courses-grid .course-details { margin: 0; padding: .8rem 0; border-top: 1px solid var(--journal-line); border-bottom: 1px solid var(--journal-line); }
+.core-courses-grid .course-details li { margin: .2rem 0; }
+.core-courses-grid .course-pricing { margin: 0; padding: 0; border: 0; }
+.core-courses-grid .course-pricing details { margin-top: .45rem; padding-top: .65rem; border-top: 1px solid var(--journal-line); }
+.core-courses-grid .course-pricing details h4 { margin: 1rem 0 .35rem; font-size: .9rem; color: var(--ocean-deep); }
+.core-courses-grid .course-pricing details ul { margin: .25rem 0 0; }
+.core-courses-grid .course-content > .btn { margin-top: auto; align-self: flex-start; }
+@media (max-width: 640px) { .core-courses-grid .course-content { padding: 1.15rem; gap: .7rem; } .core-courses-grid .course-content > p { min-height: 0; } }
