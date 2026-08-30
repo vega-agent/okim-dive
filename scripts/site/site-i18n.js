@@ -96,7 +96,8 @@
   "Beginner": "初学者",
   "Your first step into the underwater world. Learn the fundamentals of scuba diving and earn your certification to dive independently.": "您迈入海底世界的第一步。学习水肺潜水的基础知识并获得独立潜水的认证。",
   "Duration:": "期间：",
-  "3-4 days": "3-4天",
+  "3-4 days": "3-4天"
+  ,"4 days / 3 nights": "4天3夜",
   "Depth Limit:": "深度限制：",
   "18 meters": "18米",
   "Prerequisites:": "先决条件：",
@@ -108,7 +109,8 @@
   "Advanced Open Water": "高级开放水域",
   "Intermediate": "中间的",
   "Take your diving to the next level with specialty dives including deep diving, navigation, and underwater photography.": "通过深潜、导航和水下摄影等专业潜水，将您的潜水提升到一个新的水平。",
-  "2 days": "2天",
+  "2 days": "2天"
+  ,"3 days / 2 nights": "3天2夜",
   "30 meters": "30米",
   "Open Water certification": "开放水域认证",
   "5 adventure dives, certification": "5次冒险潜水，认证",
