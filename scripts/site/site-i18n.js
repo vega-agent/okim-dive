@@ -446,6 +446,20 @@
     "Build your skills with guidance from your instructor.": "在教练指导下逐步建立你的潜水技能。",
     "Complete your dives and take your next step underwater.": "完成潜水训练，迈出探索水下世界的下一步。",
   });
+  Object.assign(translations, {
+    "Wherever you are in your diving journey": "无论你处于潜水旅程的哪个阶段",
+    "Find Your Way Into Diving": "找到适合你的潜水之路",
+    "Okim Dive is here to support you at every stage—from learning the fundamentals, to rebuilding your confidence, to joining an international dive trip and discovering what lies beyond Tioman.": "无论是学习基础、重新建立信心，还是参加国际潜水之旅，探索刁曼岛以外的水下世界，奥金潜水都会在每个阶段陪伴你。",
+    "Learn": "学习",
+    "Start with the foundations and gain the skills you need to feel comfortable underwater.": "从基础开始，逐步掌握在水下自在行动所需的技能。",
+    "Explore courses →": "探索课程 →",
+    "Return": "重拾潜水",
+    "Been away from diving? Rebuild your comfort and confidence with guidance at your own pace.": "离开潜水一段时间了吗？在指导下按照自己的节奏，重新找回水中的舒适感与信心。",
+    "Ask about a refresher →": "咨询复习课程 →",
+    "Go Further": "探索更远",
+    "Keep practising and explore new underwater worlds through Okim Dive’s international dive trips.": "继续练习，并通过奥金潜水的国际潜水之旅探索更多水下世界。",
+    "Discover dive trips →": "了解潜水旅行 →",
+  });
   document.body.dataset.enTitle = document.title;
   applyLanguage(localStorage.getItem('okim-language') || 'en');
 })();

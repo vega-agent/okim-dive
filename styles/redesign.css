@@ -277,3 +277,14 @@ html[lang="zh-CN"] .section-title { font-family: var(--font-chinese-heading); }
 .faq-cta { max-width: 720px; margin: 3rem auto 0; padding-top: 2rem; border-top: 1px solid var(--journal-line); text-align: center; }
 @media (max-width: 900px) { .core-courses-grid { grid-template-columns: 1fr; max-width: 620px; margin-inline: auto; } }
 @media (max-width: 640px) { .courses-inquiry-panel { margin-top: 2rem; padding: 1.4rem 1rem; } .faq-intro { margin-bottom: 1.75rem; } .faq-cta { margin-top: 2rem; } }
+
+/* Home journey overview */
+.home-journey-content { max-width: 980px; margin: 0 auto; text-align: center; }
+.home-journey-content .intro-text { max-width: 700px; margin: 0 auto 2.4rem; }
+.home-journey-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 1.25rem; text-align: left; }
+.home-journey-step { padding: 1.5rem; border-top: 1px solid var(--journal-line); }
+.home-journey-step .journey-node-mark { margin-bottom: 1rem; }
+.home-journey-step h3 { margin: 0 0 .6rem; color: var(--ocean-deep); }
+.home-journey-step p { margin: 0 0 1rem; }
+.text-link { color: var(--ocean-deep); font-weight: 700; text-decoration: underline; text-underline-offset: .2em; }
+@media (max-width: 640px) { .home-journey-grid { grid-template-columns: 1fr; gap: .5rem; } .home-journey-step { padding: 1.25rem 0; } }
