@@ -224,6 +224,7 @@
   "Local and international dive destinations": "本地和国际潜水目的地",
   "See our underwater world in pictures": "在图片中查看我们的海底世界",
   "Get in touch to plan your dive": "联系我们来计划您的潜水",
+  "Tell us what you are planning, and we’ll help you find the right next step.": "告诉我们您的计划，我们会帮助您找到合适的下一步。",
   "Dive Trips - Okim Dive": "潜水旅行 - Okim Dive",
   "Explore unforgettable international dive destinations": "探索令人难忘的国际潜水目的地",
   "Join our organized dive trips to explore some of the world's most stunning underwater destinations. We plan every detail of international dive trips so you can focus on the diving, the marine life, and the experience.": "加入我们组织的潜水之旅，探索世界上一些最令人惊叹的水下目的地。我们规划国际潜水旅行的每一个细节，以便您可以专注于潜水、海洋生物和体验。",
