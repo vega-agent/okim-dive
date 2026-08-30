@@ -2,7 +2,7 @@ import { existsSync, readFileSync } from 'node:fs';
 import { join, resolve } from 'node:path';
 
 const root = process.cwd();
-const pages = ['index.html', 'about.html', 'courses.html', 'trips.html', 'gallery.html', 'contact.html'];
+const pages = ['pages/index.html', 'pages/about.html', 'pages/courses.html', 'pages/trips.html', 'pages/gallery.html', 'pages/contact.html'];
 
 for (const page of pages) {
   const path = join(root, page);
@@ -12,15 +12,14 @@ for (const page of pages) {
   console.log(`PAGE_OK ${page}`);
 }
 
-const cssPath = join(root, 'styles.css');
+const cssPath = join(root, 'styles', 'styles.css');
 const css = readFileSync(cssPath, 'utf8');
+const cssDir = resolve(cssPath, '..');
 const refs = [...css.matchAll(/url\(['"]?([^)'"\\]+)['"]?\)/g)].map((match) => match[1]);
 
 for (const ref of refs) {
-  let assetPath;
-  if (ref.startsWith('./')) assetPath = resolve(root, ref.slice(2));
-  else if (ref.startsWith('../')) assetPath = resolve(root, 'assets', ref);
-  else continue;
+  if (!ref.startsWith('.')) continue;
+  const assetPath = resolve(cssDir, ref);
   if (!existsSync(assetPath)) throw new Error(`Missing CSS asset: ${ref}`);
 }
 

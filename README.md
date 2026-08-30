@@ -6,13 +6,22 @@ A multi-page website for Okim Dive, a freelance dive instructor and trip planner
 
 ```
 okim-dive/
-├── index.html          # Homepage with hero, intro, and quick links
-├── about.html          # About Iris, our story, and why choose us
-├── courses.html        # Dive courses from beginner to professional
-├── trips.html          # Local and international dive trips
-├── gallery.html        # Photo gallery with placeholder watercolor images
-├── contact.html        # Contact methods, form, and FAQ
-├── styles.css          # Complete stylesheet with watercolor theme
+├── pages/
+│   ├── index.html
+│   ├── about.html
+│   ├── courses.html
+│   ├── trips.html
+│   ├── gallery.html
+│   └── contact.html
+├── styles/
+│   ├── styles.css
+│   └── redesign.css
+├── scripts/
+│   ├── verify-static.mjs
+│   └── site/
+│       ├── site-i18n.js
+│       ├── site-motion.js
+│       └── trips-data.js
 ├── assets/
 │   └── watercolor/     # Folder for watercolor design elements
 │       ├── backgrounds/
@@ -23,10 +32,14 @@ okim-dive/
 │       ├── icons/
 │       ├── corners/
 │       └── overlays/
-├── PRD.md              # Product Requirements Document
-├── DESIGN-SYSTEM.md    # Design system specifications
-├── BRAND-GUIDE.md      # Brand guide with watercolor theme
-└── WATERCOLOR-DESIGN-ELEMENTS.md  # Prompts for generating watercolor assets
+├── docs/
+│   ├── design/
+│   │   ├── PRD.md
+│   │   ├── DESIGN-SYSTEM.md
+│   │   ├── BRAND-GUIDE.md
+│   │   └── WATERCOLOR-DESIGN-ELEMENTS.md
+│   └── reports/
+│       └── PHASE-4-QA-REPORT.md
 ```
 
 ## Pages
@@ -90,7 +103,7 @@ Future pages must extend this visual system rather than introduce a new page-spe
 
 ## Next Steps
 
-1. Generate watercolor design elements using prompts in `WATERCOLOR-DESIGN-ELEMENTS.md`
+1. Generate watercolor design elements using prompts in `docs/design/WATERCOLOR-DESIGN-ELEMENTS.md`
 2. Replace placeholder images with actual watercolor assets
 3. Add real photography from Iris's Instagram/Facebook
 4. Update contact form to connect to backend service

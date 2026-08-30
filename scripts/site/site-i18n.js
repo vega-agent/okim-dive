@@ -80,7 +80,17 @@
   "Dive Courses - Okim Dive": "潜水课程 - Okim Dive",
   "From beginner to professional - find your perfect course": "从初学者到专业人士 - 找到您的完美课程",
   "Your Diving Journey Starts Here": "您的潜水之旅从这里开始",
-  "Whether you're taking your first breath underwater or looking to advance your skills, we offer comprehensive courses for all levels. Our PADI and SSI certified courses are designed to build your confidence and knowledge while ensuring safety and fun.": "无论您是第一次在水下呼吸还是希望提高自己的技能，我们都为各个级别提供综合课程。我们的 PADI 和 SSI 认证课程旨在增强您的信心和知识，同时确保安全和乐趣。",
+  "Whether you're taking your first breath underwater or looking to advance your skills, we offer comprehensive PADI courses for all levels. Our PADI courses are designed to build your confidence and knowledge while ensuring safety and fun.": "无论您是第一次在水下呼吸，还是希望提升潜水技能，我们都为各个级别提供完整的 PADI 课程。PADI 课程旨在增强您的信心与知识，同时确保安全并充满乐趣。",
+  "Find your starting point — then follow the path further.": "找到您的起点，然后沿着这条路径继续前进。",
+  "Curious": "好奇探索",
+  "Try the water": "体验水下世界",
+  "Learning": "学习成长",
+  "Build your basics": "打好基础",
+  "Certified": "完成认证",
+  "Dive independently": "独立潜水",
+  "Exploring": "持续探索",
+  "Go further": "探索更远",
+  "Diving course progression": "潜水课程进阶路径",
   "Our Courses": "我们的课程",
   "Open Water Diver": "开放水域潜水员",
   "Beginner": "初学者",
@@ -246,6 +256,7 @@
     "Lessons are conducted in Mandarin.": "课程以普通话授课。",
     "Certified PADI instructor with years of experience": "拥有多年经验的 PADI 认证教练",
     "PADI-certified courses with internationally recognized qualifications.": "PADI 认证课程，获得国际认可的潜水资格。",
+    "As a PADI-certified instructor, she has guided hundreds of divers—from complete beginners to advanced enthusiasts—through the magical underwater world. Her patient, personalized approach ensures every student feels confident and excited about their diving journey.": "作为一名 PADI 认证教练，她已带领数百名潜水员——从完全初学者到进阶爱好者——探索神奇的水下世界。她耐心且个性化的教学方式，让每位学员都能充满信心与热情地开启潜水之旅。",
     "we offer comprehensive PADI courses for all levels. Our PADI courses are": "我们提供适合各个水平的 PADI 潜水课程。课程",
     "PADI certifications are valid for life. However, we recommend refresher courses if you haven't dived in over a year.": "PADI 认证终身有效。不过，如果您超过一年没有潜水，我们建议参加复习课程。",
     "Are lessons conducted in Mandarin?": "课程是否以普通话授课？",
@@ -309,7 +320,54 @@
     "International Destinations": "国际潜水目的地",
     "What's Included": "行程包含",
     "Upcoming Trips": "即将出发",
-    "Plan Your Trip": "规划您的行程"
+    "Plan Your Trip": "规划您的行程",
+    "Adventure Awaits": "冒险即将启程",
+    "Gallery in progress": "照片库正在完善",
+    "Real underwater stories are coming soon": "真实的水下故事即将与您见面",
+    "We are preparing a collection of real Okim Dive moments from Tioman and our international dive destinations. Follow along for the stories and underwater photography as the collection grows.": "我们正在整理来自刁曼岛及国际潜点的真实 Okim Dive 潜水瞬间。随着照片库逐步完善，敬请期待更多故事与水下影像。",
+    "We are preparing a collection of verified Okim Dive photography. Until then, contact us to hear about the places and encounters behind the next dive.": "我们正在整理经确认的 Okim Dive 潜水照片。在此之前，欢迎联系我们，了解下一次潜水目的地与水下相遇的故事。",
+    "Plan a Dive": "规划一次潜水",
+    "Real underwater stories are coming soon": "真实的水下故事即将与您见面",
+    "Close trip details": "关闭行程详情",
+    "Travel dates": "出发日期",
+    "Difficulty": "难度",
+    "Cost": "费用",
+    "per diver": "每位潜水员",
+    "Highlights": "亮点",
+    "Sample itinerary": "示例行程",
+    "Included": "费用包含",
+    "Sample booking rules": "示例预订规则",
+    "Deposit:": "订金：",
+    "Balance:": "尾款：",
+    "Cancellation:": "取消政策：",
+    "Requirements:": "报名要求：",
+    "View Details": "查看详情",
+    "Trip information is temporarily unavailable.": "行程信息暂时无法加载。",
+    "Sample trip": "示例行程",
+    "Inquire about Sipadan": "咨询西巴丹岛行程",
+    "Sipadan Blue Current Week": "西巴丹蓝色洋流周",
+    "Sipadan Island, Malaysia": "马来西亚西巴丹岛",
+    "Advanced": "进阶",
+    "8–10 divers": "8–10 名潜水员",
+    "A sample small-group itinerary built around Sipadan’s famous walls, turtles, and schooling fish.": "围绕西巴丹著名峭壁、海龟与鱼群设计的小团示例行程。",
+    "Barracuda Point": "梭鱼点",
+    "Turtle encounters": "海龟邂逅",
+    "Guided wall dives": "峭壁带队潜水",
+    "Professional dive guidance": "专业潜水指导",
+    "Local boat transfers": "当地船只接送",
+    "Trip planning support": "行程规划支持",
+    "SAMPLE CONTENT ONLY. Dates, pricing, permits, accommodation, and booking rules are placeholders for product design review.": "仅为示例内容。日期、价格、许可、住宿和预订规则均为产品设计审阅阶段的占位信息。",
+    "Raja Ampat Reef Explorer": "四王岛珊瑚礁探索",
+    "Raja Ampat, Indonesia": "印度尼西亚四王群岛",
+    "A sample expedition concept for exploring Raja Ampat’s reefs, bays, and exceptional marine biodiversity.": "围绕四王群岛珊瑚礁、海湾及丰富海洋生物多样性设计的探险示例方案。",
+    "Intermediate to advanced": "中级至进阶",
+    "10–12 divers": "10–12 名潜水员",
+    "Manta ray sites": "蝠鲼潜点",
+    "Coral gardens": "珊瑚花园",
+    "Remote reef exploration": "偏远珊瑚礁探索",
+    "Local transfers": "当地接送",
+    "Inquire about Raja Ampat": "咨询四王群岛行程",
+    "SAMPLE CONTENT ONLY. Dates, pricing, liveaboard details, and booking rules are placeholders for product design review.": "仅为示例内容。日期、价格、船宿详情和预订规则均为产品设计审阅阶段的占位信息。"
   });
 
   const original = new WeakMap();
@@ -324,7 +382,16 @@
     node.nodeValue = language === 'zh' ? (translations[value] || source) : source;
   }
 
+  let currentLanguage = 'en';
+
+  function translateSubtree(root, language) {
+    const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT);
+    let node;
+    while ((node = walker.nextNode())) translateNode(node, language);
+  }
+
   function applyLanguage(language) {
+    currentLanguage = language;
     document.documentElement.lang = language === 'zh' ? 'zh-CN' : 'en';
     document.title = language === 'zh' ? (translations[document.title] || document.title) : (document.body.dataset.enTitle || document.title);
     const walker = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT);
@@ -337,8 +404,20 @@
     document.querySelectorAll('.nav-toggle').forEach((button) => {
       button.setAttribute('aria-label', language === 'zh' ? '切换导航菜单' : 'Toggle navigation');
     });
+    document.querySelectorAll('.journey-track').forEach((track) => {
+      track.setAttribute('aria-label', language === 'zh' ? '潜水课程进阶路径' : 'Diving course progression');
+    });
     localStorage.setItem('okim-language', language);
   }
+
+  window.okimApplyLanguage = applyLanguage;
+  new MutationObserver((mutations) => {
+    if (currentLanguage !== 'zh') return;
+    mutations.forEach(({ addedNodes }) => addedNodes.forEach((node) => {
+      if (node.nodeType === Node.TEXT_NODE) translateNode(node, currentLanguage);
+      else if (node.nodeType === Node.ELEMENT_NODE) translateSubtree(node, currentLanguage);
+    }));
+  }).observe(document.body, { childList: true, subtree: true });
 
   document.querySelectorAll('[data-lang-toggle]').forEach((button) => {
     button.addEventListener('click', () => applyLanguage(document.documentElement.lang === 'zh-CN' ? 'en' : 'zh'));

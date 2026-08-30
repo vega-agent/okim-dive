@@ -1,0 +1,13 @@
+{
+  "framework": null,
+  "buildCommand": "npm run build",
+  "outputDirectory": ".",
+  "rewrites": [
+    { "source": "/", "destination": "/pages/index.html" },
+    { "source": "/about.html", "destination": "/pages/about.html" },
+    { "source": "/courses.html", "destination": "/pages/courses.html" },
+    { "source": "/trips.html", "destination": "/pages/trips.html" },
+    { "source": "/gallery.html", "destination": "/pages/gallery.html" },
+    { "source": "/contact.html", "destination": "/pages/contact.html" }
+  ]
+}

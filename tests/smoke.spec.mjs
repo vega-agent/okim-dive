@@ -1,6 +1,6 @@
 import { test, expect } from '@playwright/test';
 
-const routes = ['', 'about.html', 'courses.html', 'trips.html', 'gallery.html', 'contact.html'];
+const routes = ['pages/index.html', 'pages/about.html', 'pages/courses.html', 'pages/trips.html', 'pages/gallery.html', 'pages/contact.html'];
 
 for (const route of routes) {
   test(`${route || 'index.html'} loads without overflow or console errors`, async ({ page }) => {
@@ -21,7 +21,7 @@ for (const route of routes) {
 
 test('mobile navigation opens and closes with Escape', async ({ page }, testInfo) => {
   test.skip(testInfo.project.name !== 'chromium-mobile', 'Mobile navigation is only visible in the mobile viewport.');
-  await page.goto('');
+  await page.goto('pages/index.html');
   const toggle = page.locator('.nav-toggle');
   await expect(toggle).toHaveAttribute('aria-expanded', 'false');
   await toggle.click();

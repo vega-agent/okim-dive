@@ -22,11 +22,22 @@
   --soft-shadow: 0 10px 30px rgba(69, 123, 157, 0.12), 0 2px 6px rgba(38, 70, 83, 0.06);
   --content-max: 1200px;
 
+  --ocean-surface: var(--ocean-mist);
+  --shadow-soft: var(--soft-shadow);
+
   /* Typography */
   --font-cursive: 'Great Vibes', cursive;
-  --font-heading: 'Playfair Display', Georgia, serif;
+  --font-heading: 'Fraunces', Georgia, serif;
   --font-body: 'Lato', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-  --font-chinese: 'Noto Sans SC', 'PingFang SC', sans-serif;
+  --font-chinese-body: 'Noto Sans SC', 'PingFang SC', 'Microsoft YaHei', sans-serif;
+  --font-chinese-heading: 'Noto Serif SC', 'Songti SC', 'STSong', serif;
+  --font-chinese: var(--font-chinese-body);
+  --type-display: clamp(2.8rem, 7vw, 6.8rem);
+  --type-h2: clamp(2rem, 4vw, 3.4rem);
+  --type-h3: clamp(1.25rem, 2vw, 1.6rem);
+  --leading-display: .98;
+  --leading-heading: 1.12;
+  --leading-body: 1.6;
 
   /* Spacing and motion */
   --space-xs: 0.5rem;
@@ -101,7 +112,7 @@ body {
   width: 50px;
   height: 50px;
   border-radius: 50%;
-  background-image: url('./assets/components/generated/nav-logo-watercolor.webp');
+  background-image: url('../assets/components/generated/nav-logo-watercolor.webp');
   background-size: cover;
   background-position: center;
   display: flex;
@@ -214,33 +225,33 @@ body {
 
 /* Homepage Hero */
 .hero .hero-bg {
-  background-image: url('./assets/backgrounds/generated/home-hero-watercolor.webp');
+  background-image: url('../assets/backgrounds/generated/home-hero-watercolor.webp');
   background-color: var(--ocean-mid);
 }
 
 /* Page Hero Backgrounds */
 .page-hero.about-hero .hero-bg {
-  background-image: url('./assets/backgrounds/generated/about-hero-watercolor.webp');
+  background-image: url('../assets/backgrounds/generated/about-hero-watercolor.webp');
   background-color: var(--ocean-deep);
 }
 
 .page-hero.courses-hero .hero-bg {
-  background-image: url('./assets/backgrounds/generated/courses-hero-watercolor.webp');
+  background-image: url('../assets/backgrounds/generated/courses-hero-watercolor.webp');
   background-color: var(--ocean-deep);
 }
 
 .page-hero.trips-hero .hero-bg {
-  background-image: url('./assets/backgrounds/generated/trips-hero-watercolor.webp');
+  background-image: url('../assets/backgrounds/generated/trips-hero-watercolor.webp');
   background-color: var(--ocean-deep);
 }
 
 .page-hero.gallery-hero .hero-bg {
-  background-image: url('./assets/backgrounds/generated/gallery-hero-watercolor.webp');
+  background-image: url('../assets/backgrounds/generated/gallery-hero-watercolor.webp');
   background-color: var(--ocean-deep);
 }
 
 .page-hero.contact-hero .hero-bg {
-  background-image: url('./assets/backgrounds/generated/contact-hero-watercolor.webp');
+  background-image: url('../assets/backgrounds/generated/contact-hero-watercolor.webp');
   background-color: var(--ocean-deep);
 }
 
@@ -296,7 +307,7 @@ body {
   line-height: 1;
   color: var(--white);
   background-color: var(--ocean-light);
-  background-image: url('./assets/watercolor/components/cta-button.webp');
+  background-image: url('../assets/watercolor/components/cta-button.webp');
   background-size: cover;
   background-position: center;
   transition: background-color 0.25s ease, background-image 0.25s ease, color 0.25s ease, transform 0.25s ease, box-shadow 0.25s ease;
@@ -322,7 +333,7 @@ body {
   color: var(--white);
   border-color: var(--ocean-light);
   background-color: var(--ocean-light);
-  background-image: url('./assets/watercolor/components/cta-button.webp');
+  background-image: url('../assets/watercolor/components/cta-button.webp');
   background-size: cover;
   background-position: center;
 }
@@ -395,7 +406,7 @@ body {
 .gallery-intro,
 .contact-intro {
   padding: 4rem 0;
-  background-image: url('./assets/backgrounds/generated/section-intro-watercolor.webp');
+  background-image: url('../assets/backgrounds/generated/section-intro-watercolor.webp');
   background-size: cover;
   background-position: center;
   background-color: var(--white);
@@ -478,7 +489,7 @@ body {
   height: 80px;
   margin: 0 auto 1rem;
   border-radius: 50%;
-  background-image: url('./assets/watercolor/components/feature-icon-bg.webp');
+  background-image: url('../assets/watercolor/components/feature-icon-bg.webp');
   background-size: cover;
   background-position: center;
   background-color: var(--ocean-light);
@@ -632,26 +643,26 @@ body {
 
 /* Standard Card Background */
 .course-card:not(.featured) {
-  background-image: url('./assets/cards/generated-course-standard.webp');
+  background-image: url('../assets/cards/generated-course-standard.webp');
   background-size: cover;
   background-position: center;
 }
 
 .trip-card:not(.featured) {
-  background-image: url('./assets/cards/generated-trip-destination.webp');
+  background-image: url('../assets/cards/generated-trip-destination.webp');
   background-size: cover;
   background-position: center;
 }
 
 /* Featured Card Background */
 .course-card.featured {
-  background-image: url('./assets/cards/generated-course-standard.webp');
+  background-image: url('../assets/cards/generated-course-standard.webp');
   background-size: cover;
   background-position: center;
 }
 
 .trip-card.featured {
-  background-image: url('./assets/cards/generated-trip-destination.webp');
+  background-image: url('../assets/cards/generated-trip-destination.webp');
   background-size: cover;
   background-position: center;
 }
@@ -818,7 +829,7 @@ body {
    ============================================ */
 
 .testimonial-card {
-  background-image: url('./assets/watercolor/cards/testimonial.webp');
+  background-image: url('../assets/watercolor/cards/testimonial.webp');
   background-size: cover;
   background-position: center;
   background-color: var(--ocean-foam);
@@ -850,7 +861,7 @@ body {
 }
 
 .method-card {
-  background-image: url('./assets/cards/generated-contact-method.webp');
+  background-image: url('../assets/cards/generated-contact-method.webp');
   background-size: cover;
   background-position: center;
   background-color: var(--ocean-foam);
@@ -901,7 +912,7 @@ body {
 .about-iris-section,
 .story-section {
   padding: 4rem 0;
-  background-image: url('./assets/backgrounds/generated/section-about-watercolor.webp');
+  background-image: url('../assets/backgrounds/generated/section-about-watercolor.webp');
   background-size: cover;
   background-position: center;
   background-color: var(--white);
@@ -1018,7 +1029,7 @@ body {
   width: 100%;
   height: 100%;
   object-fit: cover;
-  background-image: url('./assets/watercolor/cards/iris-portrait-frame.webp');
+  background-image: url('../assets/watercolor/cards/iris-portrait-frame.webp');
   background-size: cover;
   background-position: center;
   background-color: var(--ocean-light);
@@ -1066,7 +1077,7 @@ body {
 .section-divider {
   width: 100%;
   height: 100px;
-  background-image: url('./assets/watercolor/dividers/wave-divider.webp');
+  background-image: url('../assets/watercolor/dividers/wave-divider.webp');
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
@@ -1074,7 +1085,7 @@ body {
 
 .section-divider.coral {
   height: 150px;
-  background-image: url('./assets/watercolor/dividers/coral-divider.webp');
+  background-image: url('../assets/watercolor/dividers/coral-divider.webp');
 }
 
 /* ============================================
@@ -1083,7 +1094,7 @@ body {
 
 .gallery-section {
   padding: 4rem 0;
-  background-image: url('./assets/watercolor/backgrounds/section-gallery.webp');
+  background-image: url('../assets/watercolor/backgrounds/section-gallery.webp');
   background-size: cover;
   background-position: center;
   background-color: var(--white);
@@ -1159,7 +1170,7 @@ body {
   min-height: 12rem;
   background:
     linear-gradient(rgba(254, 250, 224, 0.78), rgba(254, 250, 224, 0.78)),
-    url('./assets/watercolor/backgrounds/section-gallery.webp') center / cover;
+    url('../assets/watercolor/backgrounds/section-gallery.webp') center / cover;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -1356,7 +1367,7 @@ body {
 
 .contact-form-section {
   padding: 4rem 0;
-  background-image: url('./assets/backgrounds/generated/section-contact-watercolor.webp');
+  background-image: url('../assets/backgrounds/generated/section-contact-watercolor.webp');
   background-size: cover;
   background-position: center;
   background-color: var(--ocean-surface);
@@ -1493,7 +1504,7 @@ body {
 
 /* Simplified Chinese typography */
 html[lang="zh-CN"] body {
-  font-family: 'Noto Sans SC', 'PingFang SC', 'Microsoft YaHei', sans-serif;
+  font-family: var(--font-chinese-body);
   letter-spacing: 0.01em;
 }
 
@@ -1502,7 +1513,7 @@ html[lang="zh-CN"] .section-title,
 html[lang="zh-CN"] h1,
 html[lang="zh-CN"] h2,
 html[lang="zh-CN"] h3 {
-  font-family: 'Noto Serif SC', 'Songti SC', 'STSong', serif;
+  font-family: var(--font-chinese-heading);
   letter-spacing: 0.02em;
 }
 
@@ -1783,7 +1794,6 @@ body {
 }
 
 .intro-content,
-.included-content,
 .form-content,
 .calendar-note,
 .process-content {
@@ -2015,7 +2025,7 @@ body {
   position: absolute;
   inset: 0;
   pointer-events: none;
-  background: url('./assets/watercolor/backgrounds/section-gallery.webp') center / cover;
+  background: url('../assets/watercolor/backgrounds/section-gallery.webp') center / cover;
   opacity: 0.18;
   mix-blend-mode: screen;
 }
@@ -2159,7 +2169,7 @@ body {
 .trip-card.featured {
   background:
     linear-gradient(135deg, rgba(38, 70, 83, 0.94), rgba(69, 123, 157, 0.88)),
-    url('./assets/watercolor/backgrounds/section-gallery.webp') center / cover;
+    url('../assets/watercolor/backgrounds/section-gallery.webp') center / cover;
   color: var(--paper-cloud);
 }
 
@@ -2301,55 +2311,55 @@ body {
 
 /* Phase 5.1: restore watercolor texture without repeating adjacent artwork */
 .quick-links-section {
-  background-image: linear-gradient(rgba(251, 250, 241, 0.78), rgba(241, 248, 244, 0.84)), url('./assets/watercolor/backgrounds/section-gallery.webp');
+  background-image: linear-gradient(rgba(251, 250, 241, 0.78), rgba(241, 248, 244, 0.84)), url('../assets/watercolor/backgrounds/section-gallery.webp');
   background-size: cover;
   background-position: center;
 }
 
 .why-us-section {
-  background-image: linear-gradient(rgba(251, 250, 241, 0.76), rgba(241, 248, 244, 0.86)), url('./assets/backgrounds/generated/section-intro-watercolor.webp');
+  background-image: linear-gradient(rgba(251, 250, 241, 0.76), rgba(241, 248, 244, 0.86)), url('../assets/backgrounds/generated/section-intro-watercolor.webp');
   background-size: cover;
   background-position: center;
 }
 
 .story-section {
-  background-image: linear-gradient(135deg, rgba(238, 249, 245, 0.86), rgba(255, 249, 226, 0.82)), url('./assets/backgrounds/generated/section-contact-watercolor.webp');
+  background-image: linear-gradient(135deg, rgba(238, 249, 245, 0.86), rgba(255, 249, 226, 0.82)), url('../assets/backgrounds/generated/section-contact-watercolor.webp');
   background-size: cover;
   background-position: center;
 }
 
 .courses-section {
-  background-image: linear-gradient(rgba(255, 251, 234, 0.82), rgba(247, 244, 223, 0.86)), url('./assets/backgrounds/generated/section-about-watercolor.webp');
+  background-image: linear-gradient(rgba(255, 251, 234, 0.82), rgba(247, 244, 223, 0.86)), url('../assets/backgrounds/generated/section-about-watercolor.webp');
   background-size: cover;
   background-position: center;
 }
 
 .process-section {
-  background-image: linear-gradient(rgba(237, 248, 245, 0.82), rgba(220, 239, 240, 0.88)), url('./assets/watercolor/backgrounds/section-gallery.webp');
+  background-image: linear-gradient(rgba(237, 248, 245, 0.82), rgba(220, 239, 240, 0.88)), url('../assets/watercolor/backgrounds/section-gallery.webp');
   background-size: cover;
   background-position: center;
 }
 
 .included-section {
-  background-image: linear-gradient(rgba(237, 248, 245, 0.8), rgba(220, 239, 240, 0.88)), url('./assets/backgrounds/generated/section-contact-watercolor.webp');
+  background-image: linear-gradient(rgba(237, 248, 245, 0.8), rgba(220, 239, 240, 0.88)), url('../assets/backgrounds/generated/section-contact-watercolor.webp');
   background-size: cover;
   background-position: center;
 }
 
 .calendar-section {
-  background-image: linear-gradient(rgba(248, 251, 249, 0.84), rgba(232, 241, 239, 0.9)), url('./assets/backgrounds/generated/section-about-watercolor.webp');
+  background-image: linear-gradient(rgba(248, 251, 249, 0.84), rgba(232, 241, 239, 0.9)), url('../assets/backgrounds/generated/section-about-watercolor.webp');
   background-size: cover;
   background-position: center;
 }
 
 .contact-methods {
-  background-image: linear-gradient(rgba(233, 246, 241, 0.82), rgba(220, 236, 239, 0.88)), url('./assets/watercolor/backgrounds/section-gallery.webp');
+  background-image: linear-gradient(rgba(233, 246, 241, 0.82), rgba(220, 236, 239, 0.88)), url('../assets/watercolor/backgrounds/section-gallery.webp');
   background-size: cover;
   background-position: center;
 }
 
 .contact-form-section {
-  background-image: linear-gradient(rgba(248, 251, 249, 0.78), rgba(232, 241, 239, 0.88)), url('./assets/backgrounds/generated/section-contact-watercolor.webp');
+  background-image: linear-gradient(rgba(248, 251, 249, 0.78), rgba(232, 241, 239, 0.88)), url('../assets/backgrounds/generated/section-contact-watercolor.webp');
   background-size: cover;
   background-position: center;
 }
@@ -2391,7 +2401,7 @@ body {
 }
 
 .about-iris-section {
-  background-image: url('./assets/backgrounds/generated/section-about-watercolor.webp');
+  background-image: url('../assets/backgrounds/generated/section-about-watercolor.webp');
   background-position: left center;
 }
 
@@ -2421,7 +2431,7 @@ body {
 /* Trips: one destination-card system; featured status is a badge, not a different card */
 .trip-card,
 .trip-card.featured {
-  background-image: url('./assets/cards/generated-trip-destination.webp');
+  background-image: url('../assets/cards/generated-trip-destination.webp');
   background-size: cover;
   background-position: center;
   border: 1px solid rgba(38, 70, 83, 0.28);
@@ -2446,55 +2456,55 @@ body {
 
 /* Final watercolor texture layer: each section uses a different crop/artwork */
 .quick-links-section {
-  background-image: linear-gradient(rgba(251, 250, 241, 0.78), rgba(241, 248, 244, 0.84)), url('./assets/watercolor/backgrounds/section-gallery.webp');
+  background-image: linear-gradient(rgba(251, 250, 241, 0.78), rgba(241, 248, 244, 0.84)), url('../assets/watercolor/backgrounds/section-gallery.webp');
   background-size: cover;
   background-position: center;
 }
 
 .why-us-section {
-  background-image: linear-gradient(rgba(251, 250, 241, 0.76), rgba(241, 248, 244, 0.86)), url('./assets/backgrounds/generated/section-intro-watercolor.webp');
+  background-image: linear-gradient(rgba(251, 250, 241, 0.76), rgba(241, 248, 244, 0.86)), url('../assets/backgrounds/generated/section-intro-watercolor.webp');
   background-size: cover;
   background-position: center;
 }
 
 .story-section {
-  background-image: linear-gradient(135deg, rgba(238, 249, 245, 0.86), rgba(255, 249, 226, 0.82)), url('./assets/backgrounds/generated/section-contact-watercolor.webp');
+  background-image: linear-gradient(135deg, rgba(238, 249, 245, 0.86), rgba(255, 249, 226, 0.82)), url('../assets/backgrounds/generated/section-contact-watercolor.webp');
   background-size: cover;
   background-position: center;
 }
 
 .courses-section {
-  background-image: linear-gradient(rgba(255, 251, 234, 0.82), rgba(247, 244, 223, 0.86)), url('./assets/backgrounds/generated/section-about-watercolor.webp');
+  background-image: linear-gradient(rgba(255, 251, 234, 0.82), rgba(247, 244, 223, 0.86)), url('../assets/backgrounds/generated/section-about-watercolor.webp');
   background-size: cover;
   background-position: center;
 }
 
 .process-section {
-  background-image: linear-gradient(rgba(237, 248, 245, 0.82), rgba(220, 239, 240, 0.88)), url('./assets/watercolor/backgrounds/section-gallery.webp');
+  background-image: linear-gradient(rgba(237, 248, 245, 0.82), rgba(220, 239, 240, 0.88)), url('../assets/watercolor/backgrounds/section-gallery.webp');
   background-size: cover;
   background-position: center;
 }
 
 .included-section {
-  background-image: linear-gradient(rgba(237, 248, 245, 0.8), rgba(220, 239, 240, 0.88)), url('./assets/backgrounds/generated/section-contact-watercolor.webp');
+  background-image: linear-gradient(rgba(237, 248, 245, 0.8), rgba(220, 239, 240, 0.88)), url('../assets/backgrounds/generated/section-contact-watercolor.webp');
   background-size: cover;
   background-position: center;
 }
 
 .calendar-section {
-  background-image: linear-gradient(rgba(248, 251, 249, 0.84), rgba(232, 241, 239, 0.9)), url('./assets/backgrounds/generated/section-about-watercolor.webp');
+  background-image: linear-gradient(rgba(248, 251, 249, 0.84), rgba(232, 241, 239, 0.9)), url('../assets/backgrounds/generated/section-about-watercolor.webp');
   background-size: cover;
   background-position: center;
 }
 
 .contact-methods {
-  background-image: linear-gradient(rgba(233, 246, 241, 0.82), rgba(220, 236, 239, 0.88)), url('./assets/watercolor/backgrounds/section-gallery.webp');
+  background-image: linear-gradient(rgba(233, 246, 241, 0.82), rgba(220, 236, 239, 0.88)), url('../assets/watercolor/backgrounds/section-gallery.webp');
   background-size: cover;
   background-position: center;
 }
 
 .contact-form-section {
-  background-image: linear-gradient(rgba(248, 251, 249, 0.78), rgba(232, 241, 239, 0.88)), url('./assets/backgrounds/generated/section-contact-watercolor.webp');
+  background-image: linear-gradient(rgba(248, 251, 249, 0.78), rgba(232, 241, 239, 0.88)), url('../assets/backgrounds/generated/section-contact-watercolor.webp');
   background-size: cover;
   background-position: center;
 }
@@ -2714,7 +2724,7 @@ body {
 }
 
 body {
-  background-image: url('./assets/backgrounds/ocean/ocean-journey.webp');
+  background-image: url('../assets/backgrounds/ocean/ocean-journey.webp');
   background-repeat: no-repeat;
   background-position: top center;
   background-size: 100% 92%;
@@ -2800,7 +2810,7 @@ body {
 .ocean-journey {
   position: relative;
   isolation: isolate;
-  background-image: linear-gradient(rgba(239, 249, 246, 0.34), rgba(235, 247, 244, 0.38)), url('./assets/backgrounds/ocean/ocean-journey.webp');
+  background-image: linear-gradient(rgba(239, 249, 246, 0.34), rgba(235, 247, 244, 0.38)), url('../assets/backgrounds/ocean/ocean-journey.webp');
   background-repeat: no-repeat;
   background-position: top center;
   background-size: 100% 100%;
@@ -2823,7 +2833,7 @@ body {
 .gallery-intro,
 .contact-intro,
 .about-iris-section {
-  background-image: linear-gradient(rgba(217, 244, 237, 0.32), rgba(217, 244, 237, 0.48)), url('./assets/backgrounds/ocean/ocean-shallow.webp');
+  background-image: linear-gradient(rgba(217, 244, 237, 0.32), rgba(217, 244, 237, 0.48)), url('../assets/backgrounds/ocean/ocean-shallow.webp');
   background-size: cover;
   background-position: center;
 }
@@ -2836,7 +2846,7 @@ body {
 .gallery-section,
 .process-section,
 .included-section {
-  background-image: linear-gradient(rgba(92, 168, 170, 0.28), rgba(35, 111, 133, 0.42)), url('./assets/backgrounds/ocean/ocean-mid.webp');
+  background-image: linear-gradient(rgba(92, 168, 170, 0.28), rgba(35, 111, 133, 0.42)), url('../assets/backgrounds/ocean/ocean-mid.webp');
   background-size: cover;
   background-position: center;
 }
@@ -2846,7 +2856,7 @@ body {
 .calendar-section,
 .gallery-cta,
 .contact-form-section {
-  background-image: linear-gradient(rgba(12, 70, 95, 0.2), rgba(8, 53, 77, 0.24)), url('./assets/backgrounds/ocean/ocean-seabed.webp');
+  background-image: linear-gradient(rgba(12, 70, 95, 0.2), rgba(8, 53, 77, 0.24)), url('../assets/backgrounds/ocean/ocean-seabed.webp');
   background-size: cover;
   background-position: center;
 }
@@ -2858,7 +2868,7 @@ body {
 }
 
 body {
-  background-image: url('./assets/backgrounds/ocean/ocean-journey.webp');
+  background-image: url('../assets/backgrounds/ocean/ocean-journey.webp');
   background-repeat: no-repeat;
   background-position: top center;
   background-size: 100% 92%;
@@ -2922,7 +2932,7 @@ body {
 .ocean-journey {
   position: relative;
   isolation: isolate;
-  background-image: linear-gradient(rgba(239, 249, 246, 0.34), rgba(235, 247, 244, 0.38)), url('./assets/backgrounds/ocean/ocean-journey.webp');
+  background-image: linear-gradient(rgba(239, 249, 246, 0.34), rgba(235, 247, 244, 0.38)), url('../assets/backgrounds/ocean/ocean-journey.webp');
   background-repeat: no-repeat;
   background-position: top center;
   background-size: 100% 100%;
