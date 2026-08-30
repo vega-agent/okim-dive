@@ -488,6 +488,16 @@
     "Accommodation, Transportation, Ferry Ticket, Marine Park Fee, Travel Insurance.": "住宿、交通、渡轮票、海洋公园费用、旅游保险。",
     "Exclude: Accommodation, Transportation, Ferry Ticket, Marine Park Fee, Travel Insurance, Dive Equipment (available for rent).": "不包括：住宿、交通、渡轮票、海洋公园费用、旅游保险、潜水装备（可租赁）。"
   });
+  Object.assign(translations, {
+    "Choose your next dive with confidence.": "充满信心地选择你的下一次潜水。",
+    "Keep exploring, one dive at a time.": "一次潜水一个发现，继续探索。",
+    "See what awaits beneath the waves.": "看看海浪之下等待着你的精彩。",
+    "Tell us where you want to dive next.": "告诉我们你想去哪里开启下一次潜水。"
+  });
+  Object.assign(translations, {
+    "Discover the underwater paradise that awaits.": "探索等待着你的水下天堂。",
+    "Where a love for the ocean meets island adventure.": "在热爱海洋的心中，遇见岛屿冒险。"
+  });
   document.body.dataset.enTitle = document.title;
   applyLanguage(localStorage.getItem('okim-language') || 'en');
 })();
