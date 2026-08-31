@@ -391,8 +391,42 @@ html[lang="zh-CN"] .section-title { font-family: var(--font-chinese-heading); }
   .story-point p { max-width: 42ch; }
 }
 
-/* Remove the legacy timeline marker; the editorial row owns its dividers. */
-.story-points::before { display: none; }
+/* Rebuilt About story principles: a simple, self-contained editorial row. */
+.story-principles {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  margin-top: 2.5rem;
+  padding-top: 2rem;
+  border-top: 1px solid rgba(69, 123, 157, .2);
+}
+.story-principle {
+  display: grid;
+  grid-template-columns: 2.25rem minmax(0, 1fr);
+  column-gap: .85rem;
+  min-width: 0;
+  padding: 0 1.5rem;
+}
+.story-principle + .story-principle { border-left: 1px solid rgba(69, 123, 157, .2); }
+.story-principle:first-child { padding-left: 0; }
+.story-principle:last-child { padding-right: 0; }
+.principle-icon {
+  display: grid;
+  width: 2.25rem;
+  height: 2.25rem;
+  place-items: center;
+  font-size: 1.45rem;
+  line-height: 1;
+}
+.story-principle h3 { margin: .1rem 0 .65rem; }
+.story-principle p { max-width: 24ch; margin: 0; line-height: 1.6; }
+@media (max-width: 640px) {
+  .story-principles { grid-template-columns: 1fr; gap: 0; margin-top: 2rem; padding-top: 1.5rem; }
+  .story-principle,
+  .story-principle:first-child,
+  .story-principle:last-child { padding: 0; }
+  .story-principle + .story-principle { padding-top: 1.5rem; border-top: 1px solid rgba(69, 123, 157, .2); border-left: 0; }
+  .story-principle p { max-width: 42ch; }
+}
 
 /* Courses: simple title + supporting copy section rhythm */
 .courses-inquiry-panel { background: transparent; border: 0; border-radius: 0; box-shadow: none; padding: 2rem 1rem 0; }
