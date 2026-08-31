@@ -351,6 +351,21 @@ html[lang="zh-CN"] .section-title { font-family: var(--font-chinese-heading); }
 .core-courses-grid .course-card p { font-size: 1rem; line-height: 1.6; }
 @media (max-width: 900px) { .core-courses-grid { width: 100%; margin-left: auto; gap: 1.5rem; } }
 
+/* About story points: align each editorial column to one reading edge. */
+.story-points { align-items: start; gap: 0; }
+.story-point { min-width: 0; padding: 0 1.5rem; text-align: left; }
+.story-point:first-child { padding-left: 0; }
+.story-point:last-child { padding-right: 0; }
+.story-point .highlight-icon { display: inline-flex; align-items: center; justify-content: center; margin-bottom: .85rem; }
+.story-point h3 { margin-bottom: .65rem; }
+.story-point p { max-width: 24ch; }
+@media (max-width: 640px) {
+  .story-points { gap: 1.5rem; margin-top: 2rem; padding-top: 1.5rem; }
+  .story-point, .story-point:first-child, .story-point:last-child { padding: 0; }
+  .story-point + .story-point { padding-top: 1.5rem; border-left: 0; border-top: 1px solid rgba(69, 123, 157, 0.2); }
+  .story-point p { max-width: 42ch; }
+}
+
 /* Courses: simple title + supporting copy section rhythm */
 .courses-inquiry-panel { background: transparent; border: 0; border-radius: 0; box-shadow: none; padding: 2rem 1rem 0; }
 .courses-inquiry-panel h3 { margin: 0 0 .8rem; }
