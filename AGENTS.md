@@ -1,18 +1,32 @@
-# Okim Dive — Agent Instructions
+# Okim Dive — Agent Working Rules
 
-This repository uses `CLAUDE.md` as the canonical detailed working guide for all coding agents, regardless of model or provider.
+These rules apply to every agent working in this repository, regardless of model or provider.
 
-Before creating or editing Okim Dive code, content, UX writing, pages, styles, scripts, data, or images:
+## Required reading by task
 
-1. Read [`CLAUDE.md`](CLAUDE.md).
-2. Read [`docs/design/OKIM-DIVE-VIBE.md`](docs/design/OKIM-DIVE-VIBE.md).
-3. Read [`docs/design/CONTENT-REVIEW-CHECKLIST.md`](docs/design/CONTENT-REVIEW-CHECKLIST.md) for content or visual work.
-4. Read [`docs/design/BRAND-GUIDE.md`](docs/design/BRAND-GUIDE.md) and [`docs/design/DESIGN-SYSTEM.md`](docs/design/DESIGN-SYSTEM.md) for design implementation.
+- **Any code, page, content, UX, or image work:** read `docs/design/OKIM-DIVE-VIBE.md`.
+- **Copy or content work:** also read `docs/design/CONTENT-REVIEW-CHECKLIST.md`.
+- **Visual, layout, typography, or image work:** also read `docs/design/BRAND-GUIDE.md` and `docs/design/DESIGN-SYSTEM.md`.
+- **Project scope or route changes:** also read `docs/design/PRD.md`.
 
-The `CLAUDE.md` filename is retained for compatibility with tools that automatically discover it. These instructions apply equally to Vega, Claude, Codex, and any other agent working in this repository.
+Do not read every reference file by default. Read only what the task requires.
 
-The central brand rule is:
+## Core rule
 
 > **Learn with care. Explore with wonder.**
 
-Do not add filler content, invent business facts, carry over the old Okim Explorer positioning, or make visual/content changes without checking the approved Okim Dive direction and the rendered result.
+New work must feel like Okim Dive: warm, nature-loving, safety-conscious, quietly adventurous, and visually thoughtful.
+
+## Content guardrail
+
+Every new sentence, section, image, or decoration must earn its space by helping visitors understand, decide, prepare, or feel more confident. Do not add filler, repeat a clear heading, or carry over unapproved Okim Explorer content.
+
+Use verified current Okim Dive facts only. Ask before publishing uncertain claims about safety, health, certification, pricing, availability, payment, booking, facilities, or conservation.
+
+## Delivery guardrail
+
+Inspect existing source and rendered output before editing. For content changes, check English and Simplified Chinese and run the content checklist. For visual changes, inspect desktop and mobile rendering. Run the repository's validation commands before handoff.
+
+Never publish credentials, bank details, passwords, API keys, tokens, or connection strings.
+
+See `CLAUDE.md` for the concise implementation and handoff checklist. `CLAUDE.md` is retained as a compatibility filename; these rules apply equally to Vega, Claude, Codex, and other agents.
