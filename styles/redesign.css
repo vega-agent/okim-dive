@@ -391,6 +391,9 @@ html[lang="zh-CN"] .section-title { font-family: var(--font-chinese-heading); }
   .story-point p { max-width: 42ch; }
 }
 
+/* Remove the legacy timeline marker; the editorial row owns its dividers. */
+.story-points::before { display: none; }
+
 /* Courses: simple title + supporting copy section rhythm */
 .courses-inquiry-panel { background: transparent; border: 0; border-radius: 0; box-shadow: none; padding: 2rem 1rem 0; }
 .courses-inquiry-panel h3 { margin: 0 0 .8rem; }
