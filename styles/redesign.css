@@ -408,20 +408,17 @@ html[lang="zh-CN"] .section-title { font-family: var(--font-chinese-heading); }
 .story-principle + .story-principle { border-left: 1px solid rgba(69, 123, 157, .2); }
 .story-principle:first-child { padding-left: 0; }
 .story-principle:last-child { padding-right: 0; }
-.principle-icon {
+.principle-graphic {
   display: flex;
-  width: 80px;
-  height: 80px;
+  width: 96px;
+  height: 64px;
   margin: 0 auto 1rem;
   align-items: center;
   justify-content: center;
-  border-radius: 50%;
-  background: var(--ocean-light);
-  color: #071b27;
+  color: var(--ocean-deep);
 }
-.principle-icon svg { width: 48px; height: 48px; fill: none; stroke: currentColor; stroke-width: 2.25; stroke-linecap: round; stroke-linejoin: round; }
-.principle-icon svg circle:first-child { fill: var(--ocean-light); }
-.principle-icon svg circle:last-child { fill: currentColor; stroke: none; }
+.principle-graphic svg { width: 96px; height: 64px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+.principle-graphic svg circle:last-child { fill: currentColor; stroke: none; }
 .story-principle h3 { margin: 0 0 .65rem; }
 .story-principle p { max-width: 26ch; margin: 0 auto; line-height: 1.6; }
 @media (max-width: 640px) {
