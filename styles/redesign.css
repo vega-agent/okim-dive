@@ -351,14 +351,18 @@ html[lang="zh-CN"] .section-title { font-family: var(--font-chinese-heading); }
 .core-courses-grid .course-card p { font-size: 1rem; line-height: 1.6; }
 @media (max-width: 900px) { .core-courses-grid { width: 100%; margin-left: auto; gap: 1.5rem; } }
 
-/* About story points: one shared axis for each icon, rule, and text column. */
-.story-points { align-items: start; gap: 0; }
+/* About story points: equal tracks and protected column spacing. */
+.story-points {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  align-items: start;
+  gap: 0;
+}
 .story-point,
 .story-point:first-child,
 .story-point:last-child {
   position: relative;
   min-width: 0;
-  padding: 0 1.5rem 0 2rem;
+  padding: 0 2rem 0 2.35rem;
   text-align: left;
   border-left: 1px solid rgba(69, 123, 157, 0.2);
 }
@@ -372,8 +376,12 @@ html[lang="zh-CN"] .section-title { font-family: var(--font-chinese-heading); }
   justify-content: center;
   margin: 0;
 }
-.story-point h3 { margin: 0 0 .65rem; }
-.story-point p { max-width: 24ch; }
+.story-point h3 {
+  margin: 0 0 .65rem;
+  font-size: clamp(1.15rem, 1.5vw, 1.45rem);
+  white-space: nowrap;
+}
+.story-point p { max-width: 22ch; }
 @media (max-width: 640px) {
   .story-points { gap: 1.5rem; margin-top: 2rem; padding-top: 1.5rem; }
   .story-point,
@@ -387,6 +395,7 @@ html[lang="zh-CN"] .section-title { font-family: var(--font-chinese-heading); }
     transform: none;
     margin-bottom: .85rem;
   }
+  .story-point h3 { font-size: 1.35rem; white-space: normal; }
   .story-point + .story-point { padding-top: 1.5rem; border-top: 1px solid rgba(69, 123, 157, 0.2); }
   .story-point p { max-width: 42ch; }
 }
