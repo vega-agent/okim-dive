@@ -7,6 +7,8 @@
 **Last Updated:** 2026-08-27
 
 > This document describes the approved implementation direction, not an aspirational alternative. Future pages must extend the current underwater environment rather than introducing a new visual language.
+>
+> Pair this system with [OKIM-DIVE-VIBE.md](OKIM-DIVE-VIBE.md), the project rule for emotional tone, copy decisions, imagery, and future generated visuals.
 
 ### Non-negotiable visual rules
 

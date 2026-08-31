@@ -6,6 +6,8 @@
 **Approved Web Direction:** Continuous Underwater Editorial / Dive Journal
 
 > The current website style is the reference point for all future pages. New work should feel like another chapter of the same underwater journey, not a separate template.
+>
+> For the approved emotional tone and content/image direction, see [OKIM-DIVE-VIBE.md](OKIM-DIVE-VIBE.md). This is the working rule for future copy, pages, UX writing, and image prompts.
 
 ### Web expression
 
