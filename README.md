@@ -37,6 +37,8 @@ okim-dive/
 │   │   ├── PRD.md
 │   │   ├── DESIGN-SYSTEM.md
 │   │   ├── BRAND-GUIDE.md
+│   │   ├── OKIM-DIVE-VIBE.md
+│   │   ├── CONTENT-REVIEW-CHECKLIST.md
 │   │   └── WATERCOLOR-DESIGN-ELEMENTS.md
 │   └── reports/
 │       └── PHASE-4-QA-REPORT.md

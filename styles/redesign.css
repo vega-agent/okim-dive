@@ -71,7 +71,7 @@
 }
 
 /* Shared transparent-watercolour treatment for large editorial reading surfaces. */
-:root { --editorial-width: 1040px; }
+:root { --editorial-width: 1040px; --editorial-copy-width: 76ch; }
 .intro-section,
 .about-iris-section,
 .story-section,
@@ -269,11 +269,173 @@ html[lang="zh-CN"] .section-title { font-family: var(--font-chinese-heading); }
 
 /* Courses priority flow */
 .core-courses-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
-.courses-inquiry-panel { max-width: 760px; margin: 3rem auto 0; padding: clamp(1.5rem, 4vw, 2.75rem); text-align: center; background: rgba(239, 249, 246, .86); border: 1px solid var(--journal-line); border-radius: 14px; }
+.courses-inquiry-panel { max-width: 900px; margin: 3rem auto 0; padding: clamp(1.5rem, 4vw, 2.75rem); text-align: center; background: rgba(239, 249, 246, .86); border: 1px solid var(--journal-line); border-radius: 14px; }
 .courses-inquiry-panel h3 { margin: .35rem 0 .8rem; color: var(--ocean-deep); }
-.courses-inquiry-panel p { max-width: 58ch; margin-inline: auto; }
+.courses-inquiry-panel p { max-width: var(--editorial-copy-width); margin-inline: auto; }
 .faq-intro { max-width: 720px; margin: 0 auto 2.5rem; text-align: center; }
 .faq-intro .section-title { margin-bottom: 1rem; }
 .faq-cta { max-width: 720px; margin: 3rem auto 0; padding-top: 2rem; border-top: 1px solid var(--journal-line); text-align: center; }
 @media (max-width: 900px) { .core-courses-grid { grid-template-columns: 1fr; max-width: 620px; margin-inline: auto; } }
 @media (max-width: 640px) { .courses-inquiry-panel { margin-top: 2rem; padding: 1.4rem 1rem; } .faq-intro { margin-bottom: 1.75rem; } .faq-cta { margin-top: 2rem; } }
+
+/* Home journey overview */
+.home-journey-content { max-width: 980px; margin: 0 auto; text-align: center; }
+.home-journey-content .intro-text { max-width: 700px; margin: 0 auto 2.4rem; }
+.home-journey-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 1.25rem; text-align: left; }
+.home-journey-step { padding: 1.5rem; border-top: 1px solid var(--journal-line); }
+.home-journey-step .journey-node-mark { margin-bottom: 1rem; }
+.home-journey-step h3 { margin: 0 0 .6rem; color: var(--ocean-deep); }
+.home-journey-step p { margin: 0 0 1rem; }
+.text-link { color: var(--ocean-deep); font-weight: 700; text-decoration: underline; text-underline-offset: .2em; }
+
+/* Contact is a form-led page; contact channels stay secondary and compact. */
+.contact-form-section { padding-top: clamp(2rem, 5vw, 4rem); }
+.contact-form-section .form-content { padding: clamp(1.5rem, 4vw, 3rem); }
+.contact-methods { padding-top: clamp(1.5rem, 4vw, 3rem); }
+.contact-methods > .container > .section-title { font-size: clamp(1.6rem, 3vw, 2.2rem); margin-bottom: 1.5rem; }
+.contact-methods .methods-grid { gap: 1rem; }
+.contact-methods .method-card { padding: 1.25rem; box-shadow: none; }
+.contact-methods .method-card p { margin: .4rem 0; font-size: .9rem; }
+.contact-methods .method-card .method-icon { font-size: 1.35rem; }
+.contact-methods .method-card .btn { padding: .55rem .85rem; font-size: .8rem; }
+.contact-form .form-group.form-consent { margin-top: .25rem; }
+.contact-form .form-group.form-consent label { display: grid; grid-template-columns: 1.1rem minmax(0, 1fr); align-items: start; column-gap: .65rem; width: 100%; margin: 0; text-align: left; font-size: .85rem; line-height: 1.45; }
+.contact-form .form-group.form-consent input[type="checkbox"] { width: 1rem; height: 1rem; margin: .2rem 0 0; justify-self: start; }
+@media (max-width: 640px) { .home-journey-grid { grid-template-columns: 1fr; gap: .5rem; } .home-journey-step { padding: 1.25rem 0; } }
+
+/* Package pricing and Tioman local diving */
+.course-pricing { margin: 1.25rem 0; padding: .9rem 1rem; border-top: 1px solid var(--journal-line); border-bottom: 1px solid var(--journal-line); }
+.course-pricing strong, .course-pricing span { display: block; }
+.course-pricing strong { color: var(--ocean-deep); font-size: 1.15rem; }
+.course-pricing span, .pricing-note { color: var(--ocean-mid); font-size: .9rem; }
+.course-pricing details { margin-top: .65rem; }
+.course-pricing summary { cursor: pointer; color: var(--ocean-deep); font-weight: 700; }
+.course-pricing details ul { margin: .55rem 0 0; padding-left: 1.1rem; }
+.section-lede { max-width: var(--editorial-copy-width); margin: -1rem auto 2rem; text-align: center; }
+.pricing-note { max-width: 700px; margin: 1.5rem auto 0; text-align: center; }
+
+/* Compact course-card rhythm */
+.core-courses-grid { align-items: stretch; }
+.core-courses-grid .course-card { display: flex; flex-direction: column; }
+.core-courses-grid .course-content { display: flex; flex: 1; flex-direction: column; gap: .9rem; padding: 1.35rem; }
+.core-courses-grid .course-content > p { min-height: 4.8em; margin: 0; line-height: 1.55; }
+.core-courses-grid .course-details { margin: 0; padding: .8rem 0; border-top: 1px solid var(--journal-line); border-bottom: 1px solid var(--journal-line); }
+.core-courses-grid .course-details li { margin: .2rem 0; }
+.core-courses-grid .course-pricing { margin: 0; padding: 0; border: 0; }
+.core-courses-grid .course-pricing details { margin-top: .45rem; padding-top: .65rem; border-top: 1px solid var(--journal-line); }
+.core-courses-grid .course-pricing details h4 { margin: 1rem 0 .35rem; font-size: .9rem; color: var(--ocean-deep); }
+.core-courses-grid .course-pricing details ul { margin: .25rem 0 0; }
+.core-courses-grid .course-content > .btn { margin-top: auto; align-self: flex-start; }
+@media (max-width: 640px) { .core-courses-grid .course-content { padding: 1.15rem; gap: .7rem; } .core-courses-grid .course-content > p { min-height: 0; } }
+
+/* Clear, single-disclosure package details */
+.core-courses-grid .course-pricing details { margin-top: .7rem; padding-top: .7rem; border-top: 1px solid var(--journal-line); }
+.core-courses-grid .course-pricing summary { padding: .25rem 0; font-size: .95rem; }
+.package-details { padding-top: .8rem; }
+.package-details h4 { margin: 0 0 .45rem; color: var(--ocean-deep); font-size: .82rem; letter-spacing: .08em; text-transform: uppercase; }
+.package-prices { display: grid; gap: .35rem; margin: 0 0 1.1rem; padding: 0; list-style: none; }
+.package-prices li { display: flex; justify-content: space-between; gap: 1rem; padding-bottom: .3rem; border-bottom: 1px dotted var(--journal-line); }
+.package-prices strong { color: var(--ocean-deep); font-size: .95rem; }
+.package-columns { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1rem; }
+.package-columns ul { margin: 0; padding-left: 1.1rem; }
+.package-columns li { margin: .22rem 0; font-size: .92rem; line-height: 1.4; }
+@media (max-width: 640px) { .package-columns { grid-template-columns: 1fr; gap: .9rem; } .package-prices li { gap: .6rem; } }
+
+/* Course cards: align width and type rhythm with the site card system */
+.core-courses-grid { width: calc(100% + 4rem); margin-left: -2rem; gap: 1.5rem; }
+.core-courses-grid .course-card h3 { font-family: var(--font-heading); font-size: var(--type-h3); line-height: 1.2; }
+.core-courses-grid .course-card p,
+.core-courses-grid .course-card li,
+.core-courses-grid .course-card summary,
+.core-courses-grid .course-card span { font-family: var(--font-body); }
+.core-courses-grid .course-card p { font-size: 1rem; line-height: 1.6; }
+@media (max-width: 900px) { .core-courses-grid { width: 100%; margin-left: auto; gap: 1.5rem; } }
+
+/* About story points: restrained editorial columns, not timeline markers. */
+.story-points {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  align-items: start;
+  gap: 0;
+}
+.story-point,
+.story-point:first-child,
+.story-point:last-child {
+  min-width: 0;
+  padding: 0 2rem;
+  text-align: left;
+  border-left: 0;
+}
+.story-point + .story-point {
+  border-left: 1px solid rgba(69, 123, 157, 0.2);
+}
+.story-point .highlight-icon {
+  position: static;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 0 .85rem;
+  transform: none;
+}
+.story-point h3 {
+  margin: 0 0 .65rem;
+  font-size: clamp(1.15rem, 1.5vw, 1.45rem);
+  white-space: normal;
+}
+.story-point p { max-width: 26ch; }
+@media (max-width: 640px) {
+  .story-points { grid-template-columns: 1fr; gap: 0; margin-top: 2rem; padding-top: 1.5rem; }
+  .story-point,
+  .story-point:first-child,
+  .story-point:last-child { padding: 0; }
+  .story-point + .story-point { padding-top: 1.5rem; border-left: 0; border-top: 1px solid rgba(69, 123, 157, 0.2); }
+  .story-point p { max-width: 42ch; }
+}
+
+/* Rebuilt About story principles: a simple, self-contained editorial row. */
+.story-principles {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  margin-top: 2.5rem;
+  padding-top: 2rem;
+  border-top: 1px solid rgba(69, 123, 157, .2);
+}
+.story-principle {
+  display: grid;
+  grid-template-columns: 2.25rem minmax(0, 1fr);
+  column-gap: .85rem;
+  min-width: 0;
+  padding: 0 1.5rem;
+}
+.story-principle + .story-principle { border-left: 1px solid rgba(69, 123, 157, .2); }
+.story-principle:first-child { padding-left: 0; }
+.story-principle:last-child { padding-right: 0; }
+.principle-icon {
+  display: grid;
+  width: 2.25rem;
+  height: 2.25rem;
+  place-items: center;
+  border-radius: 50%;
+  background: var(--ocean-light);
+  color: #071b27;
+}
+.principle-icon svg { width: 1.65rem; height: 1.65rem; fill: none; stroke: currentColor; stroke-width: 2.25; stroke-linecap: round; stroke-linejoin: round; }
+.principle-icon svg circle:first-child { fill: var(--ocean-light); }
+.principle-icon svg circle:last-child { fill: currentColor; stroke: none; }
+.story-principle h3 { margin: .1rem 0 .65rem; }
+.story-principle p { max-width: 24ch; margin: 0; line-height: 1.6; }
+@media (max-width: 640px) {
+  .story-principles { grid-template-columns: 1fr; gap: 0; margin-top: 2rem; padding-top: 1.5rem; }
+  .story-principle,
+  .story-principle:first-child,
+  .story-principle:last-child { padding: 0; }
+  .story-principle + .story-principle { padding-top: 1.5rem; border-top: 1px solid rgba(69, 123, 157, .2); border-left: 0; }
+  .story-principle p { max-width: 42ch; }
+}
+
+/* Courses: simple title + supporting copy section rhythm */
+.courses-inquiry-panel { background: transparent; border: 0; border-radius: 0; box-shadow: none; padding: 2rem 1rem 0; }
+.courses-inquiry-panel h3 { margin: 0 0 .8rem; }
+.courses-inquiry-panel p { margin-bottom: 1.25rem; }
+.courses-inquiry-panel .btn { margin-top: .25rem; }
+.courses-inquiry-panel .journey-kicker, .faq-section .journey-kicker { display: none; }
+.faq-intro { border: 0; }
