@@ -414,9 +414,13 @@ html[lang="zh-CN"] .section-title { font-family: var(--font-chinese-heading); }
   width: 2.25rem;
   height: 2.25rem;
   place-items: center;
-  font-size: 1.45rem;
-  line-height: 1;
+  border-radius: 50%;
+  background: var(--ocean-light);
+  color: #071b27;
 }
+.principle-icon svg { width: 1.65rem; height: 1.65rem; fill: none; stroke: currentColor; stroke-width: 2.25; stroke-linecap: round; stroke-linejoin: round; }
+.principle-icon svg circle:first-child { fill: var(--ocean-light); }
+.principle-icon svg circle:last-child { fill: currentColor; stroke: none; }
 .story-principle h3 { margin: .1rem 0 .65rem; }
 .story-principle p { max-width: 24ch; margin: 0; line-height: 1.6; }
 @media (max-width: 640px) {
