@@ -344,6 +344,8 @@ html[lang="zh-CN"] .section-title { font-family: var(--font-chinese-heading); }
 /* Course cards: align width and type rhythm with the site card system */
 .core-courses-grid { width: calc(100% + 4rem); margin-left: -2rem; gap: 1.5rem; }
 .core-courses-grid .course-card h3 { font-family: var(--font-heading); font-size: var(--type-h3); line-height: 1.2; }
+.core-courses-grid .course-icon { width: 117px; height: 117px; margin: 0 auto 1rem; }
+.core-courses-grid .course-icon img { display: block; width: 100%; height: 100%; object-fit: contain; }
 .core-courses-grid .course-card p,
 .core-courses-grid .course-card li,
 .core-courses-grid .course-card summary,
@@ -408,17 +410,8 @@ html[lang="zh-CN"] .section-title { font-family: var(--font-chinese-heading); }
 .story-principle + .story-principle { border-left: 1px solid rgba(69, 123, 157, .2); }
 .story-principle:first-child { padding-left: 0; }
 .story-principle:last-child { padding-right: 0; }
-.principle-graphic {
-  display: flex;
-  width: 96px;
-  height: 64px;
-  margin: 0 auto 1rem;
-  align-items: center;
-  justify-content: center;
-  color: var(--ocean-deep);
-}
-.principle-graphic svg { width: 96px; height: 64px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
-.principle-graphic svg circle:last-child { fill: currentColor; stroke: none; }
+.principle-graphic { display: flex; width: 100%; height: 96px; margin: 0 auto 1rem; align-items: center; justify-content: center; color: var(--ocean-deep); }
+.principle-graphic img { display: block; width: 117px; height: 117px; object-fit: contain; }
 .story-principle h3 { margin: 0 0 .65rem; }
 .story-principle p { max-width: 26ch; margin: 0 auto; line-height: 1.6; }
 @media (max-width: 640px) {
