@@ -256,7 +256,8 @@
   "Start Your Adventure": "开始你的冒险",
   "From beginner to advanced certifications": "从初级到高级认证",
   "Dive Trips": "潜水旅行",
-  "Tioman on request. Organised trips with fixed travel dates.": "刁曼岛按需安排，组织的潜水行程提供固定出行日期。",
+  "Follow your curiosity beneath the surface.": "跟随好奇心，探索水面之下。",
+  "Join us for the reefs, light, and marine life—or for the simple pleasure of being underwater. Choose a Tioman dive arranged around your plans, or a planned journey to a new destination.": "为了珊瑚礁、光影与海洋生物，也为了单纯享受在水下的时光，和我们一起出发。你可以选择配合计划安排的刁曼岛潜水，或前往新目的地的规划行程。",
   "See our underwater world in pictures": "在图片中查看我们的海底世界",
   "Get in touch to plan your dive": "联系我们来计划您的潜水",
   "Dive Trips - Okim Dive": "潜水旅行 - Okim Dive",
@@ -328,7 +329,7 @@
   "Planning": "规划",
   "Complete trip planning, permits, and logistics handled for you": "为您处理完整的旅行计划、许可和物流",
   "Upcoming Trips": "即将到来的旅行",
-  "Trip dates are planned based on optimal diving conditions and group availability. Contact us to join upcoming trips or to plan a custom trip for your group.": "旅行日期是根据最佳潜水条件和团体可用性来计划的。联系我们加入即将到来的旅行或为您的团体计划定制旅行。",
+  "Planned trips will appear here with their destination, dates, and available details. Contact us if you would like to hear what is currently being considered.": "已规划的行程会在这里列出目的地、日期与现有详情。如果你想了解目前正在考虑的安排，欢迎联系我们。",
   "Plan Your Trip": "计划您的旅行",
   "Your gateway to international underwater adventures": "您通往国际水下探险的门户"
 };
@@ -625,6 +626,18 @@
     "Contact us to confirm availability, equipment needs, prices, and the best sites for the day.": "欢迎联系我们确认安排、装备需求、价格及当天适合的潜点。",
     "Plan a Tioman dive": "计划刁曼岛潜水",
     "A thoughtful way into the underwater world": "用心走进水下世界。"
+  });
+  Object.assign(translations, {
+    "Explore the Ocean With Wonder": "带着好奇，探索海洋",
+    "Join us for a dive, a trip, or the next step in your own journey beneath the surface.": "无论是一次潜水、一段旅程，还是属于你的下一步探索，都欢迎和我们一起走到水面之下。",
+    "Whether you are already certified, returning to the water, or curious about learning, there is always more to notice beneath the surface.": "无论你已经持证、准备重返水中，还是对学习潜水感到好奇，水面之下总有更多值得留意的事物。",
+    "Come for the reefs, the light, the marine life, or the feeling of being underwater. We will help you find the right way to take part.": "为了珊瑚礁、光影、海洋生物，或只是为了在水下的感觉而来。我们会陪你找到适合自己的参与方式。",
+    "Follow your curiosity beneath the surface.": "跟随好奇心，探索水面之下。",
+    "Join us for the reefs, light, and marine life—or for the simple pleasure of being underwater. Choose a Tioman dive arranged around your plans, or a planned journey to a new destination.": "为了珊瑚礁、光影与海洋生物，也为了单纯享受在水下的时光，和我们一起出发。你可以选择配合计划安排的刁曼岛潜水，或前往新目的地的规划行程。",
+    "A direct way to ask about courses, Tioman diving, or an organised trip": "直接了解课程、刁曼岛潜水或组织行程",
+    "See the places, light, and life that keep us looking beneath the surface": "看看那些让我们持续凝望水下的地方、光影与生命",
+    "Stay close to the water and hear what we are exploring next": "靠近海水，听听我们下一步要探索什么",
+    "If you are looking for another path, tell us what you would like to learn. We will explain the available options and help you choose a sensible next step.": "如果你正在寻找另一条学习路径，告诉我们你想学什么。我们会说明可选方案，陪你选择合适的下一步。"
   });
   document.body.dataset.enTitle = document.title;
   applyLanguage(localStorage.getItem('okim-language') || 'en');
