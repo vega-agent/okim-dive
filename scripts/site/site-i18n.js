@@ -546,7 +546,7 @@
     "Which certification organisation should I choose?": "应该选择哪一种潜水认证？",
     "How many days does a diving course take?": "潜水课程需要多少天？",
     "Do I need to buy diving equipment?": "需要购买潜水装备吗？",
-    "Still have questions? Tell us about your experience and we’ll be happy to help.": "还有疑问吗？告诉我们你的情况，我们很乐意为你解答。",
+    "Every diver arrives with a different story. Whether you are choosing your first course, returning after time away, or wondering what to learn next, tell us a little about where you are and what you hope to find in the water. We will take the time to listen and help you find a course that feels right for you.": "每位潜水员都有自己的故事。无论你是在选择第一门课程、离开一段时间后准备重返水中，还是在想下一步学习什么，都可以告诉我们你现在的情况，以及你希望在水下寻找什么。我们会花时间倾听，陪你找到适合自己的课程。",
     "Talk to Us": "联系我们",
     "Enjoy the Water": "享受水下世界",
     "Build your skills with guidance from your instructor.": "在教练指导下逐步建立你的潜水技能。",
