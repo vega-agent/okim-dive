@@ -1,0 +1,18 @@
+{
+  "id": "tioman-on-request",
+  "title": "Tioman Island Diving",
+  "location": "Tioman Island, Malaysia",
+  "status": "On request",
+  "summary": "Relaxed diving around Tioman with flexible options for certified recreational divers.",
+  "travelDates": "On request",
+  "duration": "Planned around your dive request",
+  "difficulty": "Certified recreational divers",
+  "groupSize": "Discuss with us",
+  "cost": { "amount": "From RM 55", "basis": "depending on dive type" },
+  "bookingRules": { "deposit": "To be confirmed when your trip is arranged.", "balanceDue": "To be confirmed when your trip is arranged.", "cancellation": "Terms depend on the requested dive and operator availability.", "requirements": "Valid certification is required for recreational diving." },
+  "highlights": ["Shore dives", "Boat dives", "Night dives"],
+  "itinerary": ["Choose your preferred date and dive type", "Confirm availability and equipment needs", "Dive around Tioman at your own pace"],
+  "included": ["Trip planning support", "Dive guidance", "Equipment options discussed during planning"],
+  "notes": "Contact us to confirm availability, equipment needs, prices, and the best sites for the day.",
+  "inquiryLabel": "Plan a Tioman dive"
+}

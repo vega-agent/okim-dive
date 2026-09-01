@@ -1,7 +1,7 @@
 (() => {
   const grid = document.querySelector('.trips-grid');
   if (!grid) return;
-  const tripFiles = ['sipadan-sample.json', 'raja-ampat-sample.json'];
+  const tripFiles = ['tioman-on-request.json', 'sipadan-sample.json', 'raja-ampat-sample.json'];
   const escapeHtml = (value) => String(value).replace(/[&<>"']/g, (char) => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[char]));
   const list = (items) => items.map((item) => `<li>${escapeHtml(item)}</li>`).join('');
   const dialog = document.createElement('dialog');
@@ -15,7 +15,7 @@
   };
   Promise.all(tripFiles.map((file) => fetch(`../data/trips/${file}`).then((response) => response.json())))
     .then((trips) => {
-      grid.innerHTML = trips.map((trip, index) => `<article class="trip-card${index === 0 ? ' featured' : ''}"><div class="trip-badge">${escapeHtml(trip.status)}</div><div class="trip-header"><h3>${escapeHtml(trip.title)}</h3><span class="trip-location">${escapeHtml(trip.location)}</span></div><div class="trip-content"><p>${escapeHtml(trip.summary)}</p><ul class="trip-details"><li><strong>Duration:</strong> ${escapeHtml(trip.duration)}</li><li><strong>Difficulty:</strong> ${escapeHtml(trip.difficulty)}</li><li><strong>Group Size:</strong> ${escapeHtml(trip.groupSize)}</li></ul><button class="btn btn-primary trip-details-trigger" type="button" data-trip-id="${escapeHtml(trip.id)}">View Details</button></div></article>`).join('');
+      grid.innerHTML = trips.map((trip, index) => `<article class="trip-card${index === 0 ? ' featured' : ''}"><div class="trip-badge">${escapeHtml(trip.status)}</div><div class="trip-header"><h3>${escapeHtml(trip.title)}</h3><span class="trip-location">${escapeHtml(trip.location)}</span></div><div class="trip-content"><p>${escapeHtml(trip.summary)}</p><ul class="trip-details"><li><strong>Travel dates:</strong> ${escapeHtml(trip.travelDates)}</li><li><strong>Duration:</strong> ${escapeHtml(trip.duration)}</li><li><strong>Difficulty:</strong> ${escapeHtml(trip.difficulty)}</li><li><strong>Group Size:</strong> ${escapeHtml(trip.groupSize)}</li></ul><button class="btn btn-primary trip-details-trigger" type="button" data-trip-id="${escapeHtml(trip.id)}">View Details</button></div></article>`).join('');
       grid.querySelectorAll('.trip-details-trigger').forEach((button) => button.addEventListener('click', () => render(trips.find((trip) => trip.id === button.dataset.tripId))));
     })
     .catch(() => { grid.innerHTML = '<p class="trip-data-error">Trip information is temporarily unavailable.</p>'; });
