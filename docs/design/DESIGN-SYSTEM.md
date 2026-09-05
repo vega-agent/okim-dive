@@ -18,6 +18,8 @@
 - Use light editorial reading surfaces only where text needs protection; do not add dark glass panels.
 - Prefer asymmetrical editorial composition, generous whitespace, restrained borders, and photography-led storytelling over repeated card grids.
 - Treat watercolor artwork as a quiet environmental layer, never as a collection of unrelated decorative stickers.
+- Use title-led sections by default; do not place decorative kickers or starter lines above a heading unless they carry necessary information.
+- Use the shared `.intro-content` editorial surface for large reading/CTA blocks that need a translucent watercolor wash. Do not introduce opaque white panels or one-off watercolor treatments when an existing shared surface fits.
 - Preserve the dependency-free HTML/CSS/JavaScript architecture and `prefers-reduced-motion` behavior.
 
 ## 1. Visual Theme & Atmosphere
@@ -245,6 +247,7 @@ letter-spacing: 0.5px;
 - **Generous vertical rhythm**: 96-128px between major sections — content breathes
 - **Warm alternation**: Sand (#F1FAEE) sections alternate with Cloud (#FEFAE0) for gentle visual rhythm
 - **Content islands**: Cards and sections float in generous whitespace
+- **Translucent editorial surfaces**: When a section needs text protection, use a shared translucent watercolor wash that lets the underlying environmental artwork remain present. The surface should read as a soft wash, not a solid white card.
 - **Photography space**: Large images with breathing room, not cramped
 
 ### Border Radius Scale
@@ -260,6 +263,9 @@ letter-spacing: 0.5px;
 - **Icon-led scanning:** Use consistent inline SVG icons for equipment, experience level, safety, duration, and destinations. Icons must clarify content, not decorate empty space.
 - **Progressive reveal:** Use the shared `site-motion.js` reveal behavior for section and node entrances. Content remains visible without JavaScript and all motion yields to `prefers-reduced-motion`.
 - **Page-specific rhythm:** Home uses depth, About uses story, Courses uses progression, Trips uses destination flow, Gallery uses image chapters, and Contact uses calm conversion.
+- **Title-led sections:** Prefer one clear heading followed by purposeful supporting copy. Decorative kickers are not part of the default hierarchy.
+- **Shared watercolor surfaces:** Reuse `.intro-content` for editorial reading and CTA blocks that need a translucent watercolor wash. Keep product cards separate from this surface contract.
+- **Trip detail dialog:** Present data-driven trip information in a readable sequence: atmospheric header, compact key-fact strip, two-column detail sections on desktop, single-column stacking on mobile, then planning note and CTA. Render `included` and `additionalCosts` as separate sections; never imply a universal package.
 - **Mobile fallback:** Horizontal journeys stack vertically with directional markers; never require horizontal scrolling or scroll hijacking.
 
 ---

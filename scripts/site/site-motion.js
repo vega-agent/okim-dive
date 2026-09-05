@@ -13,11 +13,10 @@
     '.journey-node',
     '.trip-card',
     '.method-card',
-    '.included-item',
     '.gallery-item',
     '.process-step',
     '.form-content',
-    '.calendar-note',
+    '.trip-planning-note',
     '.gallery-cta .cta-content'
   ];
 
@@ -28,7 +27,7 @@
     elements.forEach((element, index) => {
       if (element.classList.contains('motion-reveal')) return;
       element.classList.add('motion-reveal');
-      if (element.matches('.feature-card, .quick-link-card, .course-card, .trip-card, .method-card, .included-item, .gallery-item')) {
+      if (element.matches('.feature-card, .quick-link-card, .course-card, .trip-card, .method-card, .gallery-item')) {
         element.style.setProperty('--reveal-delay', `${Math.min(index % 4, 3) * 70}ms`);
       }
     });

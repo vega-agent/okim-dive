@@ -142,6 +142,10 @@ If the answer to these questions is no, remove the content rather than padding t
 
 A clear heading does not need supporting copy when the supporting copy only repeats the heading. For example, “Frequently Asked Questions” can stand alone before the questions.
 
+### Cross-page section rule
+
+Use a clear section heading as the entry point. Do not add a decorative kicker or starter line above it unless the label provides essential context that the heading cannot provide. Supporting copy should sound like the same calm, personal dive journal as the surrounding page—not like operational or package boilerplate. Keep it only when it helps the visitor understand the next step.
+
 ## 6. Page-Level Direction
 
 ### Home
@@ -159,6 +163,10 @@ Focus on calm confidence, clear guidance, steady progress, and safety. Certifica
 ### Trips
 
 Present Tioman Island and other destinations as part of one continuing dive journey. Explain practical differences such as on-demand versus fixed-date trips only when they help the visitor make a decision.
+
+When trip details vary, avoid page-wide package promises. Use one honest, title-led planning invitation and explain variable arrangements in warm, plain language. Equipment rental must be described as an additional cost where relevant.
+
+Trip detail dialogs should reveal the destination story and practical information progressively: summary and key facts first, then highlights, itinerary, included items, additional costs, and planning notes. Sample records must keep their sample status and placeholder notes visible.
 
 ### Gallery
 

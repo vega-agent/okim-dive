@@ -561,8 +561,7 @@ body {
 .highlight-card,
 .why-card,
 .testimonial-card,
-.faq-item,
-.calendar-note {
+.faq-item {
   border: 1px solid rgba(0, 0, 0, 0.08);
   border-radius: 15px;
   box-shadow: 0 5px 20px rgba(69, 123, 157, 0.08);
@@ -757,71 +756,30 @@ body {
   margin-top: auto;
 }
 
-/* Included items and final CTA */
-.included-section,
-.calendar-section {
+/* Trip planning CTA */
+.trip-planning-section {
   padding: 4rem 0;
   position: relative;
 }
 
-.included-grid {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 1.5rem;
-  margin-top: 2rem;
-}
-
-.included-item {
-  min-height: 220px;
-  padding: 2rem 1.5rem;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: flex-start;
+.trip-planning-note {
+  padding: 3rem 2rem;
   text-align: center;
-  background: var(--white);
-  border: 1px solid rgba(0, 0, 0, 0.08);
-  border-radius: 15px;
-  box-shadow: 0 5px 20px rgba(69, 123, 157, 0.08);
 }
 
-.included-icon {
-  width: 64px;
-  height: 64px;
+.trip-planning-note .section-title {
   margin-bottom: 1rem;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: 50%;
-  background: var(--ocean-surface);
-  font-size: 2rem;
 }
 
-.included-item h3 {
-  margin-bottom: 0.6rem;
-  color: var(--ocean-deep);
-}
-
-.included-item p {
-  margin: 0;
+.trip-planning-note > p {
+  max-width: 650px;
+  margin: 0 auto 1.75rem;
   color: var(--ocean-mid);
-  line-height: 1.55;
+  line-height: 1.65;
 }
 
-.calendar-note {
-  max-width: 820px;
-  margin: 2rem auto 0;
-  padding: 2rem;
-  text-align: center;
-  background: var(--white);
-  border: 1px solid rgba(0, 0, 0, 0.08);
-  border-radius: 15px;
-  box-shadow: 0 5px 20px rgba(69, 123, 157, 0.08);
-}
-
-.calendar-note p {
-  margin: 0 auto 1.5rem;
-  max-width: 680px;
+.trip-planning-note .btn {
+  display: inline-flex;
 }
 
 /* ============================================
@@ -1589,7 +1547,6 @@ html[lang="zh-CN"] .hero-subtitle {
 
   .courses-grid,
   .trips-grid,
-  .included-grid,
   .intro-features,
   .quick-links-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -1661,7 +1618,6 @@ html[lang="zh-CN"] .hero-subtitle {
 
   .courses-grid,
   .trips-grid,
-  .included-grid,
   .intro-features,
   .quick-links-grid,
   .methods-grid,
@@ -1795,7 +1751,7 @@ body {
 
 .intro-content,
 .form-content,
-.calendar-note,
+.trip-planning-note,
 .process-content {
   border: 1px solid var(--whisper-border);
   box-shadow: var(--soft-shadow);
@@ -2340,13 +2296,7 @@ body {
   background-position: center;
 }
 
-.included-section {
-  background-image: linear-gradient(rgba(237, 248, 245, 0.8), rgba(220, 239, 240, 0.88)), url('../assets/backgrounds/generated/section-contact-watercolor.webp');
-  background-size: cover;
-  background-position: center;
-}
-
-.calendar-section {
+.trip-planning-section {
   background-image: linear-gradient(rgba(248, 251, 249, 0.84), rgba(232, 241, 239, 0.9)), url('../assets/backgrounds/generated/section-about-watercolor.webp');
   background-size: cover;
   background-position: center;
@@ -2414,12 +2364,11 @@ body {
   background: linear-gradient(180deg, #fffbea 0%, #f7f4df 100%);
 }
 
-.process-section,
-.included-section {
+.process-section {
   background: linear-gradient(180deg, #edf8f5 0%, #dceff0 100%);
 }
 
-.calendar-section,
+.trip-planning-section,
 .gallery-cta {
   background: linear-gradient(180deg, #f8fbf9 0%, #e8f1ef 100%);
 }
@@ -2485,13 +2434,7 @@ body {
   background-position: center;
 }
 
-.included-section {
-  background-image: linear-gradient(rgba(237, 248, 245, 0.8), rgba(220, 239, 240, 0.88)), url('../assets/backgrounds/generated/section-contact-watercolor.webp');
-  background-size: cover;
-  background-position: center;
-}
-
-.calendar-section {
+.trip-planning-section {
   background-image: linear-gradient(rgba(248, 251, 249, 0.84), rgba(232, 241, 239, 0.9)), url('../assets/backgrounds/generated/section-about-watercolor.webp');
   background-size: cover;
   background-position: center;
@@ -2555,8 +2498,7 @@ body::before {
 .faq-section,
 .trips-intro,
 .trips-section.international,
-.included-section,
-.calendar-section,
+.trip-planning-section,
 .gallery-intro,
 .gallery-section,
 .gallery-cta,
@@ -2579,8 +2521,7 @@ body::before {
 .faq-section::before,
 .trips-intro::before,
 .trips-section.international::before,
-.included-section::before,
-.calendar-section::before,
+.trip-planning-section::before,
 .gallery-intro::before,
 .gallery-section::before,
 .gallery-cta::before,
@@ -2609,8 +2550,7 @@ body::before {
 }
 
 .process-section::before,
-.included-section::before,
-.calendar-section::before,
+.trip-planning-section::before,
 .contact-form-section::before {
   opacity: 0.54;
 }
@@ -2647,8 +2587,7 @@ body > section:last-of-type::after {
 .faq-section > *,
 .trips-intro > *,
 .trips-section.international > *,
-.included-section > *,
-.calendar-section > *,
+.trip-planning-section > *,
 .gallery-intro > *,
 .gallery-section > *,
 .gallery-cta > *,
@@ -2695,8 +2634,7 @@ body > section:last-of-type::after {
   .faq-section::before,
   .trips-intro::before,
   .trips-section.international::before,
-  .included-section::before,
-  .calendar-section::before,
+  .trip-planning-section::before,
   .gallery-intro::before,
   .gallery-section::before,
   .gallery-cta::before,
@@ -2711,8 +2649,7 @@ body > section:last-of-type::after {
 
 @media (max-width: 640px) {
   .trips-grid,
-  .courses-grid,
-  .included-grid {
+  .courses-grid {
     grid-template-columns: minmax(0, 1fr);
   }
 }
@@ -2741,8 +2678,7 @@ body {
 .faq-section,
 .trips-intro,
 .trips-section.international,
-.included-section,
-.calendar-section,
+.trip-planning-section,
 .gallery-intro,
 .gallery-section,
 .gallery-cta,
@@ -2764,8 +2700,7 @@ body {
 .faq-section::before,
 .trips-intro::before,
 .trips-section.international::before,
-.included-section::before,
-.calendar-section::before,
+.trip-planning-section::before,
 .gallery-intro::before,
 .gallery-section::before,
 .gallery-cta::before,
@@ -2844,8 +2779,7 @@ body {
 .trips-section.international,
 .contact-methods,
 .gallery-section,
-.process-section,
-.included-section {
+.process-section {
   background-image: linear-gradient(rgba(92, 168, 170, 0.28), rgba(35, 111, 133, 0.42)), url('../assets/backgrounds/ocean/ocean-mid.webp');
   background-size: cover;
   background-position: center;
@@ -2853,7 +2787,7 @@ body {
 
 .why-us-section,
 .faq-section,
-.calendar-section,
+.trip-planning-section,
 .gallery-cta,
 .contact-form-section {
   background-image: linear-gradient(rgba(12, 70, 95, 0.2), rgba(8, 53, 77, 0.24)), url('../assets/backgrounds/ocean/ocean-seabed.webp');
@@ -2885,8 +2819,7 @@ body {
 .faq-section,
 .trips-intro,
 .trips-section.international,
-.included-section,
-.calendar-section,
+.trip-planning-section,
 .gallery-intro,
 .gallery-section,
 .gallery-cta,

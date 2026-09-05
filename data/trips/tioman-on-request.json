@@ -12,7 +12,8 @@
   "bookingRules": { "deposit": "To be confirmed when your trip is arranged.", "balanceDue": "To be confirmed when your trip is arranged.", "cancellation": "Terms depend on the requested dive and operator availability.", "requirements": "Valid certification is required for recreational diving." },
   "highlights": ["Shore dives", "Boat dives", "Night dives"],
   "itinerary": ["Choose your preferred date and dive type", "Confirm availability and equipment needs", "Dive around Tioman at your own pace"],
-  "included": ["Trip planning support", "Dive guidance", "Equipment options discussed during planning"],
+  "included": ["Trip planning support", "Dive guidance"],
+  "additionalCosts": ["Equipment rental, if needed"],
   "notes": "Contact us to confirm availability, equipment needs, prices, and the best sites for the day.",
   "inquiryLabel": "Plan a Tioman dive"
 }
