@@ -4,13 +4,13 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Okim Dive - Scuba Diving Adventures in Tioman</title>
-    <link rel="stylesheet" href="../styles/styles.css?v=11">
-    <link rel="stylesheet" href="../styles/redesign.css?v=32">
+    <link rel="stylesheet" href="../styles/styles.css?v=home-pilot-1">
+    <link rel="stylesheet" href="../styles/redesign.css?v=home-pilot-1">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&family=Great+Vibes&family=Lato:wght@400;700&family=Noto+Sans+SC:wght@400;500;600;700&family=Noto+Serif+SC:wght@400;500;600;700&family=Playfair+Display:wght@400;600&display=swap" rel="stylesheet">
 </head>
-<body>
+<body class="home-pilot">
     <!-- Navigation -->
     <nav class="navbar">
         <div class="nav-container">
@@ -34,104 +34,54 @@
         </div>
     </nav>
 
-    <!-- Hero Section -->
-    <section class="hero">
-        <div class="hero-bg"></div>
-        <div class="hero-content">
-            <h1 class="hero-title">Explore the Ocean With Wonder</h1>
-            <p class="hero-subtitle">Join us for a dive, a trip, or the next step in your own journey beneath the surface.</p>
-            <div class="hero-cta">
-                <a href="courses.html" class="btn btn-primary">Explore Courses</a>
-                <a href="trips.html" class="btn btn-secondary">View Trips</a>
-            </div>
-        </div>
-    </section>
-
-    <main class="ocean-journey">
-    <!-- Introduction Section -->
-    <section class="intro-section">
-        <div class="container">
-            <div class="intro-content">
-                <div class="watercolor-decoration top-left"></div>
-                <div class="watercolor-decoration top-right"></div>
-                <h2 class="section-title">More Than a Certification</h2>
-                <p class="intro-text">
-                    Whether you are already certified, returning to the water, or curious about learning, there is always more to notice beneath the surface.
-                </p>
-                <div class="intro-features">
-                    <div class="feature-card">
-                        <div class="feature-icon">🎓</div>
-                        <h3>Learn with Care</h3>
-                        <p>Clear, patient guidance to help you feel at home in the water</p>
-                    </div>
-                    <div class="feature-card">
-                        <div class="feature-icon">🏝️</div>
-                        <h3>Love the Ocean</h3>
-                        <p>Look closer at the reefs, light, and life beneath the surface</p>
-                    </div>
-                    <div class="feature-card">
-                        <div class="feature-icon">🌊</div>
-                        <h3>Explore Further</h3>
-                        <p>Keep discovering new underwater worlds, one dive at a time</p>
-                    </div>
+    <main id="main-content">
+        <section class="pilot-hero" aria-labelledby="pilot-title">
+            <div class="pilot-hero-art" aria-hidden="true"></div>
+            <div class="pilot-hero-copy">
+                <h1 id="pilot-title">Explore the Ocean With Wonder</h1>
+                <p>Join us for a dive, a trip, or the next step in your own journey beneath the surface.</p>
+                <div class="pilot-actions">
+                    <a href="courses.html" class="pilot-button pilot-primary">Explore Courses</a>
+                    <a href="trips.html" class="pilot-button pilot-secondary">View Trips</a>
                 </div>
             </div>
-        </div>
-    </section>
+        </section>
 
-    <!-- Diving Journey Section -->
-    <section class="home-journey-section" aria-labelledby="home-journey-title">
-        <div class="container">
-            <div class="home-journey-content">
-                <h2 class="section-title" id="home-journey-title">Find Your Way Into Diving</h2>
-                <p class="intro-text">Come for the reefs, the light, the marine life, or the feeling of being underwater. We will help you find the right way to take part.</p>
-                <div class="home-journey-grid">
-                    <article class="home-journey-step"><span class="journey-node-mark" aria-hidden="true">01</span><h3>Learn</h3><p>Start with the foundations and gain the skills you need to feel comfortable underwater.</p><a href="courses.html" class="text-link">Explore courses →</a></article>
-                    <article class="home-journey-step"><span class="journey-node-mark" aria-hidden="true">02</span><h3>Return</h3><p>Been away from diving? Rebuild your comfort and confidence with guidance at your own pace.</p><a href="courses.html" class="text-link">Ask about a refresher →</a></article>
-                    <article class="home-journey-step"><span class="journey-node-mark" aria-hidden="true">03</span><h3>Go Further</h3><p>Keep practising and explore new underwater worlds through organised trips with published dates.</p><a href="trips.html" class="text-link">Discover dive trips →</a></article>
+        <div class="pilot-ocean">
+            <div class="pilot-waterline" aria-hidden="true"></div>
+            <section class="pilot-philosophy" aria-labelledby="pilot-philosophy-title">
+                <div class="pilot-reading">
+                    <h2 id="pilot-philosophy-title">Learn with care. Explore with wonder.</h2>
+                    <p>Look closer at the reefs, the light, and the life beneath the surface. With patient guidance and room for curiosity, there is always more to discover.</p>
+                    <a class="pilot-text-link" href="about.html">Meet Iris and Okim Dive <span aria-hidden="true">↗</span></a>
                 </div>
-            </div>
-        </div>
-    </section>
+            </section>
 
-    <!-- Quick Links Section -->
-    <section class="quick-links-section">
-        <div class="container">
-            <h2 class="section-title">Start Your Adventure</h2>
-            <div class="quick-links-grid">
-                <a href="courses.html" class="quick-link-card">
-                    <div class="card-content">
-                        <h3>Dive Courses</h3>
-                        <p>Build your confidence from the first lesson onward</p>
-                        <span class="card-arrow">→</span>
-                    </div>
-                </a>
-                <a href="trips.html" class="quick-link-card">
-                    <div class="card-content">
-                        <h3>Dive Trips</h3>
-                        <p>Discover Tioman and the waters beyond</p>
-                        <span class="card-arrow">→</span>
-                    </div>
-                </a>
-                <a href="gallery.html" class="quick-link-card">
-                    <div class="card-content">
-                        <h3>Photo Gallery</h3>
-                        <p>Look closer at the beauty beneath the surface</p>
-                        <span class="card-arrow">→</span>
-                    </div>
-                </a>
-                <a href="contact.html" class="quick-link-card">
-                    <div class="card-content">
-                        <h3>Contact Us</h3>
-                        <p>Tell us what you would like to explore</p>
-                        <span class="card-arrow">→</span>
-                    </div>
-                </a>
-            </div>
-        </div>
-    </section>
+            <section class="pilot-chooser" aria-labelledby="pilot-chooser-title">
+                <h2 id="pilot-chooser-title">Find your next dive</h2>
+                <div class="pilot-paths">
+                    <a href="courses.html" class="pilot-path"><h3>Learn</h3><p>Start with the foundations and gain the skills you need to feel comfortable underwater.</p><span aria-hidden="true">↗</span></a>
+                    <a href="courses.html" class="pilot-path"><h3>Return</h3><p>Been away from diving? Rebuild your comfort and confidence with guidance at your own pace.</p><span aria-hidden="true">↗</span></a>
+                    <a href="trips.html" class="pilot-path"><h3>Explore</h3><p>Discover Tioman and the waters beyond.</p><span aria-hidden="true">↗</span></a>
+                </div>
+            </section>
 
+            <section class="pilot-tioman" aria-labelledby="pilot-tioman-title">
+                <div class="pilot-reading">
+                    <p class="pilot-availability">On request</p>
+                    <h2 id="pilot-tioman-title">Tioman Island</h2>
+                    <p>Already certified? Come back to the water around Tioman. Share your preferred dates and dive interests; we will confirm availability and equipment needs together.</p>
+                    <a class="pilot-text-link" href="trips.html">Explore Tioman diving <span aria-hidden="true">↗</span></a>
+                </div>
+            </section>
+
+            <section class="pilot-enquiry" aria-labelledby="pilot-enquiry-title">
+                <h2 id="pilot-enquiry-title">Where would you like to go next?</h2>
+                <a class="pilot-button pilot-primary" href="contact.html">Talk to us about your next dive</a>
+            </section>
+        </div>
     </main>
+
 
     <!-- Footer -->
     <footer class="footer">
@@ -166,6 +116,6 @@
     </footer>
 
     <script src="../scripts/site/site-i18n.js"></script>
-    <script src="../scripts/site/site-motion.js?v=6"></script>
+    <script src="../scripts/site/site-motion.js?v=home-pilot-1"></script>
 </body>
 </html>

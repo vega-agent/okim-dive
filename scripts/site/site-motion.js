@@ -41,6 +41,7 @@
   }
 
   function setupObserver() {
+    if (document.body.classList.contains('home-pilot')) return;
     const elements = prepareReveals();
     if (reduceMotion.matches || !('IntersectionObserver' in window)) {
       showAll();
@@ -111,6 +112,34 @@
     else setupObserver();
   }
 
+  // Home owns a one-shot waterline enhancement; no continuous ambient animation.
+  function setupHomeWaterline() {
+    if (!document.body.classList.contains('home-pilot')) return;
+    const waterline = document.querySelector('.pilot-waterline');
+    if (!waterline || reduceMotion.matches || !('IntersectionObserver' in window)) return;
+
+    let crossing;
+    const observer = new IntersectionObserver(entries => {
+      entries.forEach(entry => {
+        if (!entry.isIntersecting || waterline.dataset.crossed) return;
+        waterline.dataset.crossed = 'true';
+        crossing = waterline.animate([
+          { opacity: .35, transform: 'translateY(-24px)' },
+          { opacity: 1, transform: 'translateY(0)' }
+        ], { duration: 900, easing: 'cubic-bezier(.2,.65,.3,1)', fill: 'forwards' });
+        observer.unobserve(waterline);
+      });
+    }, { threshold: 0 });
+
+    observer.observe(waterline);
+    reduceMotion.addEventListener('change', () => {
+      if (!reduceMotion.matches) return;
+      crossing?.cancel();
+      waterline.dataset.crossed = 'true';
+    });
+  }
+
+  setupHomeWaterline();
   setupNavigation();
   setupMobileMenu();
   setupObserver();

@@ -469,6 +469,7 @@
 
   function translateNode(node, language) {
     if (node.nodeType !== Node.TEXT_NODE) return;
+    if (document.body.classList.contains('home-pilot') && node.parentElement?.closest('[data-home-state]')) return;
     if (!original.has(node)) original.set(node, node.nodeValue);
     const source = original.get(node);
     const value = normalize(source);
@@ -498,10 +499,13 @@
     document.querySelectorAll('.nav-toggle').forEach((button) => {
       button.setAttribute('aria-label', language === 'zh' ? '切换导航菜单' : 'Toggle navigation');
     });
+    document.querySelectorAll('[data-portrait-fallback]').forEach((portrait) => {
+      portrait.setAttribute('aria-label', language === 'zh' ? '这里预留了经过认可的肖像照片位置' : 'Portrait space reserved for an approved image');
+    });
     document.querySelectorAll('.journey-track').forEach((track) => {
       track.setAttribute('aria-label', language === 'zh' ? '潜水课程进阶路径' : 'Diving course progression');
     });
-    localStorage.setItem('okim-language', language);
+    try { localStorage.setItem('okim-language', language); } catch (_) { /* Language still works without storage. */ }
   }
 
   window.okimApplyLanguage = applyLanguage;
@@ -626,6 +630,21 @@
     "Stay close to the water and hear what we are exploring next": "靠近海水，听听我们下一步要探索什么",
     "If you are looking for another path, tell us what you would like to learn. We will explain the available options and help you choose a sensible next step.": "如果你正在寻找另一条学习路径，告诉我们你想学什么。我们会说明可选方案，陪你选择合适的下一步。"
   });
+  // Pilot-only additions do not change translations on the other routes.
+  if (document.body.classList.contains('home-pilot')) Object.assign(translations, {
+    "Learn with care. Explore with wonder.": "用心学习，带着好奇探索。",
+    "Look closer at the reefs, the light, and the life beneath the surface. With patient guidance and room for curiosity, there is always more to discover.": "细看珊瑚礁、水下光影与海洋生命。在耐心的指导中，带着好奇慢慢探索，总有新的发现。",
+    "Meet Iris and Okim Dive": "认识 Iris 与 Okim Dive",
+    "Find your next dive": "找到你的下一次潜水",
+    "Explore": "探索",
+    "Discover Tioman and the waters beyond.": "探索刁曼岛，以及更远的水下世界。",
+    "Already certified? Come back to the water around Tioman. Share your preferred dates and dive interests; we will confirm availability and equipment needs together.": "已经持证了吗？欢迎来到刁曼岛水域。告诉我们你希望的日期和潜水兴趣，一起确认可安排的行程与装备需求。",
+    "Explore Tioman diving": "了解刁曼岛潜水",
+    "Where would you like to go next?": "下一次，你想去哪里？",
+    "Talk to us about your next dive": "聊聊你的下一次潜水"
+  });
   document.body.dataset.enTitle = document.title;
-  applyLanguage(localStorage.getItem('okim-language') || 'en');
+  let savedLanguage = 'en';
+  try { savedLanguage = localStorage.getItem('okim-language') || 'en'; } catch (_) { /* Use visible English fallback. */ }
+  applyLanguage(savedLanguage);
 })();

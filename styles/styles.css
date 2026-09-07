@@ -1941,51 +1941,6 @@ body {
    PHASE 3 - SIGNATURE PAGE TREATMENTS
    ============================================ */
 
-/* Home: surface-to-depth composition */
-.hero {
-  isolation: isolate;
-}
-
-.hero::after {
-  content: '';
-  position: absolute;
-  inset: auto 0 0;
-  height: 38%;
-  z-index: -1;
-  pointer-events: none;
-  background: linear-gradient(180deg, transparent, rgba(38, 70, 83, 0.22));
-  mix-blend-mode: multiply;
-}
-
-.hero .hero-content {
-  max-width: 48rem;
-}
-
-.hero .hero-title {
-  max-width: 11ch;
-  text-wrap: balance;
-}
-
-.hero .hero-subtitle {
-  max-width: 34rem;
-}
-
-.hero + .intro-section {
-  position: relative;
-  background: linear-gradient(180deg, var(--ocean-deep), var(--ocean-mid));
-  color: var(--paper-cloud);
-}
-
-.hero + .intro-section::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-  background: url('../assets/watercolor/backgrounds/section-gallery.webp') center / cover;
-  opacity: 0.18;
-  mix-blend-mode: screen;
-}
-
 /* About: convert the story points into a readable vertical narrative */
 .story-content {
   position: relative;
