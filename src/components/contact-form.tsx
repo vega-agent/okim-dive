@@ -17,10 +17,16 @@ export default function ContactForm() {
     const localeInput = form.elements.namedItem('locale') as HTMLInputElement
     localeInput.value = document.documentElement.lang === 'zh-CN' ? 'zh' : 'en'
     setPending(true)
-    const result = await submitInquiry(new FormData(form))
-    setPending(false)
-    setState(result.status)
-    if (result.status === 'success') form.reset()
+    try {
+      const result = await submitInquiry(new FormData(form))
+      setState(result.status)
+      if (result.status === 'success') form.reset()
+    } catch {
+      // Transport failure (offline/server unreachable) — same recovery path.
+      setState('error')
+    } finally {
+      setPending(false)
+    }
   }
 
   if (state === 'success') {

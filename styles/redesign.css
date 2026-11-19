@@ -557,9 +557,30 @@ html[lang="zh-CN"] .section-title { font-family: var(--font-chinese-heading); }
 .courses-inquiry-panel .journey-kicker, .faq-section .journey-kicker { display: none; }
 .faq-intro { border: 0; }
 
-/* Contact: form submission states (M3) — same readable-surface language as the form card */
-.contact-form .form-status { margin: 0 0 1.25rem; padding: .85rem 1rem; border-radius: 8px; font-size: .95rem; line-height: 1.5; border: 1px solid var(--whisper-border); }
-.contact-form .form-status-error { color: var(--coral); background: rgba(230, 57, 70, .06); border-color: rgba(230, 57, 70, .3); }
-.form-success { display: grid; gap: 1.25rem; margin-top: 2rem; padding: 1.75rem; border: 1px solid rgba(42, 157, 143, .3); border-radius: 12px; background: rgba(42, 157, 143, .07); }
+/* Contact: form submission states (M3). Audited against DESIGN-SYSTEM.md v1.1:
+   Body Small error text (§13), 8px spacing scale (§5), whisper border + soft kelp
+   wash (§2/§6); confirmation text stays Deep Sea — kelp fails 4.5:1 on light bg.
+   Error text uses Coral Hover #d42f3d: coral #e63946 on the tint is 3.84:1 (<4.5). */
+.contact-form .form-status { margin: 0 0 1rem; padding: .75rem 1rem; border-radius: 8px; font-size: .875rem; line-height: 1.5; border: 1px solid var(--whisper-border); }
+.contact-form .form-status-error { color: #d42f3d; background: rgba(230, 57, 70, .06); border-color: rgba(230, 57, 70, .3); }
+.form-success { display: grid; gap: 1rem; margin-top: 2rem; padding: 1.5rem; border: 1px solid var(--whisper-border); border-radius: 12px; background: rgba(42, 157, 143, .07); }
 .form-success p { margin: 0; color: var(--ocean-deep); line-height: 1.6; }
 .form-success .btn { justify-self: start; }
+/* Pending submit: muted, no hover lift (§7); each variant keeps its own base look */
+.btn:disabled,
+.btn:disabled:hover,
+.btn:disabled:focus-visible {
+  opacity: .55;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+  background-color: var(--ocean-light);
+  background-image: url('../assets/watercolor/components/cta-button.webp');
+}
+.btn-primary:disabled,
+.btn-primary:disabled:hover,
+.btn-primary:disabled:focus-visible {
+  background-color: var(--coral);
+  border-color: var(--coral);
+  background-image: none;
+}

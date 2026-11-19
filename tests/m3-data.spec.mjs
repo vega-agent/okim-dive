@@ -105,3 +105,22 @@ test('contact form blocks submission without consent', async ({ page }) => {
   const rows = await sql`SELECT * FROM inquiries WHERE email = 'no-consent@example.com'`;
   expect(rows.length).toBe(0);
 });
+
+test('contact form shows the error state when the action request fails', async ({ page }) => {
+  await page.goto('/contact');
+  // Server actions POST to the page URL with a Next-Action header.
+  await page.route('**/contact', (route) => {
+    if (route.request().method() === 'POST') return route.abort();
+    return route.continue();
+  });
+  await page.fill('#name', 'Error Path');
+  await page.fill('#email', 'error-path@example.com');
+  await page.selectOption('#interest', 'general-question');
+  await page.fill('#message', 'M3 error-path check.');
+  await page.check('input[name="consent"]');
+  await page.click('.contact-form button[type="submit"]');
+  await expect(page.locator('.form-status-error')).toBeVisible();
+  await expect(page.locator('.form-status-error')).toContainText('could not be sent');
+  await expect(page.locator('.contact-form button[type="submit"]')).toBeEnabled();
+  await expect(page.locator('.contact-form button[type="submit"]')).toHaveText('Send Enquiry');
+});
