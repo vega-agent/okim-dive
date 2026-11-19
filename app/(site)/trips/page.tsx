@@ -1,17 +1,22 @@
 // M2 port of legacy-static/trips.html (design preserved verbatim).
-// Trip cards + detail dialog are rendered by TripsGrid from /data/trips/*.json,
-// exactly as scripts/site/trips-data.js did (DB-backed in M3).
+// M3: trip cards + detail dialog render from Postgres (src/lib/trips.ts,
+// seed JSON fallback); no client-side data fetch.
 import type { Metadata } from 'next'
 import Link from 'next/link'
 import SiteFooter from '@/components/site-footer'
 import TripsGrid from '@/components/trips-grid'
+import { getTrips } from '@/lib/trips'
+
+// Read trips at request time so portal edits (M5) appear without a rebuild.
+export const dynamic = 'force-dynamic'
 
 export const metadata: Metadata = {
   title: 'Dive Trips - Okim Dive',
   description: 'Follow your curiosity beneath the surface. Tioman dives arranged around your plans, and organised journeys to new destinations.',
 }
 
-export default function TripsPage() {
+export default async function TripsPage() {
+  const trips = await getTrips()
   return (
     <>
       {/* Hero Section */}
@@ -29,7 +34,7 @@ export default function TripsPage() {
           <div className="container">
             <h2 className="section-title">Trips</h2>
             <p className="section-lede">Join us for the reefs, light, and marine life—or for the simple pleasure of being underwater. Choose a Tioman dive arranged around your plans, or a planned journey to a new destination.</p>
-            <TripsGrid />
+            <TripsGrid trips={trips} />
           </div>
         </section>
 

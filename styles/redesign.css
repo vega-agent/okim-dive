@@ -556,3 +556,10 @@ html[lang="zh-CN"] .section-title { font-family: var(--font-chinese-heading); }
 .courses-inquiry-panel .btn { margin-top: .25rem; }
 .courses-inquiry-panel .journey-kicker, .faq-section .journey-kicker { display: none; }
 .faq-intro { border: 0; }
+
+/* Contact: form submission states (M3) — same readable-surface language as the form card */
+.contact-form .form-status { margin: 0 0 1.25rem; padding: .85rem 1rem; border-radius: 8px; font-size: .95rem; line-height: 1.5; border: 1px solid var(--whisper-border); }
+.contact-form .form-status-error { color: var(--coral); background: rgba(230, 57, 70, .06); border-color: rgba(230, 57, 70, .3); }
+.form-success { display: grid; gap: 1.25rem; margin-top: 2rem; padding: 1.75rem; border: 1px solid rgba(42, 157, 143, .3); border-radius: 12px; background: rgba(42, 157, 143, .07); }
+.form-success p { margin: 0; color: var(--ocean-deep); line-height: 1.6; }
+.form-success .btn { justify-self: start; }

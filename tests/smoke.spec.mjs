@@ -14,7 +14,7 @@ for (const route of routes) {
     const response = await page.goto(route);
     expect(response?.status()).toBe(200);
     await expect(page.locator('body')).toBeVisible();
-    // Trips cards render client-side from JSON; give them a moment before overflow check.
+    // M3: trip cards are server-rendered from Postgres; wait for hydration.
     if (route === '/trips') await page.locator('.trip-card').first().waitFor({ state: 'attached', timeout: 10_000 });
     expect(await page.evaluate(() => document.documentElement.scrollWidth))
       .toBeLessThanOrEqual(await page.evaluate(() => window.innerWidth));

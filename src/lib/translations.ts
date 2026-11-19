@@ -536,6 +536,13 @@ Object.assign(translations, {
   "Day 1: Arrival and trip briefing": "第 1 天：抵达与行程简报",
   "Days 2–6: Guided dives and surface excursions": "第 2–6 天：带队潜水与水面活动",
   "Day 7: Departure after breakfast": "第 7 天：早餐后返程",
+  // Contact — form submission states (M3). Content review 2026-11-19: functional
+  // UI copy only (confirm/pending/error/reset); no prices, dates, or response-time
+  // claims (response time unverified, §17). Decision: publish as written, EN+CN.
+  "Thank you. Your enquiry has been received — we will reply by email.": "谢谢你的咨询。我们已收到你的信息，会通过电子邮件回复你。",
+  "Send another enquiry": "再发送一条咨询",
+  "Sending…": "发送中…",
+  "Your enquiry could not be sent. Please try again, or contact us directly.": "咨询未能发送。请重试，或直接联系我们。",
 })
 
 export default translations

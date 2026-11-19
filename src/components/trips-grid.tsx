@@ -1,41 +1,22 @@
 'use client'
 
-// M2 port of scripts/site/trips-data.js — same card/dialog rendering from the
-// trip JSON files (served from /data/trips until M3 moves trips into Postgres).
+// M3: trip data comes from Postgres via the server component (src/lib/trips.ts,
+// JSON fallback there). Cards render as JSX (server-side); the detail dialog keeps
+// the M2 imperative <dialog> port so rendered output and CN translation via the
+// site-i18n MutationObserver stay identical.
 import { useEffect, useRef } from 'react'
+import type { Trip } from '@/lib/trips'
 
-type Trip = {
-  id: string
-  title: string
-  location: string
-  status: string
-  summary: string
-  travelDates: string
-  duration: string
-  difficulty: string
-  groupSize: string
-  cost?: { amount?: string; basis?: string }
-  bookingRules?: { deposit?: string; balanceDue?: string; cancellation?: string; requirements?: string }
-  highlights?: string[]
-  itinerary?: string[]
-  included?: string[]
-  additionalCosts?: string[]
-  notes?: string
-  inquiryLabel?: string
-}
-
-const tripFiles = ['tioman-on-request.json', 'sipadan-sample.json', 'raja-ampat-sample.json']
 const escapeHtml = (value: unknown) => String(value ?? '').replace(/[&<>"']/g, (char) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[char] as string))
 const list = (items: string[] = []) => items.map((item) => `<li>${escapeHtml(item)}</li>`).join('')
 const section = (title: string, items: string[] | undefined, className = '') => items?.length ? `<section class="trip-dialog-section ${className}"><h3>${escapeHtml(title)}</h3><ul>${list(items)}</ul></section>` : ''
 
-export default function TripsGrid() {
+export default function TripsGrid({ trips }: { trips: Trip[] }) {
   const gridRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
     const grid = gridRef.current
-    if (!grid) return
-    let cancelled = false
+    if (!grid || !trips.length) return
 
     const dialog = document.createElement('dialog')
     dialog.className = 'trip-dialog'
@@ -84,13 +65,13 @@ export default function TripsGrid() {
       dialog.showModal()
     }
 
-    Promise.all(tripFiles.map((file) => fetch(`/data/trips/${file}`).then((response) => response.json())))
-      .then((trips: Trip[]) => {
-        if (cancelled) return
-        grid.innerHTML = trips.map((trip, index) => `<article class="trip-card${index === 0 ? ' featured' : ''}"><div class="trip-badge">${escapeHtml(trip.status)}</div><div class="trip-header"><h3>${escapeHtml(trip.title)}</h3><span class="trip-location">${escapeHtml(trip.location)}</span></div><div class="trip-content"><p>${escapeHtml(trip.summary)}</p><ul class="trip-details"><li><strong>Travel dates:</strong> ${escapeHtml(trip.travelDates)}</li><li><strong>Duration:</strong> ${escapeHtml(trip.duration)}</li><li><strong>Difficulty:</strong> ${escapeHtml(trip.difficulty)}</li><li><strong>Group Size:</strong> ${escapeHtml(trip.groupSize)}</li></ul><button class="btn btn-primary trip-details-trigger" type="button" data-trip-id="${escapeHtml(trip.id)}">View Details</button></div></article>`).join('')
-        grid.querySelectorAll('.trip-details-trigger').forEach((button) => button.addEventListener('click', () => render(trips.find((trip) => trip.id === (button as HTMLElement).dataset.tripId) as Trip)))
-      })
-      .catch(() => { if (!cancelled) grid.innerHTML = '<p class="trip-data-error">Trip information is temporarily unavailable.</p>' })
+    const onTrigger = (event: MouseEvent) => {
+      const button = (event.target as Element).closest('.trip-details-trigger') as HTMLElement | null
+      if (!button) return
+      const trip = trips.find((item) => item.id === button.dataset.tripId)
+      if (trip) render(trip)
+    }
+    grid.addEventListener('click', onTrigger)
 
     const onBackdrop = (event: MouseEvent) => { if (event.target === dialog) dialog.close() }
     const onClose = (event: MouseEvent) => {
@@ -100,12 +81,38 @@ export default function TripsGrid() {
     dialog.addEventListener('click', onClose)
 
     return () => {
-      cancelled = true
+      grid.removeEventListener('click', onTrigger)
       dialog.removeEventListener('click', onBackdrop)
       dialog.removeEventListener('click', onClose)
       dialog.remove()
     }
-  }, [])
+  }, [trips])
 
-  return <div className="trips-grid" ref={gridRef}></div>
+  if (!trips.length) {
+    return <div className="trips-grid"><p className="trip-data-error">Trip information is temporarily unavailable.</p></div>
+  }
+
+  return (
+    <div className="trips-grid" ref={gridRef}>
+      {trips.map((trip, index) => (
+        <article key={trip.id} className={`trip-card${index === 0 ? ' featured' : ''}`}>
+          <div className="trip-badge">{trip.status}</div>
+          <div className="trip-header">
+            <h3>{trip.title}</h3>
+            <span className="trip-location">{trip.location}</span>
+          </div>
+          <div className="trip-content">
+            <p>{trip.summary}</p>
+            <ul className="trip-details">
+              <li><strong>Travel dates:</strong> {trip.travelDates}</li>
+              <li><strong>Duration:</strong> {trip.duration}</li>
+              <li><strong>Difficulty:</strong> {trip.difficulty}</li>
+              <li><strong>Group Size:</strong> {trip.groupSize}</li>
+            </ul>
+            <button className="btn btn-primary trip-details-trigger" type="button" data-trip-id={trip.id}>View Details</button>
+          </div>
+        </article>
+      ))}
+    </div>
+  )
 }
