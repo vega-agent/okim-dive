@@ -1,8 +1,8 @@
 # Okim Dive - Brand Guide
 
-**Version:** 1.0  
-**Created:** 2026-01-XX  
-**Last Updated:** 2026-08-27
+**Version:** 1.1\
+**Created:** 2026-01-XX\
+**Last Updated:** 2026-11-19 (typography aligned with DESIGN-SYSTEM v1.1 and live CSS)\
 **Approved Web Direction:** Continuous Underwater Editorial / Dive Journal
 
 > The current website style is the reference point for all future pages. New work should feel like another chapter of the same underwater journey, not a separate template.
@@ -74,17 +74,25 @@ Deep Sea        #264653  (headings)
 
 ### 2.3 Typography
 
-**Heading Font:** 
-- **Primary:** 'Playfair Display' (serif, elegant, organic)
-- **Fallback:** Georgia, serif
-- **Usage:** Page titles, section headings
-- **Weight:** Regular (400) or Light (300) for softness
+> Aligned with `DESIGN-SYSTEM.md` v1.1 (2026-11-19). The earlier Playfair Display
+> direction was superseded by the live role-based bilingual type system.
 
-**Body Font:**
-- **Primary:** 'Lato' (sans-serif, clean, readable)
+**English display headings:**
+- **Primary:** 'Fraunces' (serif, weight 500)
+- **Fallback:** Georgia, serif
+- **Usage:** Hero and section headings
+
+**English body/UI:**
+- **Primary:** 'Lato' (sans-serif, 400/700)
 - **Fallback:** -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif
-- **Usage:** Body text, buttons, navigation
-- **Weight:** Light (300) or Regular (400)
+- **Usage:** Body text, buttons, navigation, forms
+
+**Simplified Chinese:**
+- **Display headings:** 'Noto Serif SC' (600), fallback 'Songti SC', 'STSong', serif
+- **Body/UI:** 'Noto Sans SC' (400/600), fallback 'PingFang SC', 'Microsoft YaHei', sans-serif
+- Negative letter-spacing applies to English headings only, never Han text
+
+**Decorative script:** 'Great Vibes' — atmosphere only, never for content hierarchy or Han characters
 
 **Font Sizes**
 ```
@@ -103,14 +111,9 @@ Body: 1.6 (generous for readability)
 
 ### 2.4 Logo
 
-**Current:** Text-based with dive emoji
-```
-🤿 Okim Dive
-```
+**Current:** Transparent watercolor logo asset (`assets/brand/okim-dive-logo-transparent.webp`), used in the navbar.
 
 **Future Direction:**
-- Consider custom hand-drawn or watercolor-style logo
-- Incorporate wave or ocean element
 - Keep simple and recognizable at small sizes
 - Should work in single color (for stamps/embossing)
 
@@ -374,7 +377,7 @@ Define all colors, spacing, and typography as CSS variables for easy updates:
   --color-deep-sea: #264653;
   
   /* Typography */
-  --font-heading: 'Playfair Display', Georgia, serif;
+  --font-heading: 'Fraunces', Georgia, serif;
   --font-body: 'Lato', -apple-system, sans-serif;
   
   /* Spacing */

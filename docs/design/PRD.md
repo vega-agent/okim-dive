@@ -1,10 +1,11 @@
 # Okim Dive Website - Product Requirements Document
 
-**Version:** 0.1 (Draft)  
-**Created:** 2026-01-XX  
-**Last Updated:** 2026-08-27
-**Owner:** Jeff  
-**Developer:** Vega
+**Version:** 0.2\
+**Created:** 2026-01-XX\
+**Last Updated:** 2026-11-18\
+**Owner:** Jeff\
+**Developer:** Vega (website foundation); QwenWork (portal MVP + Next.js migration)\
+**Companion spec:** `docs/design/MVP-SPEC.md` v1.0 — approved source of truth for booking/portal scope. Where this PRD and the MVP spec differ on portal/booking matters, the MVP spec wins.
 
 ---
 
@@ -21,12 +22,18 @@ Okim Dive is a freelance dive instructor and trip planner business run by Iris, 
 - **Target Audience:** Bilingual (English + Chinese speakers)
 
 ### 1.3 Product Vision
-A static website that provides:
-1. Branding and professional online presence
-2. Information about services offered (courses)
-3. Details about dive trips (Tioman + overseas)
+A production-intent Next.js application (migrated from the static website) that provides:
+1. Branding and professional online presence (design preserved)
+2. Information about services offered (courses — inquiry-only in v1)
+3. Details about dive trips (Tioman + overseas), rendered from the database
 4. Educational content for students
-5. Contact and booking information
+5. Contact and inquiry capture into the instructor portal
+6. **Trip booking portal:** magic-link sign-in, one diver per booking, external payment with instructor verification, invoices/receipts
+7. **Instructor operations portal** for Iris: inquiries, trips, bookings, payment verification, Okim Points ledger, refund-policy editor, settings, preparation checklist, trip-briefing draft workflow
+8. **Read-only customer area "My Okim":** My Trips + My Rewards
+9. Bilingual EN + 简体中文 across all surfaces and transactional emails
+
+Scope, flows, rules, and schema are defined in `docs/design/MVP-SPEC.md` (approved 2026-11-18).
 
 ---
 
@@ -84,13 +91,21 @@ A static website that provides:
 ```
 /                    Home (landing page)
 /about               About Iris & Okim Dive
-/courses             Dive courses offered
-/trips               Dive trips (Tioman + overseas)
+/courses             Dive courses offered (inquiry-only in v1)
+/trips               Dive trips (Tioman + overseas), from database
+/trips/[slug]        Trip detail + "Book this trip"
 /gallery             Verified Okim Dive photography and visual stories
-/contact             Contact information
+/contact             Contact information + inquiry form → portal
+/book/[tripSlug]     Booking flow (magic link → details → invoice)
+/my                  My Okim — read-only My Trips + My Rewards
+/portal              Instructor portal (role-gated)
+/refund-policy       Versioned public refund policy (Iris-editable)
+/privacy             Privacy policy (PDPA)
+/terms               Terms + waiver
+/api/auth/*          Auth.js magic-link endpoints
 ```
 
-The current implementation uses six static route files: `index.html`, `about.html`, `courses.html`, `trips.html`, `gallery.html`, and `contact.html`. Future routes should be added only when they support a clear user journey or substantial content; do not create pages solely to add navigation items.
+**Approved scope expansion (2026-11-18):** the original six static pages are migrated to Next.js App Router with the design preserved; the booking, customer, portal, and policy routes above are added per `MVP-SPEC.md` §10. This supersedes the "preserve six-page static structure" guardrail in `CLAUDE.md`/`AGENTS.md`; those files are updated during migration phase M7. The principle still holds: add routes only for a clear user journey or substantial content, never to pad navigation.
 
 ### 4.2 Page Requirements
 
@@ -218,7 +233,7 @@ The current implementation uses six static route files: `index.html`, `about.htm
 - **Theme:** Continuous underwater editorial / dive journal
 - **Composition:** Distinct hero followed by one continuous underwater canvas: surface light at the top, open mid-sea content in the middle, seabed only at the final content section
 - **Colors:** Light watercolor ocean blues, seafoam, warm paper, sand, and restrained coral accents; avoid heavy dark surfaces
-- **Typography:** Playfair Display for expressive headings and Lato for readable body text; use Chinese-compatible heading and UI fallbacks for translated content
+- **Typography:** Fraunces for expressive English headings and Lato for readable body text; Noto Serif SC / Noto Sans SC for Chinese content (see DESIGN-SYSTEM v1.1)
 - **Surfaces:** Light editorial reading surfaces only where needed for contrast; no dark glassmorphism
 - **Imagery:** Real, approved Okim Dive photography first; generated watercolor artwork only as atmosphere or illustration, never as verified photography
 - **Mood:** Calm, immersive, personal, adventurous, and trustworthy
@@ -243,12 +258,17 @@ The current implementation uses six static route files: `index.html`, `about.htm
 
 ## 7. Technical Requirements
 
-### 7.1 Tech Stack
-- **Framework:** Static HTML/CSS (no build process for now)
-- **Hosting:** Free tier (Vercel or GitHub Pages)
-- **Domain:** Free subdomain initially (okimdive.vercel.app)
-- **Responsive:** Mobile-first CSS
-- **Performance:** Target < 3s load time on 3G
+### 7.1 Tech Stack (updated 2026-11-18 — see MVP-SPEC §2)
+- **Framework:** Next.js 14 (App Router) + TypeScript — full migration from static HTML (owner decision, option A)
+- **Styling:** existing `styles.css` / `redesign.css` preserved verbatim; no Tailwind rewrite
+- **Database:** Neon Postgres (free tier) + Drizzle ORM — single source of truth
+- **Auth:** Auth.js email magic links (no passwords), role-gated instructor portal
+- **Email:** Resend free tier + purchased email-only domain (~SGD 15/yr); site stays on free subdomain
+- **Storage:** S3-compatible (Cloudflare R2 free tier) for payment screenshots only
+- **Hosting:** Vercel free tier, `okimdive.vercel.app`, Next server runtime (`output: 'export'` removed)
+- **Responsive:** Mobile-first CSS preserved
+- **Performance:** Target < 3s load time on 3G for public pages
+- **Portability:** standard Postgres/S3/email APIs; host swap must remain a config change
 
 ### 7.2 Browser Support
 - Modern browsers (Chrome, Firefox, Safari, Edge)
@@ -305,14 +325,28 @@ The current implementation uses six static route files: `index.html`, `about.htm
 
 ### Phase 5: Growth (Post-Launch)
 - [ ] Add blog/tips section
-- [ ] Bilingual support (EN/CN)
-- [ ] Photo gallery
+- [x] Bilingual support (EN/CN) — live on static site; preserved and extended in migration
+- [x] Photo gallery — live; verified-imagery rules apply
 - [ ] Testimonials section
-- [ ] CMS migration (if needed)
+- [ ] CMS migration (if needed) — headless WordPress doc remains deferred; portal already gives Iris self-service trip/policy editing
+
+### Phase 6: Portal MVP + Next.js migration (approved 2026-11-18)
+Defined by `docs/design/MVP-SPEC.md`; work on branch `QwenWork-refactor`.
+- [ ] M1 Scaffold Next.js + Neon + Drizzle + Auth.js + Resend
+- [ ] M2 Port six public pages with design/i18n/motion parity (desktop + mobile verified)
+- [ ] M3 DB-backed trips + contact form → inquiries
+- [ ] M4 Magic-link auth + booking flow + invoice + payment claim with screenshot
+- [ ] M5 Instructor portal (verification queue, bookings, eligibility, trips CRUD, points ledger, policy editor, settings, checklist, briefing handoff)
+- [ ] M6 My Okim (read-only) + public refund/privacy/terms pages
+- [ ] M7 Hardening, tests, cutover, remove vestigial static config, update AGENTS/CLAUDE guardrails
+- [ ] Hackathon: 3-minute video demo due 23 Nov 2026; organizer Hashmeta-eligibility question outstanding
+- [ ] Phase 2 (deferred): one bookable course; group bookings; online payments; other uploads
 
 ---
 
 ## 9. Open Questions
+
+> **Update 2026-11-18:** business, pricing, booking/payment, and legal questions are now tracked as Iris/Jeff confirmation items in `MVP-SPEC.md` §17 (content gate: nothing publishes as fact until confirmed). The lists below remain as historical context; §17 is the live tracker.
 
 ### 9.1 Content Questions (Need Iris Input)
 - [ ] What is Iris's full background and story?
@@ -370,6 +404,47 @@ The current implementation uses six static route files: `index.html`, `about.htm
 - Fast CDN
 - Easy custom domain setup later
 
+### Decision 4: Full Next.js migration (supersedes Decision 1 for the app)
+**Date:** 2026-11-18\
+**Decision:** Migrate the entire static site to Next.js 14 App Router + TypeScript (option A), one codebase; preserve the approved design, bilingual i18n, motion, and accessibility.\
+**Rationale:**
+- Booking portal, magic-link auth, and Postgres require a server runtime; static export cannot support them
+- Owner chose one codebase over a separate portal app (option B) despite higher migration effort
+- Existing Next/React deps were vestigial; this makes them real
+- Design is ported verbatim (CSS reuse), not redesigned; parity verified per page before removing static files
+
+### Decision 5: Portal scope expansion + one record book
+**Date:** 2026-11-18\
+**Decision:** Add instructor portal, trip booking (one diver per booking), read-only My Okim, Okim Points ledger, and versioned policy pages. Neon Postgres is the single source of truth; `data/trips/*.json` becomes seed data.\
+**Rationale:**
+- Iris runs a one-person company; inquiries, bookings, payments, and loyalty must live in one record book
+- Points are a transaction ledger (earned/redeemed/expired/reversed), never an editable balance
+- External payments only; slot confirmed only after instructor deposit verification with availability re-check
+- Courses stay inquiry-only in v1; Phase 2 targets one bookable course via product-agnostic schema
+
+### Decision 6: Currency and points base
+**Date:** 2026-11-18\
+**Decision:** Iris sets currency per trip (MYR/SGD/USD/etc.); Okim Points are calculated in RM using an Iris-set per-trip conversion rate snapshotted on each ledger entry.\
+**Rationale:**
+- Trips span multiple countries with different payment requirements
+- RM base reflects Iris's Malaysia base; snapshots keep history correct when rates/rules change
+
+### Decision 7: Email provider and domain
+**Date:** 2026-11-18\
+**Decision:** Resend free tier + a purchased email-only domain (~SGD 15/yr). Brevo rejected after verification.\
+**Rationale:**
+- Brevo rewrites free sender addresses to its own sending domains and adds mandatory branding — unsuitable for trustworthy magic links
+- Gmail/Yahoo/Microsoft sender rules (2024/2025) make domain authentication effectively required
+- Resend: clean API, Auth.js provider, 3,000/mo free, no forced branding; domain is a one-time annual cost, not a platform subscription
+- Site hosting stays on the free Vercel subdomain; email APIs remain swappable (portability)
+
+### Decision 8: Hashmeta AI dropped
+**Date:** 2026-11-18\
+**Decision:** Do not use Hashmeta AI for the website; owner accepts the risk to the hackathon's 15% criterion. Eligibility confirmation from organizers is outstanding.\
+**Rationale:**
+- Owner refuses recurring platform fees and requires code ownership for production use
+- QwenWork is the build workspace and back-end operations engine, not an embedded product API; AI use is shown as a stated manual handoff
+
 ---
 
 ## 11. Change Log
@@ -377,16 +452,17 @@ The current implementation uses six static route files: `index.html`, `about.htm
 | Date | Version | Change | Author |
 |------|---------|--------|--------|
 | 2026-01-XX | 0.1 | Initial draft | Vega |
+| 2026-11-18 | 0.2 | Portal scope expansion; Next.js migration (Decisions 4–8); routes, stack, roadmap updated; companion MVP-SPEC v1.0 approved as source of truth | QwenWork (owner: Jeff) |
 
 ---
 
 ## 12. Approval
 
-**Product Owner:** Jeff  
-**Developer:** Vega  
-**Client:** Iris (pending)
+**Product Owner:** Jeff\
+**Developer:** Vega (website foundation); QwenWork (portal MVP + migration)\
+**Client:** Iris (pending review of business facts)
 
-**Status:** Draft - Pending Iris Review
+**Status:** v0.2 approved for build on branch `QwenWork-refactor` per `MVP-SPEC.md` v1.0. Iris confirmation outstanding on prices, deposit/refund rules, eligibility requirements, RM rates, and legal text (MVP-SPEC §17) — these gate publication, not build.
 
 ---
 

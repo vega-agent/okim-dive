@@ -1,0 +1,18 @@
+{
+  "id": "sipadan-sample",
+  "title": "Sipadan Blue Current Week",
+  "location": "Sipadan Island, Malaysia",
+  "status": "Sample trip",
+  "summary": "A sample small-group itinerary built around Sipadan’s famous walls, turtles, and schooling fish.",
+  "travelDates": "October 12–16, 2027",
+  "duration": "5 days / 4 nights",
+  "difficulty": "Advanced",
+  "groupSize": "8–10 divers",
+  "cost": { "amount": "USD 2,450", "basis": "per diver" },
+  "bookingRules": { "deposit": "30% deposit required to reserve a place.", "balanceDue": "Remaining balance due 60 days before departure.", "cancellation": "Cancellations 60+ days before departure receive a sample 70% refund; later terms require confirmation.", "requirements": "Advanced certification, recent dive experience, and travel insurance required." },
+  "highlights": ["Barracuda Point", "Turtle encounters", "Guided wall dives"],
+  "itinerary": ["Day 1: Arrival, check-in, and orientation", "Days 2–4: Morning and afternoon guided dives", "Day 5: Departure after breakfast"],
+  "included": ["Professional dive guidance", "Local boat transfers", "Trip planning support"],
+  "notes": "SAMPLE CONTENT ONLY. Dates, pricing, permits, accommodation, and booking rules are placeholders for product design review.",
+  "inquiryLabel": "Inquire about Sipadan"
+}

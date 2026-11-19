@@ -1,0 +1,4 @@
+/* M1 scaffold: imports the existing watercolor styles verbatim.
+   M2 ports each static page; this placeholder keeps the build green. */
+@import './styles.css';
+@import './redesign.css';
