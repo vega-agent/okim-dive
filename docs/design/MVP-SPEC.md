@@ -1,7 +1,7 @@
 # Okim Dive — MVP Specification (Website + Booking Portal)
 
-**Version:** 1.0
-**Date:** 2026-11-18
+**Version:** 1.1
+**Date:** 2026-11-20
 **Owner:** Jeff (product owner) · Iris (instructor / business owner)
 **Status:** Approved for build — source of truth for the QwenWork-refactor branch
 **Extends:** `docs/design/PRD.md` (v0.2). Where this spec and the PRD differ, this spec wins for portal/booking scope.
@@ -21,7 +21,7 @@ Okim Dive is Iris's freelance dive business (Tioman, Malaysia): dive courses and
 - Bilingual EN + 简体中文 on all user-facing surfaces, including emails.
 - One AI workflow: draft a trip briefing from instructor-approved trip details (manual handoff, see §15).
 
-**Out of scope (v1):** online payments, group/family bookings, course booking (Phase 2: one bookable course), document uploads other than the payment screenshot, embedded AI/cloud agents in the product, headless WordPress CMS, self-service booking changes by customers.
+**Out of scope (v1):** online payments, group/family bookings, course booking (Phase 2: one bookable course), in-app document uploads of any kind (payment evidence is shared manually via WhatsApp — decision #20), embedded AI/cloud agents in the product, headless WordPress CMS, self-service booking changes by customers.
 
 **Production intent:** this is built for real use, not a throwaway demo. Secure sign-in, storage, backups, privacy, and audit trails are in scope even where a demo alone would not need them.
 
@@ -38,7 +38,7 @@ Okim Dive is Iris's freelance dive business (Tioman, Malaysia): dive courses and
 | Database | Neon Postgres (free tier) + Drizzle ORM | Standard Postgres + SQL migrations = host-portable |
 | Auth | Auth.js (NextAuth) email magic links | No passwords; short expiry; rate-limited; role-gated |
 | Email | Resend free tier (3,000/mo, 100/day) + purchased email-only domain (~SGD 15/yr) | Domain used for sending only; site stays on free Vercel subdomain |
-| File storage | S3-compatible object storage (Cloudflare R2 free tier) | Payment screenshots only; standard S3 API keeps it portable |
+| File storage | Deferred — no uploads in v1 (decision #20) | Payment evidence travels via WhatsApp; Iris records verification in the portal. Cloudflare R2 remains the portable option if in-app uploads return later |
 | Hosting | Vercel free tier, `okimdive.vercel.app` | Next server runtime (not static export) |
 | PDF | Invoice/receipt PDFs generated on demand from DB records | No PDF storage needed; regenerate from ledger |
 
@@ -89,7 +89,7 @@ Okim Dive is Iris's freelance dive business (Tioman, Malaysia): dive courses and
 2. Magic link sent → diver verifies → Customer ID created (new) or linked (returning).
 3. Diver completes booking details: eligibility declarations (cert, dives, insurance, medical, emergency contact), accepts refund policy + terms (version snapshot recorded).
 4. Booking created with status `awaiting_deposit`; **invoice issued** (states: slot confirmed only after deposit verification, subject to availability).
-5. Diver pays externally (bank transfer/PayNow) using **Booking ID as reference**, then submits a payment claim (§6).
+5. Diver pays externally (bank transfer/PayNow) using **Booking ID as reference**, then sends the transfer screenshot to Iris via **WhatsApp** (§6). Iris records and verifies the payment in the portal.
 6. Instructor verifies the deposit against the bank app → **availability re-checked at verification** → slot `confirmed`, or `refund_flagged` if the trip filled meanwhile.
 7. Balance tracked to the trip's due date; instructor reviews at deadline (grace / chase / cancel — no auto-cancellation).
 8. Trip `completed` → earned points become usable (§7).
@@ -108,9 +108,9 @@ Eligibility approval (`pending / approved / declined`) is a **separate gate** fr
 ## 6. Payments, claims, invoices, receipts (locked)
 
 - **External payments only.** No payment gateway in v1. Payment status is tracked separately from booking status.
-- **Payment claim ("I've paid") — required step:** diver submits amount, date paid, transfer reference, and **one screenshot (required)**. This bridges external payment to instructor verification; without it the instructor has no signal to check the bank.
-- **Screenshot boundaries:** payment evidence only (no passport/medical/cert uploads). Stored in S3-compatible storage; **instructor-only access**; never visible to other customers. Retention: kept until trip completed + refund window closed, then purgeable; stated on the privacy page. Screenshots may contain bank details — treat as sensitive personal data.
-- **Screenshot ≠ verification.** The instructor matches the claim against the bank app and verifies manually. Every verification records who/when (audit trail).
+- **Payment evidence is manual (decision #20, owner 2026-11-20):** the diver sends the amount, date paid, transfer reference, and transfer screenshot to Iris via **WhatsApp**. There is **no in-app claim form and no file upload in v1**. Iris matches the evidence against the bank app and **records the payment in the portal** (M5): amount, currency, date, reference, kind (deposit/balance/full), with who/when audit trail. Recording ≠ verification; verification is Iris's explicit act against the real bank record.
+- **WhatsApp evidence boundaries:** payment evidence only (no passport/medical/cert documents). Screenshots stay in Iris's instructor-only WhatsApp/business records — never uploaded to the app, never visible to other customers. They may contain bank details — treat as sensitive personal data; the privacy page states that payment evidence is handled this way and how long Iris keeps it.
+- **Screenshot ≠ verification.** The instructor matches the evidence against the bank app and verifies manually. Every verification records who/when (audit trail).
 - **Invoice:** one per booking, generated on demand as PDF from DB records. Must state that the slot is confirmed only after deposit verification, subject to availability. Shows trip currency, deposit, balance, due date, any points discount, and Booking ID as payment reference.
 - **Receipt:** one per instructor-verified payment (deposit, balance, or full), generated on demand. Links booking + payment + claim.
 - **Refunds:** executed externally by Iris, recorded in the portal against the booking/payment; points reversed per §7. Refund reasons: instructor cancellation, trip full after payment, eligibility declined, diver cancellation per policy (§8).
@@ -197,7 +197,7 @@ Eligibility approval (`pending / approved / declined`) is a **separate gate** fr
 - Inquiries list (from contact form + course interest), mark handled.
 - Trip management: create/edit trips, currency, deposit/balance rules, requirements, capacity, RM rate, status, bilingual content.
 - Bookings: per-trip manifest, eligibility review (approve/decline), status transitions, cancellation + refund flagging.
-- Payment verification queue: claim details + screenshot, verify/reject with audit trail, issue receipts.
+- Payment recording + verification: Iris logs payment details from the WhatsApp evidence, verifies against the bank record with audit trail, issues receipts.
 - Points ledger view per customer; apply redemption at invoice time.
 - Policy editor (refund/privacy/terms) with versioning.
 - Settings: points rules, default RM rate, instructor email allowlist, locale.
@@ -224,7 +224,7 @@ Key tables and fields (full DDL written during build; IDs human-readable where d
 - **customers** — `id` (CUS-xxx), `user_id`, name, email, phone, locale, created_at, `merged_into` (nullable, instructor-only merge).
 - **trips** — `id`, slug, status, currency, price_amount, deposit_type (`fixed`|`percent`), deposit_value, balance_due_days, capacity, min_participants, rm_rate, requirements (cert_level, min_dives, insurance, medical), bilingual content fields (title, summary, highlights, itinerary, included, additional_costs, notes), published flag, sample flag.
 - **bookings** — `id` (BKG-xxx), customer_id, `product_type` (`trip`|`course`), product_id, status (§5 machine), eligibility_status, policy_version_id, accepted_at, deposit_amount, balance_amount, currency, points_discount_amount, declarations (JSON: cert, dives, insurance, medical, emergency contact, age), created_at, completed_at, cancelled_at, cancel_reason.
-- **payment_claims** — id, booking_id, amount, currency, paid_on, reference, screenshot_key (S3), submitted_at, status (`pending`|`verified`|`rejected`).
+- **payment_claims** — id, booking_id, amount, currency, paid_on, reference, screenshot_key (nullable — unused in v1; evidence stays in WhatsApp), submitted_at, status (`pending`|`verified`|`rejected`). In v1 the **instructor** creates these records from WhatsApp evidence (M5); there is no diver-facing claim form.
 - **payments** — id, booking_id, claim_id, kind (`deposit`|`balance`|`full`|`refund`), amount, currency, rm_rate, rm_amount, verified_by, verified_at, receipt_no.
 - **invoices** — id, booking_id, number, issued_at, points_redemption_id (nullable); PDF regenerated on demand.
 - **points_ledger** — id, customer_id, booking_id (nullable), payment_id (nullable), type (`earned`|`redeemed`|`expired`|`reversed`), points, rm_amount, rate_snapshot, rule_snapshot (JSON), expires_at, created_at, note. Balance always derived.
@@ -247,7 +247,7 @@ Work happens on branch **`QwenWork-refactor`** (created 2026-11-18). No pushes t
 
 **Phase M3 — Data-backed content:** import `data/trips/*.json` as seed trips (sample labels preserved); trips list/detail render from DB via server components; retire `trips-data.js` client fetch; contact form → server action → `inquiries`.
 
-**Phase M4 — Auth + booking:** magic-link flow, customer identity, booking flow with declarations + policy acceptance, invoice generation, payment claim + screenshot upload.
+**Phase M4 — Auth + booking:** magic-link flow, customer identity, booking flow with declarations + policy acceptance, invoice generation. Payment evidence is manual via WhatsApp (decision #20); Iris records and verifies payments in the M5 portal.
 
 **Phase M5 — Instructor portal:** verification queue, bookings/eligibility, trips CRUD, points ledger + redemption, policy editor, settings, checklist, briefing handoff record.
 
@@ -261,9 +261,9 @@ Work happens on branch **`QwenWork-refactor`** (created 2026-11-18). No pushes t
 
 ## 14. Production obligations (in scope, not optional)
 
-- **Privacy/PDPA:** consent checkbox at booking and inquiry; public privacy page (versioned) covering what is collected (name, email, declarations, emergency contact, payment screenshot), why, access (instructor-only), retention, and how to request correction/deletion. Iris is the data controller; contact route for requests.
+- **Privacy/PDPA:** consent checkbox at booking and inquiry; public privacy page (versioned) covering what is collected in the app (name, email, declarations, emergency contact), why, access (instructor-only), retention, and how to request correction/deletion. Payment screenshots are **not collected by the app** — they travel via WhatsApp and stay in Iris's instructor-only records (§6). Iris is the data controller; contact route for requests.
 - **Terms + waiver:** accepted at booking with version snapshot; liability/waiver text confirmed by Iris before publication (content gate).
-- **Sensitive data:** medical declarations, emergency contacts, screenshots — instructor-only, encrypted at rest (provider default), never logged, never in repo, retention per §6/§9.
+- **Sensitive data:** medical declarations and emergency contacts — instructor-only, encrypted at rest (provider default), never logged, never in repo, retention per §9. Payment screenshots stay in Iris's WhatsApp records (instructor-only), never uploaded to the app (decision #20).
 - **Auth security:** single-use short-expiry magic links, request rate limiting + resend cooldown, session expiry, role checks server-side on every portal route, instructor allowlist.
 - **Audit trail:** every verification, eligibility decision, refund, merge, policy edit, and settings change recorded (who/when).
 - **Backups:** Neon point-in-time recovery + scheduled logical export to owner-controlled storage; restore procedure documented.
@@ -279,7 +279,7 @@ Work happens on branch **`QwenWork-refactor`** (created 2026-11-18). No pushes t
 - **Use of QwenWork (20%):** QwenWork is the founder's back-end workspace — it builds the site/portal, runs business workflows, and produces the trip-briefing draft. It is **not** an embedded API backend in the product. Any AI use in the demo must be presented as a **stated manual handoff**, not an implied integration.
 - **The one AI workflow:** Iris approves trip details in the portal → QwenWork drafts the trip briefing → Iris reviews/edits/approves → approved briefing stored and shared. Demo shows the handoff honestly: approved inputs, AI draft, human approval, published output.
 - **Demo data:** real database, fictional-but-realistic records — Iris persona, one featured bookable trip, a handful of customers/bookings across statuses (awaiting deposit, claimed, confirmed, completed with points). Sample/unverified trips keep honest `sample` labels per the vibe doc; no generated artwork presented as verified photography.
-- **Demo story arc (3 min):** diver discovers trip → books via magic link → pays externally + submits claim with screenshot → Iris verifies, slot confirmed, receipt issued → points earned → My Okim shows trip + rewards → Iris drafts briefing via QwenWork handoff. Show the instructor portal as the one-person-company operations engine.
+- **Demo story arc (3 min):** diver discovers trip → books via magic link → pays externally + sends the transfer screenshot to Iris via WhatsApp → Iris records and verifies the payment, slot confirmed, receipt issued → points earned → My Okim shows trip + rewards → Iris drafts briefing via QwenWork handoff. Show the instructor portal as the one-person-company operations engine.
 - **Two separate projects:** Okim Dive and JFunnel Studio remain separate submissions, connected only by a clearly-labelled manual deliverables handoff (no technical integration).
 
 ## 16. Deferred / Phase 2
@@ -288,6 +288,7 @@ Work happens on branch **`QwenWork-refactor`** (created 2026-11-18). No pushes t
 - Group/family bookings (multiple divers per booking).
 - Online payments / payment gateway.
 - Document uploads beyond the payment screenshot (cert cards, passports, medical forms).
+- **In-app payment claim form + screenshot upload (Cloudflare R2)** — owner decision #20 (2026-11-20): v1 uses manual WhatsApp evidence; Iris records payments in the portal. Revisit only if the manual flow proves too slow in real use.
 - Customer self-service changes (cancel, reschedule, redeem points online).
 - Embedded AI/cloud agents inside the product; AI eligibility assessment (never — safety decisions stay with Iris).
 - Headless WordPress CMS (existing future doc remains deferred; Postgres + portal already gives Iris self-service content editing, which may remove the need).
@@ -344,5 +345,8 @@ Per the repo content gate, none of these are published as fact until confirmed:
 | 16 | 2026-11-18 | Okim Points ledger (earned/redeemed/expired/reversed), never editable balance; usable after completion; reversed on refund | Earlier agreement, reaffirmed |
 | 17 | 2026-11-18 | Hashmeta dropped; eligibility question to organizers outstanding; AI shown as stated manual handoff | Earlier agreement, reaffirmed |
 | 18 | 2026-11-18 | Production intent: privacy/PDPA, terms, backups, audit, secure sign-in in scope | Earlier agreement, reaffirmed |
+| 19 | 2026-11-19 | Home pilot approved: Vega's UI-Refactor immersive-watercolour home (pilot hero, Learn/Return/Explore chooser, Tioman on-request feature, enquiry ending) + courses FAQ disclosures ported into the Next.js app, superseding the verbatim-port rule for these two surfaces only. UI-Refactor branch itself stays unmerged; unified audited footer kept | Owner (Jeff), after visual review of the pilot |
+| 20 | 2026-11-20 | Payment evidence manual: diver sends transfer screenshot via WhatsApp; Iris records + verifies payments in the portal; no in-app claim form or uploads; Cloudflare R2 deferred out of v1 | Owner (Jeff) |
+| 21 | 2026-11-20 | Policy v1 (refund/privacy/terms) seeded from §8 defaults, owner-approved for demo use; final wording pending Iris confirmation; versioned acceptance snapshots unchanged | Owner (Jeff) |
 
 **Change control:** edits to locked decisions require owner approval and a new row here. Iris-confirmation items (§17) are tracked separately and do not block build, only publication.

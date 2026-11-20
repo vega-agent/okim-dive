@@ -399,6 +399,48 @@ html[lang="zh-CN"] .section-title { font-family: var(--font-chinese-heading); }
 .courses-inquiry-panel p { max-width: var(--editorial-copy-width); margin-inline: auto; }
 .faq-intro { max-width: 720px; margin: 0 auto 2.5rem; text-align: center; }
 .faq-intro .section-title { margin-bottom: 1rem; }
+/* FAQ disclosures (UI-Refactor courses commit, approved 2026-11-19) */
+.faq-item {
+  padding: 0;
+  overflow: hidden;
+  background: rgba(255, 253, 247, .82);
+}
+.faq-item summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  min-height: 4.5rem;
+  padding: 1.25rem 1.5rem;
+  color: var(--ocean-deep);
+  font-family: var(--font-heading);
+  font-size: clamp(1.05rem, 1.8vw, 1.3rem);
+  font-weight: 500;
+  line-height: 1.3;
+  cursor: pointer;
+  list-style: none;
+}
+.faq-item summary::-webkit-details-marker { display: none; }
+.faq-item summary::after {
+  flex: 0 0 auto;
+  content: '+';
+  color: var(--ocean-deep);
+  font-family: var(--font-body);
+  font-size: 1.5rem;
+  font-weight: 400;
+  line-height: 1;
+}
+.faq-item[open] summary::after { content: '−'; }
+.faq-item summary:focus-visible {
+  outline: 3px solid var(--coral);
+  outline-offset: -3px;
+}
+.faq-item p {
+  margin: 0;
+  padding: 0 1.5rem 1.5rem;
+  color: var(--ocean-mid);
+  line-height: 1.65;
+}
 .faq-cta { max-width: 820px; margin: 3rem auto 0; padding: clamp(1.75rem, 4vw, 2.5rem) clamp(1.25rem, 5vw, 3.5rem); border-top: 1px solid rgba(23, 59, 74, .18); border-bottom: 1px solid rgba(23, 59, 74, .12); background: radial-gradient(ellipse at 50% 48%, rgba(255, 253, 247, .72) 0%, rgba(255, 253, 247, .42) 56%, rgba(255, 253, 247, 0) 100%); text-align: center; }
 .faq-cta p { max-width: 680px; margin: 0 auto 1.5rem; color: var(--ocean-deep); font-weight: 500; line-height: 1.75; }
 @media (max-width: 900px) { .core-courses-grid { grid-template-columns: 1fr; max-width: 620px; margin-inline: auto; } }
@@ -424,9 +466,11 @@ html[lang="zh-CN"] .section-title { font-family: var(--font-chinese-heading); }
 .contact-methods .method-card p { margin: .4rem 0; font-size: .9rem; }
 .contact-methods .method-card .method-icon { font-size: 1.35rem; }
 .contact-methods .method-card .btn { padding: .55rem .85rem; font-size: .8rem; }
-.contact-form .form-group.form-consent { margin-top: .25rem; }
-.contact-form .form-group.form-consent label { display: grid; grid-template-columns: 1.1rem minmax(0, 1fr); align-items: start; column-gap: .65rem; width: 100%; margin: 0; text-align: left; font-size: .85rem; line-height: 1.45; }
-.contact-form .form-group.form-consent input[type="checkbox"] { width: 1rem; height: 1rem; margin: .2rem 0 0; justify-self: start; }
+/* Consent checkboxes: shared across ALL forms (contact, booking, portal) —
+   checkbox left, wrapping label text right; never full-width inputs. */
+.form-group.form-consent { margin-top: .25rem; }
+.form-group.form-consent label { display: grid; grid-template-columns: 1.1rem minmax(0, 1fr); align-items: start; column-gap: .65rem; width: 100%; margin: 0; text-align: left; font-size: .85rem; line-height: 1.45; }
+.form-group.form-consent input[type="checkbox"] { width: 1rem; height: 1rem; margin: .2rem 0 0; justify-self: start; }
 @media (max-width: 640px) { .home-journey-grid { grid-template-columns: 1fr; gap: .5rem; } .home-journey-step { padding: 1.25rem 0; } }
 
 /* Package pricing and Tioman local diving */
@@ -583,4 +627,155 @@ html[lang="zh-CN"] .section-title { font-family: var(--font-chinese-heading); }
   background-color: var(--coral);
   border-color: var(--coral);
   background-image: none;
+}
+
+/* Home pilot — one painting-led environment (UI-Refactor, approved 2026-11-19).
+   Ported from body.home-pilot to a .home-pilot wrapper so the styles are
+   server-rendered and work without JS; body-level effects use :has(). */
+.home-pilot { --pilot-ink: #173e4b; --pilot-paper: #f4f8eb; color: var(--pilot-ink); background: #174f67; }
+body:has(.home-pilot) { background: #174f67; }
+body:has(.home-pilot)::before { content: none; animation: none; }
+.home-pilot #main-content { overflow: clip; }
+.home-pilot .pilot-hero { position: relative; isolation: isolate; display: flex; align-items: center; min-height: 700px; height: min(880px, 100svh); padding: 110px max(7vw, calc((100vw - 1100px) / 2)) 130px; }
+.home-pilot .pilot-hero-art { position: absolute; z-index: -3; inset: 0; background: url('../assets/backgrounds/generated/home-hero-watercolor.webp') center / cover; }
+.home-pilot .pilot-hero::before { content: ''; position: absolute; z-index: -1; inset: 0; background: radial-gradient(ellipse at 24% 42%, rgba(244,248,235,.94) 0%, rgba(244,248,235,.75) 22%, rgba(244,248,235,.25) 43%, transparent 65%); pointer-events: none; }
+.home-pilot .pilot-hero-copy { position: relative; width: min(100%, 760px); }
+.home-pilot h1 { font-size: clamp(3.2rem, 6.2vw, 5.2rem); line-height: 1.03; max-width: 18ch; margin: 0 0 1.5rem; color: var(--pilot-ink); text-wrap: balance; }
+.home-pilot h2 { font-size: clamp(2.25rem, 4vw, 3.5rem); line-height: 1.12; margin: 0 0 1.5rem; color: var(--pilot-ink); text-wrap: balance; }
+.home-pilot main p { color: var(--pilot-ink); font-weight: 400; line-height: 1.7; margin: 0 0 1.5rem; }
+.home-pilot .pilot-hero-copy > p { font-size: 1.15rem; max-width: 38ch; }
+.home-pilot .pilot-actions { display: flex; flex-wrap: wrap; gap: .8rem; }
+.home-pilot .pilot-button { display: inline-flex; align-items: center; justify-content: center; min-height: 48px; padding: .8rem 1.45rem; border: 1px solid transparent; border-radius: 4px; font-family: var(--font-body); font-weight: 700; line-height: 1.4; text-align: center; text-decoration: none; transition: background-color 160ms, color 160ms; }
+.home-pilot .pilot-primary { background: #b92f40; color: #fff; }
+.home-pilot .pilot-primary:hover { background: #9c2434; }
+.home-pilot .pilot-secondary { background: rgba(244,248,235,.9); color: var(--pilot-ink); border-color: var(--pilot-ink); }
+.home-pilot .pilot-secondary:hover { background: #fff; }
+.home-pilot a:focus-visible, .home-pilot button:focus-visible { outline: 3px solid #173e4b; outline-offset: 5px; box-shadow: 0 0 0 7px #f4f8eb; }
+.home-pilot .pilot-ocean { position: relative; isolation: isolate; background: url('../assets/backgrounds/ocean/ocean-journey.webp') center / cover no-repeat; padding: 1px 0 80px; }
+.home-pilot .pilot-waterline { position: absolute; z-index: 2; top: -100px; left: -2%; width: 104%; height: 210px; pointer-events: none; background: url('../assets/watercolor/dividers/wave-divider.webp') center 65% / cover; mask-image: linear-gradient(transparent, #000 38%, #000 58%, transparent); }
+.home-pilot .pilot-philosophy, .home-pilot .pilot-tioman { position: relative; isolation: isolate; display: flex; align-items: center; min-height: 530px; max-width: 1200px; margin: 0 auto; padding: 100px 7%; }
+.home-pilot .pilot-reading { position: relative; width: min(100%, 700px); }
+.home-pilot .pilot-reading::before { content: ''; position: absolute; z-index: -1; inset: -70px -80px; pointer-events: none; background: radial-gradient(ellipse, rgba(244,248,235,.94) 10%, rgba(244,248,235,.78) 44%, transparent 72%); }
+.home-pilot .pilot-philosophy .pilot-reading { margin-left: 5%; }
+.home-pilot .pilot-reading > p { max-width: 58ch; font-size: 1.1rem; }
+.home-pilot .pilot-text-link { display: inline-flex; gap: 1.5rem; align-items: center; min-height: 44px; color: var(--pilot-ink); font-weight: 700; text-decoration: underline; text-underline-offset: .3em; }
+.home-pilot .pilot-chooser { position: relative; isolation: isolate; max-width: 950px; width: calc(100% - 96px); margin: 30px auto 70px; padding: 50px 45px; }
+.home-pilot .pilot-chooser::before { content: ''; position: absolute; z-index: -1; inset: -40px -90px; background: radial-gradient(ellipse, rgba(244,248,235,.96) 15%, rgba(244,248,235,.83) 48%, transparent 73%); pointer-events: none; }
+.home-pilot .pilot-path { display: grid; grid-template-columns: 150px 1fr 32px; align-items: center; gap: 2rem; padding: 1.75rem 0; color: var(--pilot-ink); border-top: 1px solid rgba(23,62,75,.45); text-decoration: none; }
+.home-pilot .pilot-path:last-child { border-bottom: 1px solid rgba(23,62,75,.45); }
+.home-pilot .pilot-path h3 { font-family: var(--font-body); font-size: 1.8rem; font-weight: 700; margin: 0; color: inherit; }
+.home-pilot .pilot-path p { margin: 0; max-width: 47ch; }
+.home-pilot .pilot-path > span { font-size: 1.8rem; }
+.home-pilot .pilot-path:hover { background: rgba(244,248,235,.45); border-color: rgba(23,62,75,.7); }
+.home-pilot .pilot-tioman { min-height: 480px; justify-content: flex-end; padding-top: 70px; padding-bottom: 110px; }
+.home-pilot .pilot-availability { font-size: .875rem; font-weight: 700; margin-bottom: .75rem; }
+.home-pilot .pilot-enquiry { position: relative; isolation: isolate; max-width: 780px; margin: 0 auto; padding: 70px 30px 90px; text-align: center; }
+.home-pilot .pilot-enquiry::before { content: ''; position: absolute; inset: 0 -60px; z-index: -1; background: radial-gradient(ellipse, rgba(244,248,235,.97), rgba(244,248,235,.84) 42%, transparent 73%); pointer-events: none; }
+@media (max-width: 700px) {
+  .home-pilot .pilot-hero { height: auto; min-height: min(800px, 100svh); padding: 140px 28px 140px; align-items: flex-start; }
+  .home-pilot .pilot-hero-art { background-position: 56% center; }
+  .home-pilot .pilot-hero::before { background: radial-gradient(ellipse at 30% 38%, rgba(244,248,235,.94), rgba(244,248,235,.76) 28%, transparent 73%); }
+  .home-pilot .pilot-hero-copy { width: 100%; }
+  .home-pilot h1 { max-width: 12ch; }
+  .home-pilot .pilot-philosophy, .home-pilot .pilot-tioman { min-height: 430px; padding: 90px 28px; }
+  .home-pilot .pilot-reading { width: 100%; }
+  .home-pilot .pilot-chooser { width: calc(100% - 48px); margin: 20px auto 50px; padding: 35px 18px; }
+  .home-pilot .pilot-path { grid-template-columns: 1fr 24px; gap: .8rem; padding: 1.4rem 0; }
+  .home-pilot .pilot-path h3 { font-size: 1.45rem; }
+  .home-pilot .pilot-path p { grid-column: 1 / -1; }
+  .home-pilot .pilot-reading::before { inset: -40px -25px; }
+  .home-pilot .pilot-enquiry { padding: 55px 20px 70px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  body:has(.home-pilot) .navbar, body:has(.home-pilot) .navbar * { transition: none !important; }
+}
+
+/* Home motion pass (owner request 2026-11-20): bounded entrance, scroll reveals
+   via the shared motion-reveal system, and hover feedback. One-shot only — no
+   continuous ambient animation; everything yields to prefers-reduced-motion. */
+@keyframes pilot-rise { from { opacity: 0; transform: translateY(18px); } to { opacity: 1; transform: none; } }
+@keyframes pilot-art-settle { from { transform: scale(1.045); } to { transform: scale(1); } }
+.home-pilot .pilot-hero-copy > * { animation: pilot-rise 700ms ease-out both; }
+.home-pilot .pilot-hero-copy > p { animation-delay: 120ms; }
+.home-pilot .pilot-actions { animation-delay: 240ms; }
+.home-pilot .pilot-hero-art { animation: pilot-art-settle 1400ms ease-out both; }
+.home-pilot .pilot-button { transition: background-color 160ms, color 160ms, transform 160ms ease, box-shadow 160ms ease; }
+.home-pilot .pilot-button:hover { transform: translateY(-2px); box-shadow: 0 6px 16px rgba(23,62,75,.22); }
+.home-pilot .pilot-button:active { transform: translateY(0); box-shadow: 0 2px 6px rgba(23,62,75,.18); }
+.home-pilot .pilot-path > span, .home-pilot .pilot-text-link span { transition: transform 160ms ease; }
+.home-pilot .pilot-path:hover > span, .home-pilot .pilot-text-link:hover span { transform: translate(4px,-4px); }
+
+/* Mobile ocean environment: fixed viewport-sized layer instead of cover-stretching
+   the 941x1672 painting across the ~4000px-tall journey (which blurred it ~2.7x).
+   A real fixed element works on iOS Safari, unlike background-attachment: fixed. */
+.pilot-ocean-bg { display: none; }
+@media (max-width: 700px) {
+  .home-pilot .pilot-ocean { background-image: none; }
+  .pilot-ocean-bg { display: block; position: fixed; inset: 0; z-index: -2; pointer-events: none; background: url('../assets/backgrounds/ocean/ocean-journey.webp') center / cover no-repeat; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .home-pilot .pilot-hero-copy > *, .home-pilot .pilot-hero-art { animation: none; }
+  .home-pilot .pilot-button, .home-pilot .pilot-path > span, .home-pilot .pilot-text-link span { transition: none; }
+  .home-pilot .pilot-button:hover, .home-pilot .pilot-button:active { transform: none; box-shadow: none; }
+  .home-pilot .pilot-path:hover > span, .home-pilot .pilot-text-link:hover span { transform: none; }
+}
+
+/* Trip detail page (M4): badge flows in the hero instead of card-corner absolute */
+.trips-hero .trip-badge { position: static; display: inline-block; margin-bottom: 1rem; }
+
+/* Booking wizard + invoice (M4) — DESIGN-SYSTEM §13: white card surfaces,
+   standard form inputs, restrained numbered step markers, print-ready invoice. */
+.booking-shell { max-width: 720px; margin: 0 auto; }
+.booking-steps { display: flex; gap: 1.5rem; list-style: none; padding: 0; margin: 0 0 1.5rem; }
+.booking-steps li { display: flex; align-items: center; gap: .5rem; color: var(--ink-soft); font-size: .9rem; font-weight: 600; }
+.booking-step-mark { width: 1.75rem; height: 1.75rem; border-radius: 999px; border: 1px solid var(--whisper-border); display: inline-flex; align-items: center; justify-content: center; font-size: .8rem; background: rgba(255,255,255,.7); }
+.booking-steps li.current { color: var(--ocean-deep); }
+.booking-steps li.current .booking-step-mark { background: var(--ocean-deep); color: #fff; border-color: var(--ocean-deep); }
+.booking-steps li.done .booking-step-mark { background: rgba(42,157,143,.15); color: var(--ocean-deep); border-color: var(--kelp); }
+.booking-card { background: rgba(255,255,255,.95); border: 1px solid var(--whisper-border); border-radius: 14px; box-shadow: 0 14px 36px rgba(23,59,74,.08); padding: clamp(1.5rem, 4vw, 2.5rem); }
+.booking-title { margin: 0 0 .25rem; font-size: 1.6rem; }
+.booking-price { margin: 0 0 1.5rem; color: var(--ocean-mid); font-weight: 700; }
+.booking-card h3 { margin: 0 0 .5rem; font-size: 1.2rem; }
+.booking-card h4 { margin: 1.25rem 0 .5rem; font-size: 1.05rem; }
+.booking-intro { color: var(--ocean-mid); line-height: 1.6; margin: 0 0 1.25rem; }
+.booking-signed-in { font-size: .9rem; color: var(--ink-soft); margin: 0 0 1.25rem; }
+.booking-card .btn { width: 100%; }
+.booking-policy { border: 1px solid var(--whisper-border); border-radius: 10px; padding: .9rem 1rem; margin: 0 0 1.25rem; background: rgba(255,253,247,.6); }
+.booking-policy summary { cursor: pointer; font-weight: 700; color: var(--ocean-deep); }
+.booking-policy h4 { margin: 1rem 0 .4rem; font-size: .95rem; }
+.booking-policy-body { white-space: pre-wrap; font-size: .875rem; line-height: 1.6; color: var(--ocean-mid); max-height: 18rem; overflow: auto; }
+.booking-summary { display: grid; gap: .75rem; margin: 0 0 1.25rem; }
+.booking-summary div { display: grid; grid-template-columns: 1fr auto; gap: 1rem; border-bottom: 1px solid rgba(23,59,74,.1); padding-bottom: .6rem; }
+.booking-summary dt { color: var(--ink-soft); font-size: .85rem; }
+.booking-summary dd { margin: 0; font-weight: 700; text-align: right; }
+.booking-id { letter-spacing: .03em; color: var(--ocean-deep); font-size: 1.05rem; }
+.booking-pay-steps { margin: 0 0 1.25rem; padding-left: 1.2rem; color: var(--ocean-mid); line-height: 1.6; }
+.booking-pay-steps li { margin: .4rem 0; }
+.booking-actions { display: flex; align-items: center; gap: 1.25rem; flex-wrap: wrap; }
+.booking-actions .btn { width: auto; }
+.invoice-doc { background: #fff; border: 1px solid var(--whisper-border); border-radius: 14px; box-shadow: 0 14px 36px rgba(23,59,74,.08); padding: clamp(1.5rem, 4vw, 3rem); max-width: 820px; margin: 0 auto; }
+.invoice-head { display: flex; justify-content: space-between; align-items: flex-start; gap: 1rem; margin-bottom: 1.5rem; }
+.invoice-head h1 { font-size: 1.6rem; margin: 0; }
+.invoice-brand { font-weight: 700; color: var(--ocean-mid); margin: 0 0 .25rem; letter-spacing: .05em; }
+.invoice-meta { display: grid; grid-template-columns: repeat(2, 1fr); gap: 1rem; margin: 0 0 1.5rem; }
+.invoice-meta dt { font-size: .75rem; text-transform: uppercase; letter-spacing: .06em; color: var(--ink-soft); font-weight: 700; }
+.invoice-meta dd { margin: .2rem 0 0; line-height: 1.5; }
+.invoice-table { width: 100%; border-collapse: collapse; margin-bottom: 1.25rem; }
+.invoice-table th { text-align: left; font-size: .8rem; text-transform: uppercase; letter-spacing: .05em; color: var(--ink-soft); border-bottom: 1px solid rgba(23,59,74,.2); padding: .5rem .4rem; }
+.invoice-table td { padding: .6rem .4rem; border-bottom: 1px solid rgba(23,59,74,.08); }
+.invoice-table th:last-child, .invoice-table td:last-child { text-align: right; }
+.invoice-table tfoot td { font-weight: 700; border-top: 2px solid var(--ocean-deep); border-bottom: 0; }
+.invoice-reference { margin: 0 0 .75rem; }
+.invoice-notice { border-left: 3px solid var(--coral); background: rgba(190,233,232,.35); padding: .9rem 1rem; color: var(--ocean-mid); line-height: 1.55; margin: 0 0 .75rem; }
+.invoice-policy { font-size: .85rem; color: var(--ink-soft); margin: 0; }
+@media (max-width: 640px) {
+  .invoice-meta { grid-template-columns: 1fr; }
+  .booking-steps { gap: .9rem; }
+  .booking-steps li { font-size: .8rem; }
+}
+@media print {
+  .navbar, .footer, .no-print, .page-hero { display: none !important; }
+  body, .invoice-page { background: #fff !important; }
+  body::before { content: none !important; }
+  .invoice-doc { border: 0; box-shadow: none; padding: 0; max-width: none; }
 }

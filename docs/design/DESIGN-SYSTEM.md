@@ -1,6 +1,6 @@
 # Okim Dive - Design System
 
-**Version:** 1.1
+**Version:** 1.2
 **Created:** 2026-01-XX
 **Inspired by:** Stripe, Notion, Airbnb design systems
 **Approved Direction:** Continuous Underwater Editorial / Dive Journal
@@ -435,12 +435,13 @@ letter-spacing: 0.5px;
 
 > These describe the six migrated public pages (existing implementations are the reference). New routes from `MVP-SPEC.md` §10 — `/trips/[slug]`, `/book/[tripSlug]`, `/my`, `/portal`, `/refund-policy`, `/privacy`, `/terms` — follow §13 plus the original page's compositional patterns.
 
-### Home Page
-1. **Hero Section**: Ocean gradient background, headline, tagline, 2 CTAs
-2. **Intro Section**: "Discover the underwater world with Iris" + description
-3. **Features Grid**: 3 cards (Courses, Trips, Personalized) with icons
-4. **Social Proof**: Instagram feed preview or testimonials
-5. **Social Links**: Instagram, Facebook, XiaoHongShu cards
+### Home Page (pilot, approved 2026-11-19 — MVP-SPEC decision #19)
+1. **Pilot hero**: full-viewport sunlit-surface → underwater watercolor scene, "Explore the Ocean With Wonder", Explore Courses / View Trips actions
+2. **Painted waterline**: one-shot crossing enhancement (bounded, reduced-motion safe); no continuous ambient animation on home
+3. **Philosophy**: "Learn with care. Explore with wonder." reading wash + Meet Iris link
+4. **Chooser**: Learn / Return / Explore — three parallel paths (not certification steps)
+5. **Tioman feature**: honest "On request" invitation for certified divers
+6. **Enquiry ending**: one primary CTA to contact; unified footer
 
 ### About Page
 1. **Hero**: "About Okim Dive"
@@ -500,7 +501,7 @@ Status badges are information, not CTAs. Coral stays reserved for primary action
 - Use the Form Input spec in §4 (white, 8px radius, soft border, Deep Water focus ring)
 - Validation: error border `#E63946` with 2px inset ring; error text Body Small in Coral below the field; success state Kelp text only (no green border flash)
 - Multi-step booking flow: one section per step, a restrained journey-track progress indicator (see §5), Back/Continue as secondary/primary buttons — never a destructive-looking Next
-- Required screenshot upload (payment claim): single file input, preview thumbnail in a Standard Card, caption "payment evidence only" per privacy rules
+- Payment evidence is manual (WhatsApp) in v1 — no upload UI (MVP-SPEC decision #20). The portal's payment-recording form follows the Form Input spec above
 
 ### Empty states
 - Short heading (Card Title size), one sentence of Body text, one primary CTA where an action exists. Example: verification queue empty → "All caught up" + "Nothing waiting for review."
@@ -526,5 +527,7 @@ Status badges are information, not CTAs. Coral stays reserved for primary action
 | 2026-01-XX | 1.0 | Initial system | Vega |
 | 2026-08-27 | 1.0 | Non-negotiable watercolor rules; trip dialog patterns | Vega |
 | 2026-11-19 | 1.1 | Audit fixes: Fraunces/Noto first-class (removes stale Playfair specs), bilingual rules for all surfaces, architecture guardrail updated for Next.js migration, hero gradient marked reference-only, Google Fonts link corrected, new §13 app surfaces (tables, status badges, forms, empty states, currency/points, transactional emails) | QwenWork (owner: Jeff) |
+| 2026-11-19 | 1.2 | Home pilot approved by owner and ported to Next.js (§12 Home template replaced; MVP-SPEC decision #19): painting-led hero, one-shot waterline, Learn/Return/Explore chooser, Tioman on-request feature, enquiry ending; courses FAQ becomes bilingual disclosures | QwenWork (owner: Jeff) |
+| 2026-11-20 | 1.3 | §13 forms: screenshot-upload rule removed — payment evidence is manual via WhatsApp in v1 (MVP-SPEC decision #20); portal payment-recording form follows the standard form spec | QwenWork (owner: Jeff) |
 
-**Status:** v1.1 active for the Next.js migration on branch `QwenWork-refactor` per `MVP-SPEC.md` v1.0.
+**Status:** v1.2 active for the Next.js migration on branch `QwenWork-refactor` per `MVP-SPEC.md` v1.0.

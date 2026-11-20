@@ -1,0 +1,20 @@
+{
+  "id": "tioman-reef-weekend",
+  "title": "Tioman Reef Weekend",
+  "location": "Tioman Island, Malaysia",
+  "status": "Open",
+  "sample": true,
+  "summary": "A small-group weekend of guided reef dives around Tioman, with dates set and equipment arranged together.",
+  "travelDates": "December 12–14, 2026",
+  "duration": "3 days / 2 nights",
+  "difficulty": "Open Water and above",
+  "groupSize": "Up to 8 divers",
+  "cost": { "amount": "RM 1,200", "basis": "per diver" },
+  "bookingRules": { "deposit": "30% deposit required to reserve a place.", "balanceDue": "Remaining balance due 30 days before departure.", "cancellation": "See the refund policy accepted at booking.", "requirements": "Open Water certification (or equivalent) and travel insurance required." },
+  "highlights": ["Six guided boat dives", "Small group of up to 8 divers", "Reef sites around Tioman"],
+  "itinerary": ["Day 1: Arrival, check-in, and two afternoon dives", "Day 2: Three guided dives around Tioman's reefs", "Day 3: Morning dive and departure after lunch"],
+  "included": ["Six guided dives", "Dive guide and trip planning support"],
+  "additionalCosts": ["Equipment rental, if needed", "Accommodation and ferry transfers"],
+  "notes": "SAMPLE CONTENT ONLY. Dates, pricing, and inclusions are placeholders for the booking-flow demo; final details require Iris's confirmation.",
+  "inquiryLabel": "Ask about this trip"
+}

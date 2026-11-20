@@ -46,10 +46,11 @@ type TripJson = {
   additionalCosts?: string[]
   notes?: string
   inquiryLabel?: string
+  sample?: boolean
 }
 
-// Seed order = current site order (Tioman featured first).
-const files = ['tioman-on-request.json', 'sipadan-sample.json', 'raja-ampat-sample.json']
+// Seed order = current site order (Tioman featured first; demo departure second).
+const files = ['tioman-on-request.json', 'tioman-reef-weekend.json', 'sipadan-sample.json', 'raja-ampat-sample.json']
 const normalize = (value: string) => value.replace(/\s+/g, ' ').trim()
 const missingZh: string[] = []
 const zh = (value: string | undefined | null): string | null => {
@@ -80,9 +81,20 @@ function parsePrice(amount: string | undefined): { currency: 'MYR' | 'SGD' | 'US
   return { currency, price: m[2].replace(/,/g, '') }
 }
 
+// Stable IDs per slug (display order is sortOrder, not ID).
+const TRIP_IDS: Record<string, string> = {
+  'tioman-on-request': 'TRP-001',
+  'sipadan-sample': 'TRP-002',
+  'raja-ampat-sample': 'TRP-003',
+  'tioman-reef-weekend': 'TRP-004',
+}
+
 const rows = files.map((file, index) => {
   const trip: TripJson = JSON.parse(readFileSync(join(process.cwd(), 'data/trips', file), 'utf8'))
-  const sample = trip.status === 'Sample trip'
+  const sample = trip.sample ?? trip.status === 'Sample trip'
+  const status = sample && trip.status === 'Sample trip' ? 'draft' as const
+    : trip.status === 'Open' ? 'open' as const
+    : 'on_request' as const
   const { currency, price } = parsePrice(trip.cost?.amount)
   const { start, end } = parseTravelDates(trip.travelDates)
   const depositPercent = /(\d+(?:\.\d+)?)%/.exec(trip.bookingRules?.deposit ?? '')
@@ -91,9 +103,9 @@ const rows = files.map((file, index) => {
   const requirements = trip.bookingRules?.requirements ?? ''
 
   return {
-    id: `TRP-${String(index + 1).padStart(3, '0')}`,
+    id: TRIP_IDS[trip.id] ?? `TRP-${String(index + 1).padStart(3, '0')}`,
     slug: trip.id,
-    status: sample ? 'draft' as const : 'on_request' as const,
+    status,
     currency,
     priceAmount: price,
     depositType: 'percent' as const,
@@ -102,7 +114,7 @@ const rows = files.map((file, index) => {
     capacity: capacityNumbers.length ? Math.max(...capacityNumbers) : 1,
     minParticipants: 1, // unconfirmed (§17); Iris sets per trip
     rmRate: '1', // USD→RM rate unconfirmed (§17); default until Iris sets it in the portal
-    reqCertLevel: /advanced certification/i.test(requirements) ? 'advanced' : null,
+    reqCertLevel: /advanced certification/i.test(requirements) ? 'advanced' : /open water/i.test(requirements) ? 'open_water' : null,
     reqMinDives: null,
     reqInsurance: /insurance required/i.test(requirements),
     reqMedical: true,

@@ -21,6 +21,12 @@ const revealSelectors = [
   '.form-content',
   '.trip-planning-note',
   '.gallery-cta .cta-content',
+  // Home pilot (motion pass 2026-11-20): gentle rise for the journey sections.
+  '.pilot-philosophy .pilot-reading',
+  '.pilot-chooser h2',
+  '.pilot-path',
+  '.pilot-tioman .pilot-reading',
+  '.pilot-enquiry',
 ]
 
 export default function SiteMotion() {
@@ -35,7 +41,7 @@ export default function SiteMotion() {
       elements.forEach((element, index) => {
         if (element.classList.contains('motion-reveal')) return
         element.classList.add('motion-reveal')
-        if (element.matches('.feature-card, .quick-link-card, .course-card, .trip-card, .method-card, .gallery-item')) {
+        if (element.matches('.feature-card, .quick-link-card, .course-card, .trip-card, .method-card, .gallery-item, .pilot-path')) {
           ;(element as HTMLElement).style.setProperty('--reveal-delay', `${Math.min(index % 4, 3) * 70}ms`)
         }
       })
@@ -148,20 +154,59 @@ export default function SiteMotion() {
   }, [])
 
   useEffect(() => {
+    const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)')
+
+    // Home pilot (UI-Refactor port): the painted waterline gets a single bounded
+    // crossing animation, cancelled if the visitor switches to reduced motion.
+    // No continuous ambient animation. Section reveals run below as usual.
+    let waterlineCleanup = () => {}
+    if (document.querySelector('.home-pilot')) {
+      const waterline = document.querySelector('.pilot-waterline') as HTMLElement | null
+      if (waterline && !reduceMotion.matches && 'IntersectionObserver' in window) {
+        let crossing: Animation | null = null
+        const waterlineObserver = new IntersectionObserver((entries) => {
+          entries.forEach((entry) => {
+            if (!entry.isIntersecting || waterline.dataset.crossed) return
+            waterline.dataset.crossed = 'true'
+            crossing = waterline.animate([
+              { opacity: .35, transform: 'translateY(-24px)' },
+              { opacity: 1, transform: 'translateY(0)' },
+            ], { duration: 900, easing: 'cubic-bezier(.2,.65,.3,1)', fill: 'forwards' })
+            waterlineObserver.unobserve(waterline)
+          })
+        }, { threshold: 0 })
+        waterlineObserver.observe(waterline)
+        const onPreferenceChange = () => {
+          if (!reduceMotion.matches) return
+          crossing?.cancel()
+          waterline.dataset.crossed = 'true'
+        }
+        if (typeof reduceMotion.addEventListener === 'function') {
+          reduceMotion.addEventListener('change', onPreferenceChange)
+        }
+        waterlineCleanup = () => {
+          waterlineObserver.disconnect()
+          crossing?.cancel()
+          if (typeof reduceMotion.removeEventListener === 'function') {
+            reduceMotion.removeEventListener('change', onPreferenceChange)
+          }
+        }
+      }
+    }
+
     // Re-prepare reveals for newly mounted page content after client navigation.
     const elements = document.querySelectorAll(revealSelectors.join(','))
-    const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)')
     elements.forEach((element, index) => {
       if (element.classList.contains('motion-reveal')) return
       element.classList.add('motion-reveal')
-      if (element.matches('.feature-card, .quick-link-card, .course-card, .trip-card, .method-card, .gallery-item')) {
+      if (element.matches('.feature-card, .quick-link-card, .course-card, .trip-card, .method-card, .gallery-item, .pilot-path')) {
         ;(element as HTMLElement).style.setProperty('--reveal-delay', `${Math.min(index % 4, 3) * 70}ms`)
       }
       if (reduceMotion.matches) element.classList.add('is-visible')
     })
     if (reduceMotion.matches || !('IntersectionObserver' in window)) {
       elements.forEach((element) => element.classList.add('is-visible'))
-      return
+      return waterlineCleanup
     }
     const observer = new IntersectionObserver((entries, currentObserver) => {
       entries.forEach((entry) => {
@@ -173,7 +218,10 @@ export default function SiteMotion() {
     elements.forEach((element) => {
       if (!element.classList.contains('is-visible')) observer.observe(element)
     })
-    return () => observer.disconnect()
+    return () => {
+      waterlineCleanup()
+      observer.disconnect()
+    }
   }, [pathname])
 
   return null

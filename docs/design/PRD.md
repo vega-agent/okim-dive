@@ -1,8 +1,8 @@
 # Okim Dive Website - Product Requirements Document
 
-**Version:** 0.2\
+**Version:** 0.3\
 **Created:** 2026-01-XX\
-**Last Updated:** 2026-11-18\
+**Last Updated:** 2026-11-20\
 **Owner:** Jeff\
 **Developer:** Vega (website foundation); QwenWork (portal MVP + Next.js migration)\
 **Companion spec:** `docs/design/MVP-SPEC.md` v1.0 — approved source of truth for booking/portal scope. Where this PRD and the MVP spec differ on portal/booking matters, the MVP spec wins.
@@ -264,7 +264,7 @@ Scope, flows, rules, and schema are defined in `docs/design/MVP-SPEC.md` (approv
 - **Database:** Neon Postgres (free tier) + Drizzle ORM — single source of truth
 - **Auth:** Auth.js email magic links (no passwords), role-gated instructor portal
 - **Email:** Resend free tier + purchased email-only domain (~SGD 15/yr); site stays on free subdomain
-- **Storage:** S3-compatible (Cloudflare R2 free tier) for payment screenshots only
+- **Storage:** no in-app uploads in v1 — payment evidence via WhatsApp, Iris records verification in the portal (MVP-SPEC decision #20); Cloudflare R2 deferred
 - **Hosting:** Vercel free tier, `okimdive.vercel.app`, Next server runtime (`output: 'export'` removed)
 - **Responsive:** Mobile-first CSS preserved
 - **Performance:** Target < 3s load time on 3G for public pages
@@ -335,7 +335,7 @@ Defined by `docs/design/MVP-SPEC.md`; work on branch `QwenWork-refactor`.
 - [ ] M1 Scaffold Next.js + Neon + Drizzle + Auth.js + Resend
 - [ ] M2 Port six public pages with design/i18n/motion parity (desktop + mobile verified)
 - [ ] M3 DB-backed trips + contact form → inquiries
-- [ ] M4 Magic-link auth + booking flow + invoice + payment claim with screenshot
+- [ ] M4 Magic-link auth + booking flow + invoice (payment evidence manual via WhatsApp; verification in M5 portal)
 - [ ] M5 Instructor portal (verification queue, bookings, eligibility, trips CRUD, points ledger, policy editor, settings, checklist, briefing handoff)
 - [ ] M6 My Okim (read-only) + public refund/privacy/terms pages
 - [ ] M7 Hardening, tests, cutover, remove vestigial static config, update AGENTS/CLAUDE guardrails
@@ -445,6 +445,14 @@ Defined by `docs/design/MVP-SPEC.md`; work on branch `QwenWork-refactor`.
 - Owner refuses recurring platform fees and requires code ownership for production use
 - QwenWork is the build workspace and back-end operations engine, not an embedded product API; AI use is shown as a stated manual handoff
 
+### Decision 9: Manual payment evidence (WhatsApp), R2 deferred
+**Date:** 2026-11-20\
+**Decision:** No in-app payment claim form or screenshot upload in v1. The diver pays externally with the Booking ID as reference and sends the transfer screenshot to Iris via WhatsApp; Iris records and verifies the payment in the portal. Cloudflare R2 is deferred out of v1.\
+**Rationale:**
+- Owner chose the simplest honest flow for a one-person business already run over WhatsApp
+- Removes upload/storage/retention surface from the MVP; verification stays a human act against the bank record
+- MVP-SPEC §6/§12/§13/§14 updated; decision #20 in the spec's change-control log
+
 ---
 
 ## 11. Change Log
@@ -453,6 +461,7 @@ Defined by `docs/design/MVP-SPEC.md`; work on branch `QwenWork-refactor`.
 |------|---------|--------|--------|
 | 2026-01-XX | 0.1 | Initial draft | Vega |
 | 2026-11-18 | 0.2 | Portal scope expansion; Next.js migration (Decisions 4–8); routes, stack, roadmap updated; companion MVP-SPEC v1.0 approved as source of truth | QwenWork (owner: Jeff) |
+| 2026-11-20 | 0.3 | Decision 9: manual WhatsApp payment evidence, R2 deferred out of v1; M4 roadmap updated; companion MVP-SPEC v1.1 (decisions #20–21) | QwenWork (owner: Jeff) |
 
 ---
 

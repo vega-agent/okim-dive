@@ -18,6 +18,9 @@ const ATTR_SKIP_SELECTOR = '[data-lang-toggle], .nav-toggle, .journey-track'
 
 function translateAttrs(el: Element, language: string) {
   if (el.matches(ATTR_SKIP_SELECTOR)) return
+  // Self-localized app surfaces (booking, invoice) render bilingual data via
+  // useLocale — the DOM dictionary must not overwrite them.
+  if (el.closest('[data-locale-managed]')) return
   const attrs: [string, string][] = []
   for (const name of TRANSLATABLE_ATTRS) {
     const value = el.getAttribute(name)
@@ -44,6 +47,7 @@ function translateAttrs(el: Element, language: string) {
 function translateNode(node: Node, language: string) {
   if (node.nodeType !== Node.TEXT_NODE) return
   const text = node as Text
+  if (text.parentElement?.closest('[data-locale-managed]')) return
   if (!original.has(text)) original.set(text, text.nodeValue ?? '')
   const source = original.get(text) as string
   const value = normalize(source)
@@ -89,14 +93,22 @@ export default function SiteI18n() {
       document.querySelectorAll('.journey-track').forEach((track) => {
         track.setAttribute('aria-label', language === 'zh' ? '潜水课程进阶路径' : 'Diving course progression')
       })
-      localStorage.setItem('okim-language', language)
+      try { localStorage.setItem('okim-language', language) } catch { /* Language still works without storage. */ }
     }
 
     // New page after client-side navigation: record its English title, then re-apply.
     // Deferred a tick on navigation so Next's metadata effect has set the new title first.
     const reapply = () => {
       document.body.dataset.enTitle = document.title
-      applyLanguage(mountedRef.current ? languageRef.current : (localStorage.getItem('okim-language') || 'en'))
+      let savedLanguage = 'en'
+      try { savedLanguage = localStorage.getItem('okim-language') || 'en' } catch { /* Use visible English fallback. */ }
+      // Signed-in app pages pin the customer's locale for the WHOLE page
+      // (chrome + self-localized content agree); marketing keeps the browser pref.
+      const pinned = document.querySelector('[data-page-locale]')?.getAttribute('data-page-locale')
+      const target = pinned === 'zh' || pinned === 'en'
+        ? pinned
+        : (mountedRef.current ? languageRef.current : savedLanguage)
+      applyLanguage(target)
       mountedRef.current = true
     }
     const timer = mountedRef.current ? window.setTimeout(reapply, 0) : (reapply(), 0)
@@ -113,7 +125,12 @@ export default function SiteI18n() {
     const onClick = (event: MouseEvent) => {
       const target = event.target as Element | null
       if (target?.closest('[data-lang-toggle]')) {
-        applyLanguage(document.documentElement.lang === 'zh-CN' ? 'en' : 'zh')
+        const next = document.documentElement.lang === 'zh-CN' ? 'en' : 'zh'
+        applyLanguage(next)
+        // User toggle only: self-localized app surfaces (booking, invoice, trip
+        // detail) subscribe to this; load/navigation applies must not flip a
+        // customer-pinned locale.
+        window.dispatchEvent(new CustomEvent('okim-language-change', { detail: next }))
       }
     }
     document.addEventListener('click', onClick)

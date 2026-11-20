@@ -7,14 +7,14 @@ export default defineConfig({
   testDir: './tests',
   timeout: 60_000,
   use: {
-    baseURL: 'http://127.0.0.1:3100',
+    baseURL: 'http://localhost:3100',
     reducedMotion: 'reduce',
     trace: 'retain-on-failure',
   },
   webServer: [
     {
       command: 'npm run start -- -p 3100',
-      url: 'http://127.0.0.1:3100',
+      url: 'http://localhost:3100',
       reuseExistingServer: true,
       timeout: 60_000,
     },

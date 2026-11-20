@@ -160,7 +160,7 @@ export const paymentClaims = pgTable('payment_claims', {
   currency: text('currency', { enum: ['MYR', 'SGD', 'USD'] }).notNull(),
   paidOn: timestamp('paid_on', { mode: 'date' }).notNull(),
   reference: text('reference').notNull(), // Booking ID as transfer reference
-  screenshotKey: text('screenshot_key').notNull(), // S3 object key; instructor-only access
+  screenshotKey: text('screenshot_key'), // nullable: v1 evidence stays in WhatsApp (decision #20); instructor-recorded claims
   submittedAt: timestamp('submitted_at', { mode: 'date' }).notNull().defaultNow(),
   status: text('status', { enum: ['pending', 'verified', 'rejected'] }).notNull().default('pending'),
 })
