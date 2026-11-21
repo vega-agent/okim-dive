@@ -16,3 +16,12 @@ const sql = connectionString ? neon(connectionString) : null
 
 export const db = sql ? drizzle(sql, { schema }) : null
 export { schema }
+
+// Interactive transactions are required for financial operations and row locks.
+import { drizzle as transactionalDrizzle } from 'drizzle-orm/neon-serverless'
+import { Pool, neonConfig } from '@neondatabase/serverless'
+import ws from 'ws'
+neonConfig.webSocketConstructor = ws
+export const transactionDb = connectionString
+  ? transactionalDrizzle(new Pool({ connectionString }), { schema })
+  : null

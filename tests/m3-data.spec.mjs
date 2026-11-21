@@ -20,9 +20,11 @@ test('trips cards are server-rendered from the DB with no /data/trips fetch', as
   expect(html).toContain('trip-card'); // cards present in the initial HTML (SSR)
   expect(html).toContain('Tioman Island Diving');
 
-  await expect(page.locator('.trip-card')).toHaveCount(3);
+  // 4 published trips since TRP-004 (tioman-reef-weekend) was published for the
+  // M4 booking flow / demo; sort order places it second (owner-approved 2026-11-21).
+  await expect(page.locator('.trip-card')).toHaveCount(4);
   await expect(page.locator('.trip-card').first()).toHaveClass(/featured/);
-  await expect(page.locator('.trip-card .trip-badge')).toHaveText(['On request', 'Sample trip', 'Sample trip']);
+  await expect(page.locator('.trip-card .trip-badge')).toHaveText(['On request', 'Sample trip', 'Sample trip', 'Sample trip']);
   expect(dataRequests).toEqual([]);
 
   // Dialog still works from DB-backed data.

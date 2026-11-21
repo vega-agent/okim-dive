@@ -23,7 +23,7 @@ async function signInViaCallback(page, email, callbackUrl) {
 
 async function fillDeclarations(page, { name = 'M4 E2E Diver', zh = false } = {}) {
   await page.fill('#b-name', name);
-  await page.selectOption('#b-cert', 'Open Water');
+  await page.selectOption('select[name="cert_level"]', 'Open Water');
   await page.fill('#b-dives', '25');
   await page.check('input[name="insurance"]');
   await page.check('input[name="medical"]');
@@ -33,6 +33,24 @@ async function fillDeclarations(page, { name = 'M4 E2E Diver', zh = false } = {}
   await page.locator('.booking-policy summary').click();
   await expect(page.locator('.booking-policy-body').first()).toContainText(zh ? '退款政策' : 'Refunds');
   await page.check('input[name="accept_policy"]');
+}
+
+// Unique diver names (owner decision 2026-11-21): new emails get a name field at
+// the email step (submit-time detection); the name is applied at diver creation.
+// Names derive from the unique test email so parallel runs never collide.
+async function enterSignupName(page, email) {
+  await expect(page.locator('#booking-name')).toBeVisible();
+  await page.fill('#booking-name', email.split('@')[0]);
+  await page.click('.booking-card button[type="submit"]');
+}
+
+// Fallback setup card: only for pending customers who sign in without a stashed
+// name (e.g. direct callback, or a lost name race).
+async function completeSetup(page, email) {
+  await expect(page.locator('#setup-name')).toBeVisible();
+  await page.fill('#setup-name', email.split('@')[0]);
+  await page.click('.customer-setup button');
+  await expect(page.locator('#b-name')).toBeVisible();
 }
 
 async function cleanup(email) {
@@ -70,16 +88,12 @@ test('full booking journey: email → magic link → declarations → booking + 
   try {
     await page.goto(`/book/${TRIP}`);
     await expect(page.locator('#booking-email')).toBeVisible();
-    await page.fill('#booking-email', email);
-    await page.click('.booking-card button[type="submit"]');
-    await expect(page.locator('.booking-card')).toContainText('Check your email');
-    // Resend cooldown: resend button disabled with countdown.
-    await expect(page.locator('.booking-card button')).toBeDisabled();
-    await expect(page.locator('.booking-card button')).toContainText('Resend available in');
-    const tokens = await sql`SELECT * FROM verification_tokens WHERE identifier = ${email}`;
-    expect(tokens.length).toBeGreaterThanOrEqual(1);
-
+    // Email-budget (owner-approved 2026-11-21): the EN success path + real Resend
+    // send is covered by the rl-ok desktop canary (tests/rate-limit.spec.mjs).
+    // Here we sign in via the token-insert callback (zero sends) and use the
+    // fallback setup card, keeping the suite inside the free-tier daily quota.
     await signInViaCallback(page, email, `/book/${TRIP}`);
+    await completeSetup(page, email);
     await expect(page.locator('#b-name')).toBeVisible();
     const cust = await sql`SELECT * FROM customers WHERE email = ${email}`;
     expect(cust.length).toBe(1);
@@ -133,18 +147,25 @@ test('booking journey works in Chinese and records locale', async ({ page }, tes
     await page.reload({ waitUntil: 'load' });
     await page.waitForFunction(() => document.documentElement.lang === 'zh-CN');
     await expect(page.locator('.booking-card h3')).toHaveText('登录以预订');
-    await page.fill('#booking-email', email);
-    await page.click('.booking-card button[type="submit"]');
-    await expect(page.locator('.booking-card')).toContainText('请查收邮件');
-
-    await signInViaCallback(page, email, `/book/${TRIP}`);
+    // Email-budget (owner-approved 2026-11-21): the CN real-send canary runs on
+    // desktop only; mobile signs in via the token-insert callback (zero sends).
+    if (testInfo.project.name === 'chromium-desktop') {
+      await page.fill('#booking-email', email);
+      await page.click('.booking-card button[type="submit"]');
+      await enterSignupName(page, email);
+      await expect(page.locator('.booking-card')).toContainText('请查收邮件');
+      await signInViaCallback(page, email, `/book/${TRIP}`);
+    } else {
+      await signInViaCallback(page, email, `/book/${TRIP}`);
+      await completeSetup(page, email);
+    }
     // Signed-in surfaces use the CUSTOMER locale (default EN), not the browser
     // preference — a zh browser still lands on English after the magic link.
     await expect(page.locator('label[for="b-name"]')).toHaveText('Full name *');
     await page.locator('[data-lang-toggle]').click();
     await expect(page.locator('label[for="b-name"]')).toHaveText('姓名 *');
-    const cust = await sql`SELECT locale FROM customers WHERE email = ${email}`;
-    expect(cust[0].locale).toBe('zh');
+    // setCustomerLocale is a fire-and-forget server action — poll, don't race it.
+    await expect.poll(async () => (await sql`SELECT locale FROM customers WHERE email = ${email}`)[0]?.locale).toBe('zh');
 
     await fillDeclarations(page, { name: 'M4 中文测试', zh: true });
     await page.click('.booking-card button[type="submit"]');
@@ -161,7 +182,9 @@ test('instructor allowlist email gets the instructor role', async ({ page }) => 
   const email = 'jeff.mailme@gmail.com';
   await page.goto(`/book/${TRIP}`);
   await signInViaCallback(page, email, `/book/${TRIP}`);
-  await expect(page.locator('#b-name')).toBeVisible();
+  // Signed-in customer provisioning shows either the setup card (name pending)
+  // or the wizard (name already set) — never the anonymous email step.
+  await expect(page.locator('#b-name, #setup-name').first()).toBeVisible();
   const users = await sql`SELECT role FROM users WHERE email = ${email}`;
   expect(users[0].role).toBe('instructor');
   const cust = await sql`SELECT id FROM customers WHERE email = ${email}`;
@@ -173,6 +196,7 @@ test('booking requires declarations and policy acceptance', async ({ page }, tes
   try {
     await page.goto(`/book/${TRIP}`);
     await signInViaCallback(page, email, `/book/${TRIP}`);
+    await completeSetup(page, email);
     await expect(page.locator('#b-name')).toBeVisible();
     // Submit empty: native required validation keeps the form; no booking row.
     await page.click('.booking-card button[type="submit"]');

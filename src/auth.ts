@@ -5,13 +5,13 @@
  * Customer identity (§3): CUS-xxx created only AFTER email verification,
  * provisioned in the session callback (database strategy fires post-verify).
  */
-import NextAuth from 'next-auth'
+import NextAuth, { AuthError } from 'next-auth'
 import { DrizzleAdapter } from '@auth/drizzle-adapter'
 import Resend from 'next-auth/providers/resend'
 import { Resend as ResendClient } from 'resend'
-import { eq } from 'drizzle-orm'
+import { and, eq, gt, ne, sql } from 'drizzle-orm'
 import { db } from '@/db'
-import { users, accounts, sessions, verificationTokens } from '@/db/schema'
+import { users, accounts, sessions, verificationTokens, settings } from '@/db/schema'
 import { ensureCustomerForUser } from '@/lib/customers'
 
 const instructorEmails = (process.env.AUTH_INSTRUCTOR_EMAILS ?? '')
@@ -19,25 +19,41 @@ const instructorEmails = (process.env.AUTH_INSTRUCTOR_EMAILS ?? '')
   .map((e) => e.trim().toLowerCase())
   .filter(Boolean)
 
-// Resend cooldown + hourly cap (in-memory; M7 upgrades to durable rate limiting).
-const lastSent = new Map<string, number>()
-const sentHour = new Map<string, { count: number; windowStart: number }>()
+// Durable resend cooldown + hourly cap (M5 dry-run fix, owner-approved 2026-11-21).
+// Module-level Maps do not survive across server-action invocations in the Next
+// production runtime, so the verification_tokens table IS the send ledger:
+// each row's expires = sentAt + 15 min, so send-time windows derive from expires.
+// Auth.js runs sendVerificationRequest and createVerificationToken in PARALLEL
+// (Promise.all), so the current request's row may or may not exist yet — it is
+// excluded by its exact expires value. Rejected attempts still leave their row
+// and count toward the windows (conservative anti-abuse).
+const TOKEN_TTL_MS = 15 * 60 * 1000
 const COOLDOWN_MS = 60_000
 const HOURLY_CAP = 5
 
-function checkSendRate(email: string) {
-  const now = Date.now()
-  const last = lastSent.get(email)
-  if (last && now - last < COOLDOWN_MS) throw new Error('EMAIL_COOLDOWN')
-  const hour = sentHour.get(email)
-  if (hour && now - hour.windowStart < 3_600_000 && hour.count >= HOURLY_CAP) throw new Error('EMAIL_RATE_LIMIT')
+// Auth.js only re-throws AuthError instances to signIn({ redirect: false });
+// a plain Error is swallowed and converted into a success redirect.
+class MagicLinkRateLimit extends AuthError {
+  static type = 'MagicLinkRateLimit'
+  constructor(kind: 'EMAIL_COOLDOWN' | 'EMAIL_RATE_LIMIT') { super(kind) }
 }
-function recordSend(email: string) {
+
+async function checkSendRate(email: string, currentExpires: Date) {
+  if (!db) return
   const now = Date.now()
-  lastSent.set(email, now)
-  const hour = sentHour.get(email)
-  if (!hour || now - hour.windowStart >= 3_600_000) sentHour.set(email, { count: 1, windowStart: now })
-  else hour.count += 1
+  const cooldownCutoff = new Date(now + TOKEN_TTL_MS - COOLDOWN_MS)
+  const hourCutoff = new Date(now + TOKEN_TTL_MS - 3_600_000)
+  const others = and(eq(verificationTokens.identifier, email), ne(verificationTokens.expires, currentExpires))
+  const [recent] = await db
+    .select({ n: sql<number>`count(*)::int` })
+    .from(verificationTokens)
+    .where(and(others, gt(verificationTokens.expires, cooldownCutoff)))
+  if (recent.n >= 1) throw new MagicLinkRateLimit('EMAIL_COOLDOWN')
+  const [hour] = await db
+    .select({ n: sql<number>`count(*)::int` })
+    .from(verificationTokens)
+    .where(and(others, gt(verificationTokens.expires, hourCutoff)))
+  if (hour.n >= HOURLY_CAP) throw new MagicLinkRateLimit('EMAIL_RATE_LIMIT')
 }
 
 // Bilingual magic-link email (MVP-SPEC §11/§13: both languages when locale unknown,
@@ -75,9 +91,9 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       apiKey: process.env.RESEND_API_KEY,
       from: process.env.EMAIL_FROM ?? 'Okim Dive <onboarding@resend.dev>',
       maxAge: 15 * 60, // §3: short expiry
-      async sendVerificationRequest({ identifier, url, provider }) {
+      async sendVerificationRequest({ identifier, url, provider, expires }) {
         const email = identifier.toLowerCase()
-        checkSendRate(email)
+        await checkSendRate(email, expires)
         const client = new ResendClient(provider.apiKey as string)
         const { error } = await client.emails.send({
           from: provider.from as string,
@@ -86,7 +102,6 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
           html: magicLinkEmail(url),
         })
         if (error) throw new Error(`EMAIL_SEND_FAILED: ${error.message}`)
-        recordSend(email)
       },
     }),
   ],
@@ -99,8 +114,15 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
     async session({ session, user }) {
       if (!db) return session
       const email = user.email?.toLowerCase() ?? ''
-      // Role from the instructor allowlist (idempotent).
-      const isInstructor = instructorEmails.includes(email)
+      // Role from the instructor allowlist (idempotent). Settings-managed
+      // (M5 item 6); the env list always keeps access as a safety fallback.
+      let storedEmails: string[] = []
+      try {
+        const [row] = await db.select().from(settings).where(eq(settings.key, 'instructor_emails'))
+        const emails = (row?.value as { emails?: unknown } | undefined)?.emails
+        if (Array.isArray(emails)) storedEmails = emails.map(e => String(e).toLowerCase())
+      } catch { /* settings unreadable — env fallback still applies */ }
+      const isInstructor = instructorEmails.includes(email) || storedEmails.includes(email)
       if (isInstructor && user.role !== 'instructor') {
         await db.update(users).set({ role: 'instructor' }).where(eq(users.id, user.id))
       }

@@ -3,6 +3,7 @@
  * Append-only ledger; human-readable diver-facing IDs (CUS-xxx, BKG-xxx).
  */
 import { pgTable, text, timestamp, integer, numeric, boolean, json, uniqueIndex, index } from 'drizzle-orm/pg-core'
+import { sql } from 'drizzle-orm'
 
 /* ---------- Auth.js tables (Drizzle adapter shape) ---------- */
 
@@ -46,7 +47,16 @@ export const verificationTokens = pgTable('verification_tokens', {
 
 /* ---------- Customers ---------- */
 
+// Name captured at the email step for new divers (owner decision 2026-11-21):
+// stashed by email until the magic link verifies, then applied at diver creation.
+export const signupNames = pgTable('signup_names', {
+  email: text('email').primaryKey(),
+  name: text('name').notNull(),
+  createdAt: timestamp('created_at', { mode: 'date' }).notNull().defaultNow(),
+})
+
 export const customers = pgTable('customers', {
+  diverProfile: json('diver_profile').$type<Record<string, unknown>>(),
   id: text('id').primaryKey(), // CUS-001
   userId: text('user_id').references(() => users.id),
   name: text('name').notNull(),
@@ -55,11 +65,17 @@ export const customers = pgTable('customers', {
   locale: text('locale', { enum: ['en', 'zh'] }).notNull().default('en'),
   mergedInto: text('merged_into'), // instructor-only merge; null = live record
   createdAt: timestamp('created_at', { mode: 'date' }).notNull().defaultNow(),
-}, (t) => [uniqueIndex('customer_email_unique').on(t.email)])
+}, (t) => [
+  uniqueIndex('customer_email_unique').on(t.email),
+  // Unique diver names so Iris never sees ambiguous customers (owner 2026-11-21).
+  // Partial: '' = setup pending, many pending customers may coexist.
+  uniqueIndex('customer_name_unique').on(sql`lower(${t.name})`).where(sql`${t.name} <> ''`),
+])
 
 /* ---------- Trips (Iris-set rules; bilingual content) ---------- */
 
 export const trips = pgTable('trips', {
+  departureTimezone: text('departure_timezone').notNull().default('Asia/Kuala_Lumpur'),
   id: text('id').primaryKey(), // TRP-001
   slug: text('slug').notNull().unique(),
   status: text('status', { enum: ['draft', 'open', 'on_request', 'full', 'departed', 'completed', 'cancelled'] }).notNull().default('draft'),
@@ -129,6 +145,7 @@ export const trips = pgTable('trips', {
 /* ---------- Bookings (product-agnostic for Phase 2 course booking) ---------- */
 
 export const bookings = pgTable('bookings', {
+  equipment: json('equipment').$type<Record<string, unknown>>(),
   id: text('id').primaryKey(), // BKG-001
   customerId: text('customer_id').notNull().references(() => customers.id),
   productType: text('product_type', { enum: ['trip', 'course'] }).notNull().default('trip'),
@@ -154,6 +171,9 @@ export const bookings = pgTable('bookings', {
 /* ---------- Payment claims + payments ---------- */
 
 export const paymentClaims = pgTable('payment_claims', {
+  kind: text('kind', { enum: ['deposit', 'balance', 'full'] }).notNull().default('deposit'),
+  recordedBy: text('recorded_by'),
+  operationKey: text('operation_key').unique(),
   id: text('id').primaryKey(),
   bookingId: text('booking_id').notNull().references(() => bookings.id),
   amount: numeric('amount', { precision: 10, scale: 2 }).notNull(),
@@ -166,6 +186,8 @@ export const paymentClaims = pgTable('payment_claims', {
 })
 
 export const payments = pgTable('payments', {
+  sourcePaymentId: text('source_payment_id'),
+  operationKey: text('operation_key').unique(),
   id: text('id').primaryKey(),
   bookingId: text('booking_id').notNull().references(() => bookings.id),
   claimId: text('claim_id').references(() => paymentClaims.id),
@@ -176,8 +198,8 @@ export const payments = pgTable('payments', {
   rmAmount: numeric('rm_amount', { precision: 12, scale: 2 }),
   verifiedBy: text('verified_by'), // audit: who
   verifiedAt: timestamp('verified_at', { mode: 'date' }), // audit: when
-  receiptNo: text('receipt_no'),
-})
+  receiptNo: text('receipt_no').unique(),
+}, (t) => [uniqueIndex('payment_claim_once').on(t.claimId)])
 
 export const invoices = pgTable('invoices', {
   id: text('id').primaryKey(),
@@ -190,6 +212,8 @@ export const invoices = pgTable('invoices', {
 /* ---------- Okim Points: append-only ledger, never a balance ---------- */
 
 export const pointsLedger = pgTable('points_ledger', {
+  sourceLotId: text('source_lot_id'),
+  operationKey: text('operation_key').unique(),
   id: text('id').primaryKey(),
   customerId: text('customer_id').notNull().references(() => customers.id),
   bookingId: text('booking_id').references(() => bookings.id),

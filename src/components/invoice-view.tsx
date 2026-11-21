@@ -62,7 +62,8 @@ const STATUS_LABELS: Record<string, readonly [string, string]> = {
 export default function InvoiceView(props: InvoiceViewProps) {
   const locale = useLocale(props.locale, (next) => void setCustomerLocale(next))
   const t = (pair: readonly [string, string]) => pick(locale, pair[0], pair[1])
-  const total = (Number(props.deposit) + Number(props.balance) + Number(props.discount)).toFixed(2)
+  const tripFee = (Number(props.deposit) + Number(props.balance) + Number(props.discount)).toFixed(2)
+  const total = (Number(props.deposit) + Number(props.balance)).toFixed(2)
   const statusPair = STATUS_LABELS[props.bookingStatus] ?? [props.bookingStatus, props.bookingStatus]
 
   return (
@@ -89,7 +90,7 @@ export default function InvoiceView(props: InvoiceViewProps) {
           <tr><th>{t(L.description)}</th><th>{t(L.amount)}</th></tr>
         </thead>
         <tbody>
-          <tr><td>{t(L.tripFee)}</td><td>{props.currency} {total}</td></tr>
+          <tr><td>{t(L.tripFee)}</td><td>{props.currency} {tripFee}</td></tr>
           {Number(props.discount) > 0 && <tr><td>{t(L.pointsDiscount)}</td><td>− {props.currency} {props.discount}</td></tr>}
           <tr><td>{t(L.deposit)}</td><td>{props.currency} {props.deposit}</td></tr>
           <tr><td>{t(L.balance)}{props.balanceDue ? ` · ${t(L.balanceDue)}: ${props.balanceDue}` : ''}</td><td>{props.currency} {props.balance}</td></tr>

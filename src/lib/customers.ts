@@ -4,9 +4,9 @@
  * callback, which fires post-verify). Many Booking IDs per customer.
  * Server-only.
  */
-import { eq } from 'drizzle-orm'
+import { eq, sql } from 'drizzle-orm'
 import { db } from '@/db'
-import { customers } from '@/db/schema'
+import { customers, signupNames } from '@/db/schema'
 
 async function nextCustomerId(): Promise<string> {
   const rows = await db!.select({ id: customers.id }).from(customers)
@@ -17,11 +17,33 @@ async function nextCustomerId(): Promise<string> {
   return `CUS-${String(max + 1).padStart(3, '0')}`
 }
 
-export async function ensureCustomerForUser(userId: string, email: string, name: string | null | undefined): Promise<string> {
-  const existing = await db!.select({ id: customers.id }).from(customers).where(eq(customers.userId, userId)).limit(1)
-  if (existing[0]) return existing[0].id
+// Atomic take of the name stashed at the email step; '' when absent or taken
+// meanwhile (the partial unique index is the backstop — fallback setup card).
+async function takeSignupName(email: string): Promise<string> {
+  const [stashed] = await db!.delete(signupNames).where(eq(signupNames.email, email)).returning({ name: signupNames.name, createdAt: signupNames.createdAt })
+  if (!stashed || stashed.createdAt.getTime() < Date.now() - 86_400_000) return ''
+  const clash = await db!.select({ id: customers.id }).from(customers).where(sql`lower(${customers.name}) = ${stashed.name.toLowerCase()}`).limit(1)
+  return clash.length ? '' : stashed.name
+}
 
-  const displayName = (name ?? '').trim() || email.split('@')[0]
+export async function ensureCustomerForUser(userId: string, email: string, name: string | null | undefined): Promise<string> {
+  const existing = await db!.select({ id: customers.id, name: customers.name }).from(customers).where(eq(customers.userId, userId)).limit(1)
+  if (existing[0]) {
+    // Existing customer with a pending name: apply the stashed signup name once.
+    if (existing[0].name === '') {
+      const stashed = await takeSignupName(email)
+      if (stashed) {
+        try {
+          await db!.update(customers).set({ name: stashed }).where(eq(customers.id, existing[0].id))
+        } catch { /* name raced to another customer — fallback setup card */ }
+      }
+    }
+    return existing[0].id
+  }
+
+  // '' = name setup pending: the book page shows the setup card before the wizard
+  // (owner decision 2026-11-21: unique diver names, set during customer setup).
+  const displayName = (name ?? '').trim() || await takeSignupName(email)
   // Two concurrent first sessions: unique email index prevents duplicates.
   for (let attempt = 0; attempt < 2; attempt++) {
     const id = await nextCustomerId()

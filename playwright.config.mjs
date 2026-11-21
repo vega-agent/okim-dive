@@ -26,7 +26,11 @@ export default defineConfig({
     },
   ],
   projects: [
-    { name: 'chromium-mobile', use: { ...devices['Desktop Chrome'], viewport: { width: 390, height: 844 } } },
-    { name: 'chromium-desktop', use: { ...devices['Desktop Chrome'] } },
+    // Public-page specs assert the exact /trips list; trip-mutation specs run
+    // afterwards in a dependent project so a temporarily published fixture trip
+    // can never race them (M5 item 6).
+    { name: 'chromium-mobile', use: { ...devices['Desktop Chrome'], viewport: { width: 390, height: 844 } }, testIgnore: ['m5-trips-lifecycle.spec.mjs', 'customer-setup.spec.mjs', 'm5-policies-publish.spec.mjs', 'm6-integration.spec.mjs', 'diver-equipment.spec.mjs'] },
+    { name: 'chromium-desktop', use: { ...devices['Desktop Chrome'] }, testIgnore: ['m5-trips-lifecycle.spec.mjs', 'customer-setup.spec.mjs', 'm5-policies-publish.spec.mjs', 'm6-integration.spec.mjs', 'diver-equipment.spec.mjs'] },
+    { name: 'chromium-mutations', use: { ...devices['Desktop Chrome'] }, testMatch: ['m5-trips-lifecycle.spec.mjs', 'customer-setup.spec.mjs', 'm5-policies-publish.spec.mjs', 'm6-integration.spec.mjs', 'diver-equipment.spec.mjs'], dependencies: ['chromium-mobile', 'chromium-desktop'] },
   ],
 });

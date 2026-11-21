@@ -8,6 +8,7 @@ import { db } from '@/db'
 import { customers, policyVersions, trips } from '@/db/schema'
 import SiteFooter from '@/components/site-footer'
 import BookingWizard from '@/components/booking-wizard'
+import CustomerSetup from '@/components/customer-setup'
 
 export const dynamic = 'force-dynamic'
 
@@ -26,16 +27,22 @@ export default async function BookPage({ params }: { params: { tripSlug: string 
   const terms = policies.find((p) => p.kind === 'terms')
   if (!refund || !terms) notFound()
 
+  let diverProfile: {agency?:string;level?:string;dives?:number;phone?:string} | undefined
+  let equipmentProfile: unknown
   let customerName = ''
   let customerLocale: 'en' | 'zh' = 'en'
   if (session?.user?.customerId) {
-    const rows = await db.select({ name: customers.name, locale: customers.locale }).from(customers)
+    const rows = await db.select({ name: customers.name, locale: customers.locale, profile: customers.diverProfile, phone: customers.phone }).from(customers)
       .where(eq(customers.id, session.user.customerId)).limit(1)
+    diverProfile = {...rows[0]?.profile,phone:rows[0]?.phone ?? undefined}
+    equipmentProfile = rows[0]?.profile?.equipment
     customerName = rows[0]?.name ?? ''
     customerLocale = rows[0]?.locale ?? 'en'
   }
 
   const bookable = trip.status === 'open'
+  // '' = name setup pending (unique diver names, owner decision 2026-11-21).
+  const needsSetup = Boolean(session?.user?.customerId) && customerName === ''
 
   return (
     <>
@@ -50,7 +57,7 @@ export default async function BookPage({ params }: { params: { tripSlug: string 
         <section className="trips-section">
           <div className="container">
             {bookable ? (
-              <BookingWizard
+              needsSetup ? <CustomerSetup locale={customerLocale} /> : <BookingWizard
                 slug={trip.slug}
                 titleEn={trip.titleEn}
                 titleZh={trip.titleZh}
@@ -58,6 +65,8 @@ export default async function BookPage({ params }: { params: { tripSlug: string 
                 depositTextEn={trip.depositTextEn}
                 depositTextZh={trip.depositTextZh}
                 authenticated={Boolean(session?.user)}
+                diverProfile={diverProfile}
+                equipmentProfile={equipmentProfile}
                 customerName={customerName}
                 customerLocale={customerLocale}
                 sessionEmail={session?.user?.email ?? ''}

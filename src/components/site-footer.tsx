@@ -20,6 +20,15 @@ export default function SiteFooter() {
               <li><Link href="/contact">Contact</Link></li>
             </ul>
           </div>
+          {/* Policy pages link from the footer only, never the navbar (owner decision 2026-11-21). */}
+          <div className="footer-section">
+            <h3>Policies</h3>
+            <ul className="footer-links">
+              <li><Link href="/refund-policy">Refund Policy</Link></li>
+              <li><Link href="/privacy">Privacy Policy</Link></li>
+              <li><Link href="/terms">Terms of Booking</Link></li>
+            </ul>
+          </div>
           <div className="footer-section">
             <h3>Connect</h3>
             <div className="social-links">

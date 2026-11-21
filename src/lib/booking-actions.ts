@@ -8,10 +8,12 @@
  */
 import { auth, signIn } from '@/auth'
 import { db } from '@/db'
-import { bookings, customers, invoices, policyVersions, trips } from '@/db/schema'
-import { and, desc, eq } from 'drizzle-orm'
+import { auditLog, bookings, customers, invoices, policyVersions, signupNames, trips } from '@/db/schema'
+import { and, desc, eq, gt, ne, sql } from 'drizzle-orm'
+import { randomUUID } from 'crypto'
+import { parseEquipment } from './diver-equipment'
 
-export type MagicLinkResult = { status: 'sent' | 'cooldown' | 'rate_limited' | 'error' }
+export type MagicLinkResult = { status: 'sent' | 'cooldown' | 'rate_limited' | 'name_taken' | 'error' }
 export type BookingResult =
   | { status: 'created'; bookingId: string; invoiceNumber: string; deposit: string; balance: string; currency: string; balanceDue: string | null }
   | { status: 'unauthenticated' | 'invalid' | 'trip_unavailable' | 'error' }
@@ -25,6 +27,28 @@ export async function setCustomerLocale(locale: 'en' | 'zh'): Promise<void> {
   await db.update(customers).set({ locale }).where(eq(customers.id, session.user.customerId))
 }
 
+export type NameSetupResult = { status: 'saved' | 'taken' | 'invalid' | 'unauthenticated' }
+
+// Customer setup (owner decision 2026-11-21): unique diver name, captured once
+// before the first booking. Case-insensitive; the partial unique index is the
+// race-safe backstop. '' names are pending and excluded from the index.
+export async function setCustomerName(formData: FormData): Promise<NameSetupResult> {
+  const session = await auth()
+  if (!session?.user?.customerId || !db) return { status: 'unauthenticated' }
+  const name = String(formData.get('name') ?? '').trim().slice(0, 200)
+  if (name.length < 2) return { status: 'invalid' }
+  const clash = await db.select({ id: customers.id }).from(customers)
+    .where(and(sql`lower(${customers.name}) = ${name.toLowerCase()}`, ne(customers.id, session.user.customerId))).limit(1)
+  if (clash.length) return { status: 'taken' }
+  try {
+    await db.update(customers).set({ name }).where(eq(customers.id, session.user.customerId))
+  } catch {
+    return { status: 'taken' } // concurrent setup won the race for this name
+  }
+  await db.insert(auditLog).values({ id: randomUUID(), actorUserId: session.user.id, action: 'customer_name_set', entity: 'customer', entityId: session.user.customerId })
+  return { status: 'saved' }
+}
+
 // Sequential human-readable IDs can collide under concurrent inserts; retry once.
 async function insertWithRetry(fn: () => Promise<string>): Promise<string> {
   try {
@@ -34,9 +58,37 @@ async function insertWithRetry(fn: () => Promise<string>): Promise<string> {
   }
 }
 
-export async function requestMagicLink(email: string, slug: string): Promise<MagicLinkResult> {
+// Email-step detection (owner decision 2026-11-21): new emails — and existing
+// customers whose name is still pending — capture a unique name right here,
+// not on a separate page. The name is stashed and applied at diver creation.
+export async function checkSignupEmail(email: string): Promise<{ status: 'existing' | 'needs_name' | 'invalid' }> {
+  const clean = email.trim().toLowerCase()
+  if (!EMAIL_RE.test(clean) || !db) return { status: 'invalid' }
+  const [customer] = await db.select({ name: customers.name }).from(customers).where(eq(customers.email, clean)).limit(1)
+  return { status: customer && customer.name !== '' ? 'existing' : 'needs_name' }
+}
+
+async function nameIsFree(name: string, excludeEmail?: string): Promise<boolean> {
+  const lower = name.toLowerCase()
+  const clash = await db!.select({ id: customers.id }).from(customers).where(sql`lower(${customers.name}) = ${lower}`).limit(1)
+  if (clash.length) return false
+  // Unconsumed stashes older than 24h never block a name (magic links live 15 min).
+  const fresh = new Date(Date.now() - 86_400_000)
+  const stashClash = await db!.select({ email: signupNames.email }).from(signupNames)
+    .where(and(sql`lower(${signupNames.name}) = ${lower}`, gt(signupNames.createdAt, fresh), excludeEmail ? ne(signupNames.email, excludeEmail) : undefined)).limit(1)
+  return stashClash.length === 0
+}
+
+export async function requestMagicLink(email: string, slug: string, name?: string): Promise<MagicLinkResult> {
   const clean = email.trim().toLowerCase()
   if (!EMAIL_RE.test(clean) || !slug) return { status: 'error' }
+  const trimmedName = (name ?? '').trim().slice(0, 200)
+  if (trimmedName) {
+    if (trimmedName.length < 2) return { status: 'error' }
+    if (!db || !(await nameIsFree(trimmedName, clean))) return { status: 'name_taken' }
+    await db.insert(signupNames).values({ email: clean, name: trimmedName })
+      .onConflictDoUpdate({ target: signupNames.email, set: { name: trimmedName, createdAt: new Date() } })
+  }
   try {
     await signIn('resend', { email: clean, redirectTo: `/book/${slug}`, redirect: false })
     return { status: 'sent' }
@@ -64,6 +116,11 @@ export async function createBooking(slug: string, formData: FormData): Promise<B
   const session = await auth()
   if (!session?.user?.customerId || !db) return { status: 'unauthenticated' }
 
+  const [owner] = await db.select().from(customers).where(and(eq(customers.id, session.user.customerId), eq(customers.userId, session.user.id!))).limit(1)
+  if (!owner || owner.mergedInto) return { status: 'unauthenticated' }
+  let equipment
+  try { equipment = parseEquipment(JSON.parse(String(formData.get('equipment')))) } catch { return { status: 'invalid' } }
+  if (!equipment) return { status: 'invalid' }
   const text = (key: string, max: number) => String(formData.get(key) ?? '').trim().slice(0, max)
   const name = text('name', 200)
   const certLevel = text('cert_level', 100)
@@ -106,6 +163,7 @@ export async function createBooking(slug: string, formData: FormData): Promise<B
       await db!.insert(bookings).values({
         id,
         customerId: session.user.customerId,
+        equipment: equipment as unknown as Record<string, unknown>,
         productType: 'trip',
         productId: trip.id,
         status: 'awaiting_deposit',
@@ -117,7 +175,7 @@ export async function createBooking(slug: string, formData: FormData): Promise<B
         currency: trip.currency,
         pointsDiscountAmount: '0',
         declarations: {
-          certLevel, loggedDives, insurance, medical, emergencyName, emergencyPhone, dob,
+          certLevel, certAgency: text('cert_agency',100), agencyOther:text('agency_other',100), levelOther:text('level_other',100), loggedDives, insurance, medical, emergencyName, emergencyPhone, dob,
           whatsapp: text('whatsapp', 40) || null,
           termsVersionId: terms.id,
           locale: formData.get('locale') === 'zh' ? 'zh' : 'en',
@@ -133,7 +191,7 @@ export async function createBooking(slug: string, formData: FormData): Promise<B
     })
     const invoiceNumber = `INV-${new Date().getFullYear()}-${invoiceId.replace('INV-', '')}`
 
-    await db.update(customers).set({ name }).where(eq(customers.id, session.user.customerId))
+    // Booking declarations and equipment never mutate the saved diver profile.
 
     return {
       status: 'created',

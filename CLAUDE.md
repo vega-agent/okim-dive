@@ -7,7 +7,7 @@ This is the concise implementation guide for all agents. Start with `AGENTS.md`;
 1. Inspect the current source, data, and rendered page.
 2. Read `docs/design/OKIM-DIVE-VIBE.md` for every content, UX, page, or image task.
 3. Read `docs/design/CONTENT-REVIEW-CHECKLIST.md` for copy/content changes.
-4. Read `docs/design/BRAND-GUIDE.md` and `docs/design/DESIGN-SYSTEM.md` for visual or layout changes.
+4. Read `docs/design/BRAND-GUIDE.md` and `docs/design/DESIGN-SYSTEM.md` for visual, layout, or bilingual/i18n changes — including §13 (app surfaces) and §14 (locale handling, stacking-context rule). Audit the rendered result against them; never hardcode "English / 中文" literals.
 5. Read `docs/design/PRD.md` only for scope, route, audience, or product decisions.
 
 ## Content gate
@@ -43,6 +43,7 @@ This is the concise implementation guide for all agents. Start with `AGENTS.md`;
 
 - Content: run the content checklist; check duplicates, page ownership, unsupported claims, English, and Simplified Chinese.
 - Visual: inspect rendered desktop and mobile states, alignment, wrapping, spacing, contrast, focus, and overflow; use independent UI/UX review for substantial changes.
+- Bilingual: run the CJK-scan specs (tests/m6-policies.spec.mjs, tests/m6-my-okim.spec.mjs) and rendered EN/CN desktop/mobile checks per DESIGN-SYSTEM §14; verify visibility with screenshots or elementFromPoint, not DOM presence alone.
 - Run the repository's lint, build, UI tests, and `git diff --check`.
 - Do not claim completion from source inspection or automated tests alone.
 

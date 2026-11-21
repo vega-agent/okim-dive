@@ -1,6 +1,6 @@
 # Okim Dive - Design System
 
-**Version:** 1.2
+**Version:** 1.4
 **Created:** 2026-01-XX
 **Inspired by:** Stripe, Notion, Airbnb design systems
 **Approved Direction:** Continuous Underwater Editorial / Dive Journal
@@ -477,6 +477,7 @@ Marketing pages follow the templates above. These rules cover the new app surfac
 - Same palette, fonts, borders, shadows, and spacing scale as the public site — the portal is the same ocean, not a separate admin theme. No dark sidebars, no dense dashboard chrome.
 - Portal pages may use **solid white cards on Sand background** for data-heavy areas (tables, verification queue) — the `.intro-content` translucent wash is reserved for editorial reading; data legibility wins.
 - Respect `prefers-reduced-motion`; server-rendered content remains readable before/without hydration.
+- Locale handling and the app-surface stacking-context rule are locked in **§14** — read it before any app-surface layout or bilingual change.
 
 ### Data tables (portal)
 - Standard Card surface (white, 12px radius, whisper border, soft shadow)
@@ -518,6 +519,29 @@ Status badges are information, not CTAs. Coral stays reserved for primary action
 - Magic-link emails keep the link on its own line, clickable text, not only "click here"
 - Email content is defined by copy rules in `OKIM-DIVE-VIBE.md`; this section only constrains visuals
 
+## 14. Bilingual Surfaces & Locale Handling (locked, v1.4)
+
+Owner mandate 2026-11-21: **every redesign, layout, or bilingual change must reference this document first and audit the rendered result against it.** These rules exist because sibling chats improvising locale handling leaked Chinese onto English surfaces twice (navbar "Profile / 资料", portal "Diver updates / 潜水员更新").
+
+### Locale source of truth per surface
+- **Public/marketing pages:** browser preference via the site-i18n DOM dictionary (`localStorage okim-language`).
+- **Signed-in customer surfaces** (`/myokim`, invoice, receipt): the customer's stored locale, pinned for the WHOLE page (chrome included) via `data-page-locale` on `main`.
+- **Instructor portal:** browser preference via `useLocale()` — Iris's own choice, not a customer's.
+- **Self-localized surfaces** render bilingual DB/content directly and mark their root `data-locale-managed` so the DOM dictionary never overwrites them; they subscribe to `okim-language-change`, which fires ONLY on a user toggle (never on load/navigation).
+
+### Hard rules
+1. **One language at a time.** Never hardcode `"English / 中文"` literals in components, server pages, emails, or attributes. Every user-visible string goes through `t(en, zh)` / `pick(locale, …)` or the dictionary.
+2. **Locale-dependent UI must be a client component** (`useLocale`). Server components cannot read the active locale — pass serializable data down and localize at the client boundary. (The Diver-updates leak was a server component with bilingual literals.)
+3. **EN surfaces contain zero CJK characters.** Sole exception: the language-switcher button (中文). Language names inside selects/options are locale-aware: "Chinese (Simplified)" in EN, 简体中文 in CN.
+4. **User-entered content displays as submitted** in every locale (names, inquiry messages, declarations). That is data, not a leak — never machine-translate it.
+5. **CN is not word-for-word:** natural, concise, warm (vibe doc). Verify wrapping in BOTH languages at desktop AND mobile; Han runs differ in length per string.
+6. **Font roles swap by `html[lang]`** per §3: EN Fraunces 500 display / Lato body; CN Noto Serif SC 600 display / Noto Sans SC body. Negative tracking never applies to Han text.
+7. **Every new or changed surface ships with a CJK-scan regression** (text nodes; exclude the switcher, script payloads, and data containers) plus rendered EN/CN desktop/mobile checks. Existing scans: `tests/m6-policies.spec.mjs` (portal UI, policy pages, navbar), `tests/m6-my-okim.spec.mjs` (all four tabs).
+
+### App-surface stacking-context rule (layout)
+- App content must render **inside** `main.<surface>` (`main.portal`, `main.my-okim`, …). The surface's fixed watercolor `::before` lives in an isolated stacking context and paints over the ENTIRE viewport: sibling nodes placed BEFORE `main` are invisible even though present in the DOM (the Diver-updates card was silently covered this way). Pass extra sections into the surface's view component — see `PortalView`'s `updates` prop.
+- Verify visibility with `document.elementFromPoint` or a screenshot, never DOM presence alone.
+
 ---
 
 ## Change Log
@@ -529,5 +553,6 @@ Status badges are information, not CTAs. Coral stays reserved for primary action
 | 2026-11-19 | 1.1 | Audit fixes: Fraunces/Noto first-class (removes stale Playfair specs), bilingual rules for all surfaces, architecture guardrail updated for Next.js migration, hero gradient marked reference-only, Google Fonts link corrected, new §13 app surfaces (tables, status badges, forms, empty states, currency/points, transactional emails) | QwenWork (owner: Jeff) |
 | 2026-11-19 | 1.2 | Home pilot approved by owner and ported to Next.js (§12 Home template replaced; MVP-SPEC decision #19): painting-led hero, one-shot waterline, Learn/Return/Explore chooser, Tioman on-request feature, enquiry ending; courses FAQ becomes bilingual disclosures | QwenWork (owner: Jeff) |
 | 2026-11-20 | 1.3 | §13 forms: screenshot-upload rule removed — payment evidence is manual via WhatsApp in v1 (MVP-SPEC decision #20); portal payment-recording form follows the standard form spec | QwenWork (owner: Jeff) |
+| 2026-11-21 | 1.4 | New §14: locked bilingual/locale rules (one language at a time, client-boundary localization, zero-CJK EN scans, data-as-submitted, font-role swap) + app-surface stacking-context rule, after the Diver-updates leak/invisibility incident. Owner mandate: every redesign/layout/bilingual change references this document and audits against it | QwenWork (owner: Jeff) |
 
-**Status:** v1.2 active for the Next.js migration on branch `QwenWork-refactor` per `MVP-SPEC.md` v1.0.
+**Status:** v1.4 active for the Next.js migration on branch `QwenWork-refactor` per `MVP-SPEC.md` v1.0.

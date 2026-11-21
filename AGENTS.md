@@ -6,7 +6,8 @@ These rules apply to every agent working in this repository, regardless of model
 
 - **Any code, page, content, UX, or image work:** read `docs/design/OKIM-DIVE-VIBE.md`.
 - **Copy or content work:** also read `docs/design/CONTENT-REVIEW-CHECKLIST.md`.
-- **Visual, layout, typography, or image work:** also read `docs/design/BRAND-GUIDE.md` and `docs/design/DESIGN-SYSTEM.md`.
+- **Visual, layout, typography, image, or bilingual/i18n work:** read `docs/design/BRAND-GUIDE.md` and `docs/design/DESIGN-SYSTEM.md` (including §13 app surfaces and §14 locale handling) BEFORE editing, and audit the rendered result against them. Redesigns extend the approved visual language; they never introduce a new one.
+- **Bilingual hard rule (DESIGN-SYSTEM §14):** one language at a time — never hardcode "English / 中文" literals; locale-dependent UI lives in client components; EN surfaces contain zero CJK except the language switcher; user-entered data displays as submitted.
 - **Project scope or route changes:** also read `docs/design/PRD.md`.
 
 Do not read every reference file by default. Read only what the task requires.

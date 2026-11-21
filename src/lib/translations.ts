@@ -581,6 +581,20 @@ Object.assign(translations, {
   "Book your trip": "预订行程",
   "One diver per booking. Your slot is confirmed after deposit verification.": "每次预订限一名潜水员。名额在订金核实后确认。",
   "This trip is arranged on request. Tell us your plans and we will confirm the options together.": "此行程按需安排。告诉我们你的计划，一起确认可选方案。",
+  // Instructor portal nav (M5)
+  "Portal": "教练工作台",
+  // My Okim nav + title (M6)
+  "My Okim": "我的 Okim",
+  "My Okim - Okim Dive": "我的 Okim - Okim Dive",
+  // Public policy pages: footer links + titles (M6)
+  "Policies": "政策条款",
+  "Profile": "资料",
+  "Refund Policy": "退款政策",
+  "Privacy Policy": "隐私政策",
+  "Terms of Booking": "预订条款",
+  "Refund Policy - Okim Dive": "退款政策 - Okim Dive",
+  "Privacy Policy - Okim Dive": "隐私政策 - Okim Dive",
+  "Terms of Booking - Okim Dive": "预订条款 - Okim Dive",
 })
 
 export default translations

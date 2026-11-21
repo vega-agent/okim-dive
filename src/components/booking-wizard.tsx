@@ -6,8 +6,10 @@
 // Bilingual via useLocale (data-driven surface).
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
+import CertificationFields from './certification-fields'
+import EquipmentEditor from './equipment-editor'
 import { useLocale, pick } from '@/lib/use-locale'
-import { requestMagicLink, createBooking, setCustomerLocale, type BookingResult } from '@/lib/booking-actions'
+import { requestMagicLink, createBooking, setCustomerLocale, checkSignupEmail, type BookingResult } from '@/lib/booking-actions'
 
 type PolicyText = { version: number; bodyEn: string; bodyZh: string }
 
@@ -21,6 +23,8 @@ export type BookingWizardProps = {
   authenticated: boolean
   customerName: string
   customerLocale: 'en' | 'zh'
+  diverProfile?: { agency?:string; level?:string; dives?:number; phone?:string }
+  equipmentProfile?: unknown
   sessionEmail: string
   refund: PolicyText
   terms: PolicyText
@@ -34,6 +38,11 @@ const L = {
   emailIntro: ['We will email you a secure sign-in link. No password needed.', '我们会通过电子邮件发送安全登录链接，无需密码。'],
   emailLabel: ['Email address', '电子邮件'],
   emailPlaceholder: ['you@example.com', 'you@example.com'],
+  signupNameLabel: ['Your name', '你的称呼'],
+  signupNamePlaceholder: ['e.g. Jeff Lee — the name Iris will see', '例如：Jeff Lee —— Iris 将看到的称呼'],
+  signupNameHint: ['New here? Choose the name Iris will know you by. It is unique to you — if another diver already uses it, add a surname or initial.', '第一次来？请选择 Iris 认识你的称呼。此名称为你独有——若已有其他潜水员使用，请加上姓氏或首字母。'],
+  nameNeededMsg: ['Please add your name so Iris knows who is booking.', '请填写你的称呼，方便 Iris 识别预订人。'],
+  nameTakenMsg: ['That name is already used by another diver — add a surname or initial.', '该称呼已被其他潜水员使用——请加上姓氏或首字母。'],
   sendLink: ['Email me a sign-in link', '发送登录链接'],
   sending: ['Sending…', '发送中…'],
   sentTitle: ['Check your email', '请查收邮件'],
@@ -100,6 +109,9 @@ export default function BookingWizard(props: BookingWizardProps) {
   const t = (pair: readonly [string, string]) => pick(locale, pair[0], pair[1])
   const [step, setStep] = useState<'email' | 'sent' | 'details' | 'confirmed'>(props.authenticated ? 'details' : 'email')
   const [email, setEmail] = useState('')
+  const [needsName, setNeedsName] = useState(false)
+  const [emailChecked, setEmailChecked] = useState(false)
+  const [signupName, setSignupName] = useState('')
   const [pending, setPending] = useState(false)
   const [notice, setNotice] = useState<string | null>(null)
   const [cooldown, setCooldown] = useState(0)
@@ -111,15 +123,35 @@ export default function BookingWizard(props: BookingWizardProps) {
     return () => window.clearInterval(timer)
   }, [cooldown])
 
-  const sendLink = async (target: string) => {
+  const sendLink = async (target: string, name?: string) => {
     setPending(true)
     setNotice(null)
-    const res = await requestMagicLink(target, props.slug)
+    const res = await requestMagicLink(target, props.slug, name)
     setPending(false)
     if (res.status === 'sent') { setStep('sent'); setCooldown(60) }
     else if (res.status === 'cooldown') { setNotice(t(L.cooldownMsg)); setCooldown(60); setStep('sent') }
     else if (res.status === 'rate_limited') setNotice(t(L.rateMsg))
+    else if (res.status === 'name_taken') setNotice(t(L.nameTakenMsg))
     else setNotice(t(L.errorMsg))
+  }
+
+  // New-email detection: on blur for smoothness, and again at submit so a fast
+  // click can never skip the name capture (owner decision 2026-11-21).
+  const checkEmail = async (target: string): Promise<boolean> => {
+    const res = await checkSignupEmail(target)
+    const needs = res.status === 'needs_name'
+    setNeedsName(needs)
+    setEmailChecked(true)
+    return needs
+  }
+
+  const submitEmail = async (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault()
+    setNotice(null)
+    let needs = needsName
+    if (!emailChecked) needs = await checkEmail(email)
+    if (needs && signupName.trim().length < 2) { setNotice(t(L.nameNeededMsg)); return }
+    await sendLink(email, needs ? signupName : undefined)
   }
 
   const submitDetails = async (event: React.FormEvent<HTMLFormElement>) => {
@@ -154,13 +186,20 @@ export default function BookingWizard(props: BookingWizardProps) {
         {props.priceDisplay && <p className="booking-price">{props.priceDisplay}</p>}
 
         {step === 'email' && (
-          <form onSubmit={(e) => { e.preventDefault(); void sendLink(email) }}>
+          <form onSubmit={(e) => void submitEmail(e)}>
             <h3>{t(L.emailTitle)}</h3>
             <p className="booking-intro">{t(L.emailIntro)}</p>
             <div className="form-group">
               <label htmlFor="booking-email">{t(L.emailLabel)} *</label>
-              <input id="booking-email" type="email" required value={email} onChange={(e) => setEmail(e.target.value)} placeholder={t(L.emailPlaceholder)} autoComplete="email" />
+              <input id="booking-email" type="email" required value={email} onChange={(e) => { setEmail(e.target.value); setNeedsName(false); setEmailChecked(false) }} onBlur={() => { if (email.includes('@')) void checkEmail(email) }} placeholder={t(L.emailPlaceholder)} autoComplete="email" />
             </div>
+            {needsName && (
+              <div className="form-group">
+                <label htmlFor="booking-name">{t(L.signupNameLabel)} *</label>
+                <input id="booking-name" required minLength={2} maxLength={200} value={signupName} onChange={(e) => setSignupName(e.target.value)} placeholder={t(L.signupNamePlaceholder)} autoComplete="name" />
+                <p className="booking-intro signup-name-hint">{t(L.signupNameHint)}</p>
+              </div>
+            )}
             {notice && <p className="form-status form-status-error" role="alert">{notice}</p>}
             <button type="submit" className="btn btn-primary" disabled={pending}>{pending ? t(L.sending) : t(L.sendLink)}</button>
           </form>
@@ -190,18 +229,13 @@ export default function BookingWizard(props: BookingWizardProps) {
             </div>
             <div className="form-group">
               <label htmlFor="b-whatsapp">{t(L.whatsappLabel)}</label>
-              <input id="b-whatsapp" name="whatsapp" type="tel" placeholder={t(L.whatsappPlaceholder)} autoComplete="tel" />
+              <input id="b-whatsapp" defaultValue={props.diverProfile?.phone} name="whatsapp" type="tel" placeholder={t(L.whatsappPlaceholder)} autoComplete="tel" />
             </div>
-            <div className="form-group">
-              <label htmlFor="b-cert">{t(L.certLabel)} *</label>
-              <select id="b-cert" name="cert_level" required defaultValue="">
-                <option value="" disabled>{t(L.certPlaceholder)}</option>
-                {L.certOptions.map(([en, zh]) => <option key={en} value={en}>{pick(locale, en, zh)}</option>)}
-              </select>
-            </div>
+            <CertificationFields prefix="booking" agency={props.diverProfile?.agency} level={props.diverProfile?.level} locale={locale}/>
+
             <div className="form-group">
               <label htmlFor="b-dives">{t(L.divesLabel)} *</label>
-              <input id="b-dives" name="logged_dives" type="number" min={0} max={10000} required inputMode="numeric" placeholder={t(L.divesPlaceholder)} />
+              <input id="b-dives" defaultValue={props.diverProfile?.dives} name="logged_dives" type="number" min={0} max={10000} required inputMode="numeric" placeholder={t(L.divesPlaceholder)} />
             </div>
             <div className="form-group form-consent">
               <label><input type="checkbox" name="insurance" required /> {t(L.insuranceLabel)} *</label>
@@ -232,6 +266,7 @@ export default function BookingWizard(props: BookingWizardProps) {
               <label><input type="checkbox" name="accept_policy" required /> {t(L.acceptLabel)} *</label>
             </div>
             {notice && <p className="form-status form-status-error" role="alert">{notice}</p>}
+            <EquipmentEditor profile={props.equipmentProfile} locale={locale} />
             <button type="submit" className="btn btn-primary" disabled={pending}>{pending ? t(L.submitting) : t(L.submitBooking)}</button>
           </form>
         )}

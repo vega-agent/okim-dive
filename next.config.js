@@ -6,6 +6,7 @@ const nextConfig = {
   // M3: include the seed JSON files in the server bundle so the trips
   // fallback (src/lib/trips.ts) works on hosted deployments too.
   experimental: {
+    serverComponentsExternalPackages: ['ws', '@neondatabase/serverless'],
     outputFileTracingIncludes: {
       '/trips': ['./data/trips/**'],
     },
