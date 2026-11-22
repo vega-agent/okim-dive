@@ -108,7 +108,7 @@ Okim Dive is Iris's freelance dive business (Tioman, Malaysia): dive courses and
 **Booking status machine:**
 `awaiting_deposit → payment_claimed → deposit_verified → confirmed → completed`
 Branches: `expired` (unpaid at the hold deadline), `refund_flagged` (full after payment), `cancelled` (diver or instructor, incl. Iris "Release hold"), `eligibility_declined` (paid-but-ineligible → full refund path).
-Eligibility approval (`pending / approved / declined`) is a **separate gate** from payment and slot confirmation.
+Eligibility approval as a separate gate is **superseded** (M5 rebuild, 2026-11-22): declarations are self-declared with a truthfulness disclaimer; `eligibility_status` stays for legacy rows; Iris's rejection path is **Withdraw** (`withdrawBooking`), not an approve/decline review.
 
 **Instructor cancellation:** trips can be cancelled (weather, minimum participants not met, operator issues). Cancelling flags all affected bookings for full refund, reverses related points, and notifies divers. Minimum-participants threshold is Iris-set per trip.
 
@@ -174,12 +174,12 @@ Eligibility approval (`pending / approved / declined`) is a **separate gate** fr
 
 - Each trip defines requirements (Iris-set): certification level, minimum logged dives, dive/travel insurance, medical self-declaration, emergency contact / next of kin.
 - At booking, the diver declares these and provides emergency contact details. Declarations are stored against the booking.
-- **Instructor approval is a separate gate** from payment and slot confirmation: `eligibility_status = pending / approved / declined`. Iris reviews declarations before the trip; a confirmed slot does not imply eligibility approval.
-- **Paid but declined → full refund path** (§8), points reversed.
+- **Self-declaration model (supersedes the approval gate, M5 rebuild 2026-11-22):** the diver declares requirements truthfully at booking; no software approval step. Iris's only rejection path is **Withdraw** (paid → refund path, unpaid → cancelled). `eligibility_status` remains for legacy rows only.
+- **Paid but withdrawn → full refund path** (§8); earned points reversed per §7 (redeemed points never restored, #30).
 - **Iris — not the AI — makes all dive-suitability and safety decisions.** The AI briefing workflow (§15) drafts text from instructor-approved details only; it never assesses suitability.
 - Safety copy follows the vibe doc: calm, capable, reassuring; no guarantees ("risk-free", "safest"); medical/certification claims qualified.
 - Minors: minimum age and parental-consent rules are an open item for Iris (§17); v1 booking form includes date-of-birth/age declaration and blocks under-minimum bookings once the rule is set.
-- Sensitive data (medical declarations, emergency contacts, screenshots): instructor-only access, minimized collection, retention stated on privacy page, PDPA consent at booking.
+- Sensitive data (medical declarations, emergency contacts, screenshots): instructor-only access **except the diver's own declarations**, which the authenticated diver may view read-only in their own session (clarification restored 2026-11-22; screenshots remain instructor-only). Minimized collection, retention stated on privacy page, PDPA consent at booking.
 
 ## 10. Surfaces and routes
 
@@ -206,15 +206,14 @@ Eligibility approval (`pending / approved / declined`) is a **separate gate** fr
 - Dashboard: upcoming trips, outstanding balances, payment-claim queue, new inquiries.
 - Inquiries list (from contact form + course interest), mark handled.
 - Trip management: create/edit trips, currency, deposit/balance rules, requirements, capacity, RM rate, status, bilingual content.
-- Bookings: per-trip manifest, eligibility review (approve/decline), status transitions, cancellation + refund flagging; hold countdown per awaiting-deposit booking, **Extend hold** (+7/+14 days, capped at departure) and **Release hold** (early cancel, audit-logged, diver emailed).
-- Payment recording + verification: Iris logs payment details from the WhatsApp evidence, verifies against the bank record with audit trail, issues receipts.
+- Bookings: per-trip manifest, **Withdraw** (self-declared model — no approve/decline review), status transitions, cancellation + refund flagging; hold countdown per awaiting-deposit booking, **Extend hold** (+7/+14 days, capped at departure) and **Release hold** (early cancel, audit-logged, diver emailed).
+- Payment recording + verification: **one-click Received** (seamless flow S1) records + verifies atomically from the WhatsApp evidence with capacity re-check and audit trail, issues receipts; the separate record/verify pair remains only as a legacy path.
 - Points ledger view per customer; apply redemption at invoice time.
 - Policy editor (refund/privacy/terms) with versioning.
 - Settings: points rules, default RM rate, instructor email allowlist, locale.
-- Preparation checklist per trip (extend existing MVP checklist concept).
-- **Trip briefing workflow (the one AI feature):** Iris approves trip details → draft briefing produced via QwenWork as a **stated manual handoff** (no embedded AI API in the product) → Iris reviews/edits/appves → approved briefing stored and shared with participants. Draft and approved text both recorded; AI never makes safety decisions.
+- **Trip Messages (#32, supersedes prep checklist + briefing workflow):** per-trip Subject+Label+Body messages, EN|CN both required, manual publish (= approval), audience confirmed/all_active filtered at view time, on-platform delivery in My Okim (unread dots, seen counts), edit/delete with before-text audit. The AI briefing handoff remains a stated manual workflow outside the product; no embedded AI.
 
-**My Okim is read-only in v1:** no self-service changes, cancellations, or redemptions — divers contact Iris, who acts in the portal.
+**My Okim is read-only in v1:** no self-service changes, cancellations, or redemptions — divers contact Iris, who acts in the portal. **Clarification (restored 2026-11-22):** showing the next step to *complete* a booking (pay by the deadline, send the transfer screenshot to Iris on WhatsApp, contact Iris) is guidance, not a change; profile/equipment self-service is the authorized exception (§10 profile contract). **Display:** points show **Total balance + Available to redeem** (both ledger-derived); friendly status labels with "what happens next", never internal jargon; **no pending-points display** — before completion use "Not yet awarded" (§7, #29).
 
 ## 11. Bilingual requirements (locked — owner: "Include Bilingual in our spec")
 
@@ -271,9 +270,9 @@ Work happens on branch **`QwenWork-refactor`** (created 2026-11-18). No pushes t
 
 ## 14. Production obligations (in scope, not optional)
 
-- **Privacy/PDPA:** consent checkbox at booking and inquiry; public privacy page (versioned) covering what is collected in the app (name, email, declarations, emergency contact), why, access (instructor-only), retention, and how to request correction/deletion. Payment screenshots are **not collected by the app** — they travel via WhatsApp and stay in Iris's instructor-only records (§6). Iris is the data controller; contact route for requests.
+- **Privacy/PDPA:** consent checkbox at booking and inquiry; public privacy page (versioned) covering what is collected in the app (name, email, declarations, emergency contact), why, access (instructor-only, plus the diver's own read-only view of their declarations), retention, and how to request correction/deletion. Payment screenshots are **not collected by the app** — they travel via WhatsApp and stay in Iris's instructor-only records (§6). Iris is the data controller; contact route for requests.
 - **Terms + waiver:** accepted at booking with version snapshot; liability/waiver text confirmed by Iris before publication (content gate).
-- **Sensitive data:** medical declarations and emergency contacts — instructor-only, encrypted at rest (provider default), never logged, never in repo, retention per §9. Payment screenshots stay in Iris's WhatsApp records (instructor-only), never uploaded to the app (decision #20).
+- **Sensitive data:** medical declarations and emergency contacts — instructor-only, encrypted at rest (provider default), never logged, never in repo, retention per §9; the authenticated diver may view their **own** declarations read-only (no other customer or public access). Payment screenshots stay in Iris's WhatsApp records (instructor-only), never uploaded to the app (decision #20).
 - **Auth security:** single-use short-expiry magic links, request rate limiting + resend cooldown, session expiry, role checks server-side on every portal route, instructor allowlist.
 - **Audit trail:** every verification, eligibility decision, refund, merge, policy edit, and settings change recorded (who/when).
 - **Backups:** Neon point-in-time recovery + scheduled logical export to owner-controlled storage; restore procedure documented.
@@ -313,7 +312,7 @@ Per the repo content gate, none of these are published as fact until confirmed:
 3. Refund policy final text (EN + CN) — §8 tiers are a starting proposal.
 4. Eligibility requirements per trip: cert level, minimum dives, insurance mandate, medical declaration wording, minimum age / parental consent.
 5. RM conversion rates per trip (and how often Iris updates them).
-6. Points: owner approved completion-only earning (#29), 1 pt/RM1 net verified cash, immediate use and 12 calendar months from individual completion; redemption unchanged (100 pts = RM5, 20% cap). Iris to confirm final EN/CN wording and new-version publication before public use. Post-completion refund/spent-points debt handling remains unresolved.
+6. Points: owner approved completion-only earning (#29), 1 pt/RM1 net verified cash, immediate use and 12 calendar months from individual completion; redemption unchanged (100 pts = RM5, 20% cap); **no refund of points (#30)** — redeemed points never restored, earned-lot reversal stays, negative balance blocks redemption. Iris to confirm final EN/CN wording; publication happens at go-live per #31 (v2 draft ready, owner waived the Iris wait 2026-11-22).
 7. Iris's receiving bank/PayNow details (entered in portal settings at runtime, never in repo).
 8. Contact details: WhatsApp number, email, response-time expectations.
 9. Terms/waiver and privacy policy text (legal review advisable for production).
@@ -388,6 +387,7 @@ Known issues logged 2026-11-22 (no user-visible impact observed): (1) Next 14.2 
 | 31 | 2026-11-22 | **Policy versions frozen at v1 until go-live.** Terms, privacy and refund policy stay at version 1; the next version publishes only when the changes go live. POL-TERMS-002 (published 2026-11-21, zero booking references) withdrawn with audit policy_version_withdrawn; v2 EN/CN completion-points wording retained as draft for go-live. Accepted-version immutability unchanged | Owner (Jeff): "Keep all terms & conditions, privacy policy and terms of booking as version 1, the next change will only start when there are changes going live" |
 | 32 | 2026-11-22 | **Trip messages (replaces M5 item 8 checklist+briefing design; Luma-style stream).** Per-trip Subject+Label+Body messages, free-form, label for sorting; EN\|CN switch, both languages server-gated; manual publish only (no scheduling/auto-send); audience per message (confirmed default / all_active) filtered at VIEW time so late bookers see earlier matching messages; delivery ON-PLATFORM ONLY (diver feed in My Okim, static unread dots, mark-read, instructor-only seen counts) — email channel deferred to post-production, S4 email boundary untouched; publish = human approval (AI drafts pasted by Iris, no embedded AI), published messages editable/deletable with before-text audit; soft delete. Tables trip_messages + message_reads (additive); briefings/trip_checklist_items stay unused. Full build authorized before the Nov 23 video; My Okim file ownership coordinated via TRIP-MESSAGES-OWNERSHIP-NOTE.md | Owner (Jeff), trip-messages grill session: "I like how Luma.com is doing… as the date closer, more messages are released by the organiser" |
 | 33 | 2026-11-22 | **Display follows the browsing language everywhere (amends the §11/M4 customer-locale pinning).** My Okim, booking wizard, invoice, receipt and setup card no longer pin to the stored customer locale (`data-page-locale` removed; views use the browser preference). Root cause of the owner-reported "Portal EN → My Okim turns Chinese": toggles on My Okim persisted zh to the customer profile while other pages only wrote the browser preference, so the pinned page diverged from the browsing language. Toggling while signed in still persists the customer locale via setCustomerLocale — it governs transactional emails only. Stored-locale display pinning is retired; tests updated (m6-my-okim, trip-messages, customer-setup, diver-equipment) | Owner (Jeff): "My Okim follows browsing language" |
+| 34 | 2026-11-22 | **Documentation consistency pass (owner: "All policy and documentation should be updated").** Spec body realigned with superseding decisions: §5/§9 eligibility approval → self-declaration + Withdraw; §10 portal → Received one-click, Withdraw, Trip Messages replaces checklist/briefing; §10 My Okim display → Total + Available, friendly labels, no pending points; restored the dropped clarifications (next-step guidance ≠ change; diver's own declarations read-only, screenshots instructor-only) in §9/§10/§14; §17 item 6 spent-points edge marked resolved by #30. PRD §5.3 bilingual corrected (EN+CN built in v1, not phased); PRD scope/milestones updated (WhatsApp evidence, Withdraw, Trip Messages). M5-HANDOFF locked rules + gotchas realigned (#22 hold, self-declaration, #33 locale, fixture-email domains). Live policy bodies stay v1 per #31; v2 EN/CN draft is go-live-ready | Owner (Jeff), diver-booking-logic chat |
 
 ### Diver profile and equipment implementation contract
 
