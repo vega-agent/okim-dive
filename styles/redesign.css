@@ -1027,13 +1027,12 @@ main.my-okim::before { content: ""; position: fixed; inset: 0; z-index: -1; opac
    booking card on Upcoming only — never under Past trips or Points. */
 .my-booking-group { display: grid; gap: .75rem; }
 .my-booking-group + .my-booking-group { margin-top: .75rem; }
-#my-panel-profile .booking-card { max-width: 820px; }
 
 /* Profile tab form styling (DESIGN-SYSTEM §4 form spec): the diver-profile
    component's bare labels/selects get the app form treatment, scoped here so
    sibling components stay untouched. */
 #my-panel-profile form { display: grid; gap: 1.1rem; margin-top: 1rem; }
-#my-panel-profile label { display: grid; gap: .4rem; font-weight: 600; color: var(--ocean-deep); }
+#my-panel-profile label { display: grid; gap: .4rem; font-weight: 400; color: var(--ocean-deep); }
 #my-panel-profile .form-group { display: grid; gap: .4rem; }
 #my-panel-profile input:not([type="checkbox"]), #my-panel-profile select { width: 100%; min-height: 44px; padding: .55rem .8rem; border: 1px solid var(--whisper-border); border-radius: 8px; background: #fff; font-family: var(--font-body); font-size: 1rem; color: var(--ocean-deep); }
 #my-panel-profile input:focus-visible, #my-panel-profile select:focus-visible { outline: 2px solid var(--deep-water); outline-offset: 1px; }
@@ -1046,7 +1045,7 @@ main.my-okim::before { content: ""; position: fixed; inset: 0; z-index: -1; opac
    standard card surfaces, auto-width buttons, app-scale headings, readable
    form measure. Scoped to .my-okim so sibling surfaces stay untouched. */
 .my-okim .my-head h1 { font-size: clamp(1.75rem, 3vw, 2.25rem); font-weight: 500; line-height: 1.15; letter-spacing: -0.3px; }
-.my-okim .portal-card h2, .my-okim .booking-card h2 { font-size: 1.5rem; font-weight: 500; line-height: 1.25; letter-spacing: -0.2px; margin: 0 0 .35rem; }
+.my-okim .portal-card h2, .my-okim .booking-card h2, .my-okim .portal-card-head h2 { font-size: 1.5rem; font-weight: 500; line-height: 1.25; letter-spacing: -0.2px; margin: 0 0 .35rem; }
 .my-okim .booking-card h2 { font-size: 1.75rem; margin: 0 0 .5rem; }
 .my-okim .portal-booking h3, .my-okim .booking-card h3 { font-size: 1.25rem; font-weight: 500; line-height: 1.25; }
 .my-okim .booking-card h4 { font-family: var(--font-body); font-size: .95rem; font-weight: 700; color: var(--ocean-deep); margin: 1.25rem 0 .5rem; }
@@ -1056,7 +1055,6 @@ html[lang="zh-CN"] .my-okim .my-head h1, html[lang="zh-CN"] .my-okim .portal-car
 .my-okim .booking-card .btn { width: auto; min-width: 200px; }
 .my-okim .booking-card > p { color: var(--ink-soft); font-size: .88rem; line-height: 1.5; }
 .my-okim .booking-card > p:first-of-type { margin: 0 0 1rem; }
-.my-okim #profile form { max-width: 680px; margin-top: 1.25rem; }
 .my-okim #profile button.btn { justify-self: start; }
 .my-okim #profile p[role="status"] { margin: 0; min-height: 1.4rem; font-size: .9rem; color: var(--ocean-mid); }
 .my-okim .my-stat-value { font-size: 2rem; line-height: 1.1; }
@@ -1079,3 +1077,153 @@ html[lang="zh-CN"] .my-okim .my-head h1, html[lang="zh-CN"] .my-okim .portal-car
   .my-okim .booking-card div[style*="space-between"] { flex-wrap: wrap; }
   .my-okim .booking-card div[style*="space-between"] > select { max-width: 100% !important; }
 }
+
+/* M6 owner revision (2026-11-21): upcoming bookings read as three sub-cards
+   (Trip information / Equipment / Sizes & fit) + a small closing disclaimer.
+   Weight discipline: 400 body/labels; 600-700 only for headers/badges/buttons. */
+.my-booking-group { display: grid; gap: 1rem; }
+.my-booking-group + .my-booking-group { margin-top: 1.25rem; }
+.my-subcard { border: 1px solid var(--whisper-border); border-radius: 10px; background: #fff; overflow: hidden; }
+.my-subcard-head { padding: .7rem 1.25rem; background: rgba(168, 218, 220, .14); border-bottom: 1px solid var(--whisper-border); }
+.my-subcard-head h3 { margin: 0; font-family: var(--font-heading); font-size: 1.15rem; font-weight: 500; line-height: 1.25; color: var(--ocean-deep); }
+html[lang="zh-CN"] .my-subcard-head h3 { font-weight: 600; }
+.my-subcard-body { padding: 1.1rem 1.25rem; display: grid; gap: .8rem; }
+.my-trip-title { margin: 0; font-family: var(--font-heading); font-size: 1.25rem; font-weight: 500; line-height: 1.25; color: var(--ocean-deep); }
+html[lang="zh-CN"] .my-trip-title { font-weight: 600; }
+.my-meta { margin: 0; color: var(--ink-soft); font-size: .88rem; line-height: 1.5; }
+.my-meta strong { font-weight: 600; color: var(--ocean-deep); }
+.my-badges { display: flex; flex-wrap: wrap; gap: .5rem; }
+.my-subcard .my-amounts dd { font-weight: 400; }
+.my-subcard .my-guidance { margin: 0; }
+.my-subcard label { font-weight: 400; }
+.my-subcard h4 { font-family: var(--font-body); font-size: .8rem; font-weight: 700; letter-spacing: .04em; text-transform: uppercase; color: var(--ocean-mid); margin: 0 0 .5rem; }
+.my-subcard fieldset > section + section { margin-top: .9rem; }
+.my-subcard input:not([type="checkbox"]), .my-subcard select { width: 100%; min-height: 44px; padding: .55rem .8rem; border: 1px solid var(--whisper-border); border-radius: 8px; background: #fff; font-family: var(--font-body); font-size: 1rem; color: var(--ocean-deep); }
+.my-subcard input:focus-visible, .my-subcard select:focus-visible { outline: 2px solid var(--deep-water); outline-offset: 1px; }
+.my-subcard label:has(> input + select) { display: flex; flex-wrap: wrap; align-items: center; gap: .5rem; }
+.my-subcard label:has(> input + select) > input { flex: 1 1 160px; width: auto; }
+.my-subcard label:has(> input + select) > select { flex: 0 0 auto; width: auto; }
+.my-subcard .btn { width: auto; min-width: 200px; }
+.my-actions { display: flex; align-items: center; gap: .9rem; flex-wrap: wrap; }
+.my-actions p[role="status"] { margin: 0; font-size: .88rem; color: var(--ocean-mid); }
+.my-disclaimer { margin: .25rem 0 0; font-size: .75rem; line-height: 1.55; color: var(--ink-soft); }
+@media (max-width: 640px) {
+  .my-subcard-body { padding: 1rem; }
+  .my-subcard .btn { width: 100%; }
+  .my-subcard div[style*="space-between"] { flex-wrap: wrap; }
+  .my-subcard div[style*="space-between"] > select { max-width: 100% !important; }
+}
+
+/* M6 owner experiment (2026-11-21): equipment pill board — three side-by-side
+   columns (Bring / Rent / No need); drag on desktop, tap-menu on touch. */
+.eq-board { display: grid; grid-template-columns: repeat(3, 1fr); gap: .75rem; }
+.eq-col { border: 1px solid var(--whisper-border); border-radius: 10px; background: rgba(241, 250, 238, .5); padding: .75rem; min-height: 130px; }
+.eq-col-drop { border-style: dashed; border-color: var(--ocean-mist); background: rgba(168, 218, 220, .18); }
+.eq-col h4 { display: flex; align-items: center; justify-content: space-between; gap: .5rem; margin: 0 0 .6rem; font-family: var(--font-body); font-size: .8rem; font-weight: 700; letter-spacing: .04em; text-transform: uppercase; color: var(--ocean-mid); }
+.eq-count { display: inline-flex; align-items: center; justify-content: center; min-width: 22px; height: 22px; padding: 0 .4rem; border-radius: 999px; background: rgba(168, 218, 220, .4); color: var(--ocean-deep); font-size: .75rem; font-weight: 700; }
+.eq-pills { display: flex; flex-wrap: wrap; gap: .4rem; }
+.eq-pill-wrap { position: relative; display: inline-flex; }
+.eq-pill { min-height: 44px; padding: .35rem .8rem; border: 1px solid var(--whisper-border); border-radius: 999px; background: #fff; font-family: var(--font-body); font-size: .85rem; font-weight: 600; line-height: 1.3; color: var(--ocean-deep); cursor: grab; text-align: left; }
+.eq-pill:hover, .eq-pill:focus-visible { background: rgba(168, 218, 220, .3); }
+.eq-pill[aria-expanded="true"] { background: var(--ocean-deep); border-color: var(--ocean-deep); color: #fff; }
+.eq-menu { position: absolute; top: calc(100% + 4px); left: 0; z-index: 40; display: grid; gap: 2px; min-width: 130px; padding: 4px; background: #fff; border: 1px solid var(--whisper-border); border-radius: 8px; box-shadow: var(--soft-shadow); }
+.eq-col:last-child .eq-menu { left: auto; right: 0; }
+.eq-menu button { min-height: 44px; padding: .4rem .7rem; border: 0; border-radius: 6px; background: transparent; font-family: var(--font-body); font-size: .85rem; font-weight: 600; color: var(--ocean-deep); text-align: left; cursor: pointer; }
+.eq-menu button:hover, .eq-menu button:focus-visible { background: rgba(168, 218, 220, .3); }
+.eq-empty { margin: 0; font-size: .75rem; line-height: 1.5; color: var(--ink-soft); }
+@media (max-width: 640px) {
+  .eq-board { gap: .4rem; }
+  .eq-col { padding: .5rem; }
+  .eq-pill { padding: .3rem .6rem; font-size: .8rem; }
+}
+@media (max-width: 640px) {
+  .eq-col h4 { font-size: .7rem; letter-spacing: .02em; gap: .35rem; }
+  .eq-count { min-width: 18px; height: 18px; font-size: .68rem; }
+}
+/* Mobile: the move menu becomes a bottom action sheet — an anchored popover
+   would cover the neighbouring column's pills at 390px. */
+@media (max-width: 640px) {
+  .eq-menu { position: fixed; top: auto; bottom: 1rem; left: 50%; transform: translateX(-50%); min-width: 240px; z-index: 60; grid-template-columns: repeat(2, 1fr); }
+  .eq-col:last-child .eq-menu { left: 50%; right: auto; }
+  .eq-menu button { text-align: center; }
+}
+
+/* M6 owner revision 2: bulk actions become icon buttons in each column header
+   (tooltip explains); Reset icon at the Equipment head right; sizes as a
+   4-column grid (2x2 mobile) with Other note below; Save right-aligned last. */
+.my-subcard-head { display: flex; align-items: center; justify-content: space-between; gap: .75rem; }
+.eq-icon-btn { display: inline-flex; align-items: center; justify-content: center; width: 44px; height: 44px; flex: 0 0 auto; border: 1px solid var(--whisper-border); border-radius: 8px; background: #fff; color: var(--ocean-mid); cursor: pointer; }
+.eq-icon-btn:hover, .eq-icon-btn:focus-visible { background: rgba(168, 218, 220, .3); color: var(--ocean-deep); }
+.eq-icon-btn:disabled { opacity: .5; cursor: not-allowed; }
+.eq-col h4 { flex-wrap: wrap; }
+.eq-col h4 .eq-icon-btn { margin-left: auto; border-radius: 6px; }
+.eq-sizes-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: .75rem; }
+.eq-size-cell { display: grid; gap: .4rem; align-content: start; font-weight: 400; }
+.eq-size-off { opacity: .55; }
+.eq-foot { display: grid; gap: .4rem; }
+.eq-notes-grid { display: grid; grid-template-columns: 1fr 1fr; gap: .75rem; margin-top: .75rem; }
+.my-subcard textarea, .profile-eq textarea { width: 100%; min-height: 88px; padding: .55rem .8rem; border: 1px solid var(--whisper-border); border-radius: 8px; background: #fff; font-family: var(--font-body); font-size: 1rem; line-height: 1.5; color: var(--ocean-deep); resize: vertical; }
+.my-subcard textarea:focus-visible, .profile-eq textarea:focus-visible { outline: 2px solid var(--deep-water); outline-offset: 1px; }
+.my-save-row { display: flex; align-items: center; justify-content: flex-end; gap: .9rem; flex-wrap: wrap; }
+.my-save-row p[role="status"] { margin: 0; font-size: .88rem; color: var(--ocean-mid); }
+@media (max-width: 640px) {
+  .eq-sizes-grid { grid-template-columns: 1fr; }
+  .eq-notes-grid { grid-template-columns: 1fr; }
+}
+
+/* Diving line-icons (generated, webp) + instant styled hover tooltips. */
+.eq-icon-btn { position: relative; background: #fff; }
+.eq-icon-btn:hover, .eq-icon-btn:focus-visible { background: #fff; border-color: var(--ocean-mist); box-shadow: var(--soft-shadow); }
+.eq-icon-btn img { display: block; }
+.eq-icon-btn::after { content: attr(data-tip); position: absolute; top: calc(100% + 6px); left: 50%; transform: translateX(-50%); z-index: 70; width: max-content; max-width: 190px; padding: .45rem .6rem; border-radius: 6px; background: var(--ocean-deep); color: #fff; font-family: var(--font-body); font-size: .75rem; font-weight: 600; line-height: 1.4; text-align: center; opacity: 0; pointer-events: none; transition: opacity .12s ease; }
+.eq-icon-btn:hover::after, .eq-icon-btn:focus-visible::after { opacity: 1; }
+.eq-col:first-child .eq-icon-btn::after { left: 0; transform: none; }
+.eq-col:last-child .eq-icon-btn::after { left: auto; right: 0; transform: none; }
+@media (prefers-reduced-motion: reduce) {
+  .eq-icon-btn::after { transition: none; }
+}
+
+/* Icon system (v1.9): diving line-icons as wayfinding on tabs and card heads.
+   Transparent webp; selected tab inverts the icon to foam on Deep Sea. */
+.my-tab-icon { width: 20px; height: 20px; flex: 0 0 auto; }
+.my-tab[aria-selected="true"] .my-tab-icon { filter: brightness(0) invert(1); }
+.my-okim .my-subcard-head h3, .my-okim .portal-card-head h2 { display: flex; align-items: center; gap: .5rem; }
+.my-okim .my-subcard-head h3 img, .my-okim .portal-card-head h2 img { width: 20px; height: 20px; flex: 0 0 auto; }
+
+/* Profile tab relayout (v1.10): full-width sub-cards matching the tab bar,
+   grouped 3-column field grids, 2-column equipment defaults, fine print last. */
+.my-profile { display: grid; gap: 1rem; }
+.my-profile-head { margin: 0; }
+.my-profile form { display: grid; gap: 1rem; }
+.profile-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: .75rem; align-items: start; }
+.profile-grid .form-group { display: grid; gap: .4rem; }
+.profile-eq fieldset { display: grid; grid-template-columns: repeat(3, 1fr); gap: .4rem .9rem; }
+.profile-eq fieldset > fieldset, .profile-eq fieldset > p { grid-column: 1 / -1; }
+.profile-eq fieldset > fieldset { display: block; margin-top: .5rem; }
+.profile-eq label:has(> input + select) { display: grid; gap: .4rem; }
+@media (max-width: 640px) {
+  .profile-grid { grid-template-columns: 1fr; }
+  .profile-eq fieldset { grid-template-columns: 1fr; }
+}
+
+/* Footer must paint ABOVE app surfaces: main.<surface> is positioned
+   (relative + isolate) and its opacity-1 watercolor ::before otherwise covers
+   the static footer — the footer's own height then reads as a huge empty gap.
+   Public pages hide this because their wash is opacity .08. */
+.footer { position: relative; z-index: 1; }
+
+/* Trip messages (TRIP-MESSAGES-SPEC, 2026-11-22): Luma-style stream.
+   Composer/outbox reuse portal cards + pills; diver feed lives in My Okim
+   sub-cards. Static unread dot only — no blinking (owner rule). */
+.trip-messages { display: grid; gap: 1.5rem; }
+.msg-filter { margin: 0 0 1rem; }
+.msg-outbox .msg-row { align-items: flex-start; }
+.msg-feed { list-style: none; margin: 0; padding: 0; display: grid; gap: .6rem; }
+.msg-feed details { border: 1px solid var(--whisper-border); border-radius: 10px; background: rgba(241, 250, 238, .5); }
+.msg-feed summary { display: flex; flex-wrap: wrap; align-items: center; gap: .5rem; min-height: 48px; padding: .55rem 1rem; cursor: pointer; }
+.msg-feed summary strong { font-weight: 700; color: var(--ocean-deep); overflow-wrap: anywhere; }
+.msg-feed summary .my-meta { margin: 0; }
+.msg-date { margin-left: auto; font-size: .8rem; }
+.msg-feed-body { padding: .25rem 1rem 1rem; white-space: pre-wrap; overflow-wrap: anywhere; font-size: .95rem; line-height: 1.65; color: var(--ocean-deep); }
+.msg-unread-dot { flex-shrink: 0; width: 10px; height: 10px; border-radius: 999px; background: #f4a261; }
+.my-messages .my-subcard-head h3 { display: flex; flex-wrap: wrap; align-items: center; gap: .5rem; }

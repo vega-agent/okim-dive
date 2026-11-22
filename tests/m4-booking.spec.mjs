@@ -61,6 +61,7 @@ async function cleanup(email) {
     await sql`DELETE FROM customers WHERE id = ${c.id}`;
   }
   await sql`DELETE FROM verification_tokens WHERE identifier = ${email}`;
+  await sql`DELETE FROM signup_names WHERE email = ${email}`;
   await sql`DELETE FROM sessions WHERE "userId" IN (SELECT id FROM users WHERE email = ${email})`;
   await sql`DELETE FROM users WHERE email = ${email}`;
 }
@@ -159,12 +160,15 @@ test('booking journey works in Chinese and records locale', async ({ page }, tes
       await signInViaCallback(page, email, `/book/${TRIP}`);
       await completeSetup(page, email);
     }
-    // Signed-in surfaces use the CUSTOMER locale (default EN), not the browser
-    // preference — a zh browser still lands on English after the magic link.
+    // #33: signed-in surfaces follow the BROWSING language — a zh browser lands
+    // on the Chinese wizard directly; toggling persists the customer locale.
+    await expect(page.locator('label[for="b-name"]')).toHaveText('姓名 *');
+    await page.locator('[data-lang-toggle]').click();
     await expect(page.locator('label[for="b-name"]')).toHaveText('Full name *');
+    // setCustomerLocale is a fire-and-forget server action — poll, don't race it.
+    await expect.poll(async () => (await sql`SELECT locale FROM customers WHERE email = ${email}`)[0]?.locale).toBe('en');
     await page.locator('[data-lang-toggle]').click();
     await expect(page.locator('label[for="b-name"]')).toHaveText('姓名 *');
-    // setCustomerLocale is a fire-and-forget server action — poll, don't race it.
     await expect.poll(async () => (await sql`SELECT locale FROM customers WHERE email = ${email}`)[0]?.locale).toBe('zh');
 
     await fillDeclarations(page, { name: 'M4 中文测试', zh: true });

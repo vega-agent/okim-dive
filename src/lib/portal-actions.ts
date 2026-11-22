@@ -68,14 +68,9 @@ export async function verifyPayment(form: FormData) {
     }
     const id = `PAY-${claim.id}`
     const now = new Date()
-    const expiry = new Date(now)
-    const [configured] = await tx.select().from(settings).where(eq(settings.key, 'points_rules'))
-    const rules = { earnRate: 1, redeemValue: 0.05, expiryMonths: 12, capPct: 20, ...configured?.value }
-    if (!Number.isFinite(Number(rules.earnRate)) || Number(rules.earnRate) < 0 || !Number.isInteger(Number(rules.expiryMonths)) || Number(rules.expiryMonths) < 1 || Number(trip.rmRate) <= 0) throw new Error('Invalid points configuration')
-    expiry.setUTCMonth(expiry.getUTCMonth() + Number(rules.expiryMonths))
+    if (Number(trip.rmRate) <= 0) throw new Error('Invalid RM conversion')
     const rm = Number(claim.amount) * Number(trip.rmRate)
     await tx.insert(payments).values({ id, bookingId: booking.id, claimId, kind: claim.kind, amount: claim.amount, currency: claim.currency, rmRate: trip.rmRate, rmAmount: rm.toFixed(2), verifiedBy: actor, verifiedAt: now, receiptNo: `RCT-${claim.id}` })
-    await tx.insert(pointsLedger).values({ id: `EARN-${id}`, customerId: booking.customerId, bookingId: booking.id, paymentId: id, type: 'earned', points: Math.floor(rm * Number(rules.earnRate)), rmAmount: rm.toFixed(2), rateSnapshot: trip.rmRate, expiresAt: expiry, ruleSnapshot: { ...rules, rounding: 'floor_per_payment', confirmation: 'aggregate_verified_cash', restoration: 'original_expiry', availableAfterCompletion: true } })
     await tx.update(paymentClaims).set({ status: 'verified' }).where(eq(paymentClaims.id, claimId))
     await tx.update(bookings).set({ status }).where(eq(bookings.id, booking.id))
     await tx.insert(auditLog).values({ id: randomUUID(), actorUserId: actor, action: 'payment_verified', entity: 'payment', entityId: id, meta: { bookingStatus: status } })
@@ -83,21 +78,28 @@ export async function verifyPayment(form: FormData) {
   revalidatePath('/portal')
 }
 
-export async function reviewEligibility(form: FormData) {
+// Owner decision 2026-11-22: eligibility APPROVAL removed — declarations are
+// self-declared (truthfulness disclaimer at booking/profile), so an approval
+// click verified nothing. Withdraw replaces Decline: diver withdraws or Iris
+// rejects; paid bookings enter refund review, unpaid bookings cancel.
+export async function withdrawBooking(form: FormData) {
   const actor = await requireInstructor()
   const id = String(form.get('bookingId') ?? '')
-  const decision = String(form.get('decision'))
-  if (!transactionDb || !['approved', 'declined'].includes(decision)) throw new Error('Invalid decision')
+  if (!transactionDb) throw new Error('Database unavailable')
   await transactionDb.transaction(async tx => {
     const [booking] = await tx.select().from(bookings).where(eq(bookings.id, id)).for('update')
     if (!booking) throw new Error('Unknown booking')
-    if (booking.eligibilityStatus === decision) return
+    if (['cancelled', 'completed', 'refund_flagged', 'eligibility_declined'].includes(booking.status)) return
     const paid = await tx.select().from(payments).where(eq(payments.bookingId, id))
     const netPaid = paid.reduce((sum, p) => sum + (p.kind === 'refund' ? -1 : 1) * Number(p.amount), 0)
-    await tx.update(bookings).set({ eligibilityStatus: decision as 'approved' | 'declined', ...(decision === 'declined' ? { status: netPaid > 0 ? 'refund_flagged' as const : 'eligibility_declined' as const } : {}) }).where(eq(bookings.id, id))
-    await tx.insert(auditLog).values({ id: randomUUID(), actorUserId: actor, action: `eligibility_${decision}`, entity: 'booking', entityId: id })
+    await tx.update(bookings).set({
+      status: netPaid > 0 ? 'refund_flagged' as const : 'cancelled' as const,
+      holdExpiresAt: null,
+      ...(netPaid > 0 ? {} : { cancelledAt: new Date(), cancelReason: 'Withdrawn' }),
+    }).where(eq(bookings.id, id))
+    await tx.insert(auditLog).values({ id: randomUUID(), actorUserId: actor, action: 'booking_withdrawn', entity: 'booking', entityId: id, meta: { netPaid } })
   })
-  revalidatePath('/portal')
+  revalidatePath('/portal'); revalidatePath('/myokim')
 }
 
 export async function refundPayment(form: FormData) {
@@ -128,18 +130,18 @@ export async function refundPayment(form: FormData) {
     const id = randomUUID()
     await tx.insert(payments).values({ id, bookingId: booking.id, sourcePaymentId: source.id, operationKey, kind: 'refund', amount: (cents / 100).toFixed(2), currency: source.currency, rmRate: source.rmRate, rmAmount: (Number(amount) * Number(source.rmRate)).toFixed(2), verifiedBy: actor, verifiedAt: new Date(), receiptNo: `REF-${id}` })
     const ledger = await tx.select().from(pointsLedger).where(eq(pointsLedger.customerId, booking.customerId))
-    const earned = ledger.find(e => e.paymentId === source.id && e.type === 'earned')
+    const earned = ledger.find(e => e.type === 'earned' && (e.paymentId === source.id || (e.bookingId === booking.id && e.ruleSnapshot?.awardVersion === 'completion-v1')))
     if (earned) {
-      const reversed = ledger.filter(e => e.sourceLotId === earned.id && e.type === 'reversed' && e.points < 0).reduce((s, e) => s - e.points, 0)
-      const points = Math.floor(earned.points * total / original) - reversed
-      if (points) await tx.insert(pointsLedger).values({ id: `REV-${id}`, customerId: booking.customerId, bookingId: booking.id, paymentId: id, sourceLotId: earned.id, type: 'reversed', points: -points, expiresAt: earned.expiresAt, ruleSnapshot: earned.ruleSnapshot, rateSnapshot: earned.rateSnapshot, note: reason })
+      const allocations = earned.ruleSnapshot?.allocations as { paymentId: string; points: number; cashCents: number; refundedCents: number }[] | undefined
+      const allocation = allocations?.find(a => a.paymentId === source.id)
+      const reversed = ledger.filter(e => e.sourceLotId === earned.id && e.type === 'reversed' && e.points < 0 && (!allocation || e.note === `refund:${source.id}`)).reduce((s, e) => s - e.points, 0)
+      const points = allocation && allocation.cashCents > 0 ? Math.floor(allocation.points * (total - allocation.refundedCents) / allocation.cashCents) - reversed : allocations ? 0 : Math.floor(earned.points * total / original) - reversed
+      if (points > 0) await tx.insert(pointsLedger).values({ id: `REV-${id}`, customerId: booking.customerId, bookingId: booking.id, paymentId: id, sourceLotId: earned.id, type: 'reversed', points: -points, expiresAt: earned.expiresAt, ruleSnapshot: earned.ruleSnapshot, rateSnapshot: earned.rateSnapshot, note: allocation ? `refund:${source.id}` : reason })
     }
-    // Restore each allocation once, preserving its source expiry, never creating a renewed lot.
-    for (const allocation of ledger.filter(e => e.bookingId === booking.id && e.type === 'redeemed')) {
-      if (ledger.some(e => e.note === `restore:${allocation.id}`)) continue
-      await tx.insert(pointsLedger).values({ id: `RESTORE-${allocation.id}`, customerId: booking.customerId, bookingId: booking.id, paymentId: id, sourceLotId: allocation.sourceLotId, type: 'reversed', points: -allocation.points, expiresAt: allocation.expiresAt, ruleSnapshot: allocation.ruleSnapshot, rateSnapshot: allocation.rateSnapshot, note: `restore:${allocation.id}` })
-    }
-    await tx.update(bookings).set({ status: 'refund_flagged' }).where(eq(bookings.id, booking.id))
+    // Owner decision (keep it simple): redeemed points are NEVER restored on
+    // refund — no refund of points. Earned-lot reversal above still applies;
+    // a resulting negative balance blocks future redemption (redeemPoints).
+    await tx.update(bookings).set({ status: booking.completedAt ? 'completed' : 'refund_flagged' }).where(eq(bookings.id, booking.id))
     await tx.insert(auditLog).values({ id: randomUUID(), actorUserId: actor, action: 'refund_recorded', entity: 'payment', entityId: id, meta: { reason, sourcePaymentId: paymentId } })
   })
   revalidatePath('/portal')
@@ -147,16 +149,44 @@ export async function refundPayment(form: FormData) {
 
 export async function completeBooking(form: FormData) {
   const actor = await requireInstructor()
+  if (form.get('participated') !== 'on') throw new Error('Confirm individual participation before completion')
   if (!transactionDb) throw new Error('Database unavailable')
   await transactionDb.transaction(async tx => {
     const id = String(form.get('bookingId') ?? '')
+    const [lookup] = await tx.select().from(bookings).where(eq(bookings.id, id))
+    if (!lookup) throw new Error('Unknown booking')
+    await tx.select().from(customers).where(eq(customers.id, lookup.customerId)).for('update')
+    const [trip] = await tx.select().from(trips).where(eq(trips.id, lookup.productId)).for('update')
     const [booking] = await tx.select().from(bookings).where(eq(bookings.id, id)).for('update')
-    if (!booking) throw new Error('Unknown booking')
     if (booking.status === 'completed') return
-    const [trip] = await tx.select().from(trips).where(eq(trips.id, booking.productId))
-    if (booking.status !== 'confirmed' || booking.eligibilityStatus !== 'approved' || !trip?.travelEnd || trip.travelEnd > new Date()) throw new Error('Completion requires approved eligibility and ended travel / 完成前须批准资格且行程已结束')
-    await tx.update(bookings).set({ status: 'completed', completedAt: new Date() }).where(eq(bookings.id, id))
-    await tx.insert(auditLog).values({ id: randomUUID(), actorUserId: actor, action: 'booking_completed', entity: 'booking', entityId: id })
+    if (booking.productType !== 'trip' || booking.status !== 'confirmed' || booking.eligibilityStatus === 'declined' || booking.cancelledAt || booking.cancelReason || !trip?.travelEnd || trip.travelEnd > new Date() || ['draft', 'cancelled'].includes(trip.status)) throw new Error('Completion requires an individual confirmed participant and ended travel')
+    const paid = await tx.select().from(payments).where(eq(payments.bookingId, id))
+    const allocations = paid.filter(p => p.kind !== 'refund' && p.verifiedAt).map(p => {
+      const refundedCents = paid.filter(r => r.kind === 'refund' && r.sourcePaymentId === p.id && r.verifiedAt).reduce((s, r) => s + Math.round(Number(r.amount) * 100), 0)
+      const cashCents = Math.round(Number(p.amount) * 100) - refundedCents
+      if (!p.rmRate || Number(p.rmRate) <= 0 || cashCents < 0) throw new Error('Invalid payment conversion or refund allocation')
+      const rm = cashCents / 100 * Number(p.rmRate)
+      return { paymentId: p.id, cashCents, refundedCents, rateSnapshot: p.rmRate, rmAmount: rm.toFixed(2), points: Math.floor(rm) }
+    })
+    const points = allocations.reduce((s, a) => s + a.points, 0)
+    const existing = await tx.select().from(pointsLedger).where(and(eq(pointsLedger.bookingId, id), eq(pointsLedger.type, 'earned')))
+    const now = new Date()
+    const expiry = new Date(now)
+    // Clamp leap-day completion to the last day of that month next year.
+    const day = expiry.getUTCDate()
+    expiry.setUTCDate(1)
+    expiry.setUTCFullYear(expiry.getUTCFullYear() + 1)
+    expiry.setUTCDate(Math.min(day, new Date(Date.UTC(expiry.getUTCFullYear(), expiry.getUTCMonth() + 1, 0)).getUTCDate()))
+    if (!existing.length) {
+      await tx.insert(pointsLedger).values({ id: `EARN-COMPLETE-${id}`, operationKey: `completion:${id}`, customerId: booking.customerId, bookingId: id, type: 'earned', points, rmAmount: (allocations.reduce((s, a) => s + Math.round(Number(a.rmAmount) * 100), 0) / 100).toFixed(2), expiresAt: expiry, ruleSnapshot: { awardVersion: 'completion-v1', earnRate: 1, expiryMonths: 12, rounding: 'floor_per_payment', restoration: 'none', allocations } })
+    } else {
+      const ledger = await tx.select().from(pointsLedger).where(eq(pointsLedger.customerId, booking.customerId))
+      const retained = existing.reduce((s, lot) => s + lot.points + ledger.filter(e => e.sourceLotId === lot.id && e.type === 'reversed' && e.points < 0).reduce((n, e) => n + e.points, 0), 0)
+      if (retained !== points) throw new Error(`Legacy points reconciliation required: retained ${retained}, completion calculation ${points}; no financial records changed`)
+      await tx.insert(auditLog).values({ id: randomUUID(), actorUserId: actor, action: 'legacy_points_retained', entity: 'booking', entityId: id, meta: { points: retained, lots: existing.map(e => e.id), originalRulesAndExpiryRetained: true } })
+    }
+    await tx.update(bookings).set({ status: 'completed', completedAt: now }).where(eq(bookings.id, id))
+    await tx.insert(auditLog).values({ id: randomUUID(), actorUserId: actor, action: 'booking_completed', entity: 'booking', entityId: id, meta: { points, legacyAwardRetained: existing.length > 0 } })
   })
   revalidatePath('/portal')
 }
@@ -207,7 +237,7 @@ export async function redeemPoints(form: FormData) {
       }
       if (!completed.some(b => b.id === lot.bookingId) || remaining <= 0) continue
       const used = Math.min(available, remaining)
-      await tx.insert(pointsLedger).values({ id: randomUUID(), customerId: booking.customerId, bookingId: id, sourceLotId: lot.id, type: 'redeemed', points: -used, operationKey: remaining === requested ? operationKey : null, expiresAt: lot.expiresAt, ruleSnapshot: { ...rules, restoration: 'original_expiry' }, rateSnapshot: trip.rmRate, rmAmount: (used * value).toFixed(2) })
+      await tx.insert(pointsLedger).values({ id: randomUUID(), customerId: booking.customerId, bookingId: id, sourceLotId: lot.id, type: 'redeemed', points: -used, operationKey: remaining === requested ? operationKey : null, expiresAt: lot.expiresAt, ruleSnapshot: { ...rules, restoration: 'none' }, rateSnapshot: trip.rmRate, rmAmount: (used * value).toFixed(2) })
       remaining -= used
     }
     if (remaining) throw new Error('Insufficient completed unexpired points / 可用积分不足')

@@ -9,6 +9,7 @@
  */
 import { readFileSync } from 'node:fs'
 import { join } from 'node:path'
+import { unstable_noStore as noStore } from 'next/cache'
 import { asc, eq } from 'drizzle-orm'
 import { db } from '@/db'
 import { trips } from '@/db/schema'
@@ -96,5 +97,8 @@ function fromJson(): Trip[] {
 }
 
 export async function getTrips(): Promise<Trip[]> {
+  // Next 14.2 cached stale /trips renders when test fixtures mutated trips
+  // mid-run; opt out of every cache layer (same pattern as policies.ts).
+  noStore()
   return (await fromDb()) ?? fromJson()
 }

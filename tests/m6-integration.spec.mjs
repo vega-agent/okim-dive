@@ -99,30 +99,28 @@ test('M6 integration: portal trip → diver booking → verification → complet
 
     // My Okim shows the new booking on Upcoming with its invoice link.
     await page.goto('/myokim');
-    const card = page.locator('#my-panel-upcoming article').filter({ hasText: bookingId });
+    const card = page.locator('#my-panel-upcoming .my-subcard').filter({ hasText: bookingId });
     await expect(card).toContainText('Awaiting deposit');
     await expect(card.locator(`a[href="/invoice/${bookingId}"]`)).toBeVisible();
 
     // PART 3 — Instructor confirmation: record + verify deposit, approve eligibility.
     await login(page, instructor);
-    await call(page, '/portal', 'Record payment', { bookingId, amount: '30', currency: 'MYR', kind: 'deposit', reference: bookingId, paidOn: '2026-01-01', operationKey: randomUUID() });
-    const [claim] = await sql`SELECT id FROM payment_claims WHERE booking_id = ${bookingId} AND status = 'pending'`;
-    await call(page, '/portal', 'Verify against bank record', { claimId: claim.id });
-    await call(page, '/portal', 'Approve eligibility', { bookingId, decision: 'approved' });
+    await call(page, '/portal', 'Received', { bookingId, amount: '30', kind: 'deposit', paidOn: '2026-01-01', operationKey: randomUUID() });
+    const [claim] = await sql`SELECT id FROM payment_claims WHERE booking_id = ${bookingId} AND status = 'verified'`;
     expect((await sql`SELECT status, eligibility_status FROM bookings WHERE id = ${bookingId}`)[0]).toMatchObject({ status: 'confirmed', eligibility_status: 'approved' });
 
-    // Diver sees Confirmed + receipt; points earned but locked (trip not completed).
+    // Diver sees Confirmed + receipt; no points awarded before individual completion.
     await login(page, email);
     await page.goto('/myokim');
-    await expect(page.locator('#my-panel-upcoming article').filter({ hasText: bookingId }).locator('.status-badge').filter({ hasText: 'Confirmed' })).toBeVisible();
+    await expect(page.locator('#my-panel-upcoming .my-subcard').filter({ hasText: bookingId }).locator('.status-badge').filter({ hasText: 'Confirmed' })).toBeVisible();
     await expect(page.locator(`#my-panel-upcoming a[href="/receipt/PAY-${claim.id}"]`)).toBeVisible();
     await page.locator('#my-tab-points').click();
-    expect(await page.locator('.my-stat').evaluateAll(els => els.map(e => e.querySelector('.my-stat-value').textContent))).toEqual(['30', '0']);
+    expect(await page.locator('.my-stat').evaluateAll(els => els.map(e => e.querySelector('.my-stat-value').textContent))).toEqual(['0', '0']);
 
     // PART 4 — Trip ends, Iris completes; My Okim moves it to Past, points unlock.
     await login(page, instructor);
     await sql`UPDATE trips SET travel_end = ${new Date(Date.now() - 86400000).toISOString()} WHERE id = ${trip.id}`;
-    await call(page, '/portal', 'Record trip completion', { bookingId });
+    await call(page, '/portal', 'Complete individual booking', { bookingId, participated: 'on' });
     expect((await sql`SELECT status FROM bookings WHERE id = ${bookingId}`)[0].status).toBe('completed');
     await login(page, email);
     await page.goto('/myokim');

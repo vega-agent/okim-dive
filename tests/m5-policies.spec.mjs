@@ -20,6 +20,7 @@ test('M5 policy editor rendered: portal section, language switch, history, help,
   await login(page, instructor);
 
   await page.goto('/portal');
+  await page.locator('#portal-tab-manage').click();
   await expect(page.locator('#policies')).toBeVisible();
   await expect(page.locator('#policies')).toContainText('Refund policy');
   await expect(page.locator('#policies')).toContainText('v1');

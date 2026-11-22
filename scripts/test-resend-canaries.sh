@@ -25,7 +25,12 @@ run() {
   echo ""
   echo "== $1 =="
   shift
-  if npx playwright test "$@" --no-deps 2>&1 | tail -3; then :; else fail=1; fi
+  # Capture status BEFORE piping: `cmd | tail` would mask the test exit code.
+  local out status
+  out=$(npx playwright test "$@" --no-deps 2>&1)
+  status=$?
+  echo "$out" | tail -3
+  if [ "$status" -ne 0 ]; then fail=1; fi
 }
 
 run "EN real-send canary (rl-ok, desktop)" tests/rate-limit.spec.mjs --project=chromium-desktop --grep "fresh address"

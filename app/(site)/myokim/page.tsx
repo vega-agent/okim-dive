@@ -5,13 +5,15 @@
 // Declarations (medical, emergency contact) are instructor-only and never queried here.
 import type { Metadata } from 'next'
 import { redirect } from 'next/navigation'
-import { desc, eq, inArray } from 'drizzle-orm'
+import { and, desc, eq, inArray, isNull } from 'drizzle-orm'
 import { auth } from '@/auth'
 import { db } from '@/db'
-import { bookings, customers, invoices, payments, pointsLedger, trips } from '@/db/schema'
+import { bookings, customers, invoices, messageReads, payments, pointsLedger, tripMessages, trips } from '@/db/schema'
 import SiteFooter from '@/components/site-footer'
 import MyOkimView from '@/components/my-okim-view'
 import { Equipment, equipmentEditable } from '@/lib/diver-equipment'
+import { messageAudienceStatuses } from '@/lib/trip-display'
+import { sweepHolds } from '@/lib/seamless-actions'
 
 export const dynamic = 'force-dynamic'
 
@@ -21,6 +23,7 @@ export default async function MyOkimPage() {
   const session = await auth()
   if (!session?.user?.customerId) redirect('/book')
   if (!db) throw new Error('Database unavailable')
+  await sweepHolds()
   const customerId = session.user.customerId
 
   const [customerRows, bookingRows, ledgerRows] = await Promise.all([
@@ -38,6 +41,13 @@ export default async function MyOkimPage() {
     bookingIds.length ? db.select().from(invoices).where(inArray(invoices.bookingId, bookingIds)) : Promise.resolve([]),
     bookingIds.length ? db.select().from(payments).where(inArray(payments.bookingId, bookingIds)) : Promise.resolve([]),
   ])
+  // Trip messages (TRIP-MESSAGES-SPEC): on-platform feed, audience filtered at
+  // view time so late bookers see earlier matching messages. Zero emails.
+  const [messageRows, readRows] = await Promise.all([
+    tripIds.length ? db.select().from(tripMessages).where(and(inArray(tripMessages.tripId, tripIds), isNull(tripMessages.deletedAt))).orderBy(desc(tripMessages.publishedAt)) : Promise.resolve([]),
+    db.select({ messageId: messageReads.messageId }).from(messageReads).where(eq(messageReads.customerId, customerId)),
+  ])
+  const seenSet = new Set(readRows.map(r => r.messageId))
   const tripById = new Map(tripRows.map(t => [t.id, t]))
   const invoiceByBooking = new Map(invoiceRows.map(i => [i.bookingId, i]))
 
@@ -56,7 +66,7 @@ export default async function MyOkimPage() {
   }
 
   const data = {
-    customer: { id: customer.id, name: customer.name, email: customer.email, phone: customer.phone, locale: customer.locale, diverProfile: customer.diverProfile },
+    customer: { id: customer.id, name: customer.name, email: customer.email, phone: customer.phone, diverProfile: customer.diverProfile },
     totalPoints,
     availablePoints,
     bookings: bookingRows.map(b => {
@@ -91,6 +101,15 @@ export default async function MyOkimPage() {
           timezone: trip.departureTimezone ?? null,
         } : null,
         invoiceNumber: invoiceByBooking.get(b.id)?.number ?? null,
+        messages: messageRows
+          .filter(m => m.tripId === b.productId && (messageAudienceStatuses(m.audience) as string[]).includes(b.status))
+          .map(m => ({
+            id: m.id, label: m.label,
+            subjectEn: m.subjectEn, subjectZh: m.subjectZh,
+            bodyEn: m.bodyEn, bodyZh: m.bodyZh,
+            publishedAt: m.publishedAt.toISOString(),
+            seen: seenSet.has(m.id),
+          })),
         receipts: paymentRows
           .filter(p => p.bookingId === b.id && p.receiptNo && p.verifiedAt)
           .map(p => ({ id: p.id, receiptNo: p.receiptNo as string, kind: p.kind, amount: p.amount, currency: p.currency })),
@@ -110,7 +129,7 @@ export default async function MyOkimPage() {
 
   return (
     <>
-      <main className="ocean-journey my-okim" data-page-locale={customer.locale} data-locale-managed>
+      <main className="ocean-journey my-okim" data-locale-managed>
         <MyOkimView data={JSON.parse(JSON.stringify(data))} />
       </main>
       <SiteFooter />

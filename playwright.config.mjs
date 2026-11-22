@@ -6,6 +6,9 @@ import { defineConfig, devices } from '@playwright/test';
 export default defineConfig({
   testDir: './tests',
   timeout: 60_000,
+  // Mutation specs share one DB/portal: parallel workers leak UUID fixtures
+  // into each other's views and trip capacity. Serialize (owner suite gate).
+  workers: 1,
   use: {
     baseURL: 'http://localhost:3100',
     reducedMotion: 'reduce',
@@ -29,8 +32,8 @@ export default defineConfig({
     // Public-page specs assert the exact /trips list; trip-mutation specs run
     // afterwards in a dependent project so a temporarily published fixture trip
     // can never race them (M5 item 6).
-    { name: 'chromium-mobile', use: { ...devices['Desktop Chrome'], viewport: { width: 390, height: 844 } }, testIgnore: ['m5-trips-lifecycle.spec.mjs', 'customer-setup.spec.mjs', 'm5-policies-publish.spec.mjs', 'm6-integration.spec.mjs', 'diver-equipment.spec.mjs'] },
-    { name: 'chromium-desktop', use: { ...devices['Desktop Chrome'] }, testIgnore: ['m5-trips-lifecycle.spec.mjs', 'customer-setup.spec.mjs', 'm5-policies-publish.spec.mjs', 'm6-integration.spec.mjs', 'diver-equipment.spec.mjs'] },
-    { name: 'chromium-mutations', use: { ...devices['Desktop Chrome'] }, testMatch: ['m5-trips-lifecycle.spec.mjs', 'customer-setup.spec.mjs', 'm5-policies-publish.spec.mjs', 'm6-integration.spec.mjs', 'diver-equipment.spec.mjs'], dependencies: ['chromium-mobile', 'chromium-desktop'] },
+    { name: 'chromium-mobile', use: { ...devices['Desktop Chrome'], viewport: { width: 390, height: 844 } }, testIgnore: ['m5-trips-lifecycle.spec.mjs', 'm5-financial.spec.mjs', 'customer-setup.spec.mjs', 'm5-policies-publish.spec.mjs', 'm6-integration.spec.mjs', 'm6-my-okim.spec.mjs', 'diver-equipment.spec.mjs', 'portal-tabs.spec.mjs', 'seamless-flow.spec.mjs', 'completion-critical.spec.mjs', 'completion-points.spec.mjs', 'trip-messages-publish.spec.mjs'] },
+    { name: 'chromium-desktop', use: { ...devices['Desktop Chrome'] }, testIgnore: ['m5-trips-lifecycle.spec.mjs', 'm5-financial.spec.mjs', 'customer-setup.spec.mjs', 'm5-policies-publish.spec.mjs', 'm6-integration.spec.mjs', 'm6-my-okim.spec.mjs', 'diver-equipment.spec.mjs', 'portal-tabs.spec.mjs', 'seamless-flow.spec.mjs', 'completion-critical.spec.mjs', 'completion-points.spec.mjs', 'trip-messages-publish.spec.mjs'] },
+    { name: 'chromium-mutations', use: { ...devices['Desktop Chrome'] }, testMatch: ['m5-trips-lifecycle.spec.mjs', 'm5-financial.spec.mjs', 'customer-setup.spec.mjs', 'm5-policies-publish.spec.mjs', 'm6-integration.spec.mjs', 'm6-my-okim.spec.mjs', 'diver-equipment.spec.mjs', 'portal-tabs.spec.mjs', 'seamless-flow.spec.mjs', 'completion-critical.spec.mjs', 'completion-points.spec.mjs', 'trip-messages-publish.spec.mjs'], dependencies: ['chromium-mobile', 'chromium-desktop'] },
   ],
 });

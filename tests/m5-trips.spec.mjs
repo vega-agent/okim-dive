@@ -22,6 +22,7 @@ test('M5 trip editors rendered: bilingual chrome, language switch, help, overflo
   expect(demoTrip).toBeTruthy();
 
   await page.goto('/portal');
+  await page.locator('#portal-tab-manage').click();
   await expect(page.locator('#trips')).toBeVisible();
   await expect(page.locator('#settings')).toBeVisible();
   await expect(page.locator('#trips')).toContainText('Tioman');

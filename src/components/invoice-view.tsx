@@ -5,7 +5,6 @@ import { useLocale, pick } from '@/lib/use-locale'
 import { setCustomerLocale } from '@/lib/booking-actions'
 
 export type InvoiceViewProps = {
-  locale: 'en' | 'zh'
   invoiceNumber: string
   issuedAt: string
   bookingId: string
@@ -60,7 +59,7 @@ const STATUS_LABELS: Record<string, readonly [string, string]> = {
 }
 
 export default function InvoiceView(props: InvoiceViewProps) {
-  const locale = useLocale(props.locale, (next) => void setCustomerLocale(next))
+  const locale = useLocale(undefined, (next) => void setCustomerLocale(next))
   const t = (pair: readonly [string, string]) => pick(locale, pair[0], pair[1])
   const tripFee = (Number(props.deposit) + Number(props.balance) + Number(props.discount)).toFixed(2)
   const total = (Number(props.deposit) + Number(props.balance)).toFixed(2)

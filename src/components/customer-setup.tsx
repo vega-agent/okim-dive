@@ -9,8 +9,8 @@ import { useLocale } from '@/lib/use-locale'
  * once after the first magic-link sign-in, before the booking wizard. Names
  * are case-insensitively unique so Iris never sees ambiguous customers.
  */
-export default function CustomerSetup({ locale }: { locale: 'en' | 'zh' }) {
-  const l = useLocale(locale)
+export default function CustomerSetup() {
+  const l = useLocale()
   const t = (en: string, zh: string) => l === 'zh' ? zh : en
   const [error, setError] = useState<'taken' | 'invalid' | null>(null)
   const [pending, startTransition] = useTransition()

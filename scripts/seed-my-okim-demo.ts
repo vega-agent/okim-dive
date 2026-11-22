@@ -39,7 +39,7 @@ async function main() {
   VALUES ('TRP-DEMO-01', 'tioman-demo-past', 'completed', 'MYR', 1000, 'percent', 30, 30, 8, 1, ${iso(new Date('2026-10-09T16:00:00Z'))}, ${iso(new Date('2026-10-11T16:00:00Z'))}, 'Tioman Reef Weekend — Past Demo', '刁曼岛珊瑚礁周末——往期示例', '9–11 Oct 2026', '2026年10月9–11日', false, true)`
 
   const declarations = JSON.stringify({ certification: 'Open Water (demo)', loggedDives: 25, insurance: true, medical: 'None declared (demo)', emergencyContact: 'Demo contact +60 12-345 6789' })
-  const rules = { earnRate: 1, redeemValue: 0.05, expiryMonths: 12, capPct: 20, rounding: 'floor_per_payment', confirmation: 'aggregate_verified_cash', restoration: 'original_expiry', availableAfterCompletion: true }
+  const rules = { earnRate: 1, redeemValue: 0.05, expiryMonths: 12, capPct: 20, rounding: 'floor_per_payment', confirmation: 'aggregate_verified_cash', restoration: 'none', availableAfterCompletion: true }
 
   // 1) Upcoming confirmed booking on the demo bookable trip TRP-004 (deposit paid).
   await sql`INSERT INTO bookings (id, customer_id, product_id, status, eligibility_status, policy_version_id, accepted_at, deposit_amount, balance_amount, currency, declarations, created_at)
@@ -66,6 +66,8 @@ async function main() {
   for (const id of ['BKG-DEMO-01', 'BKG-DEMO-02']) {
     await sql`INSERT INTO audit_log (id, actor_user_id, action, entity, entity_id, meta) VALUES (${`demo-seed-${id}`}, ${ACTOR}, 'demo_seeded', 'booking', ${id}, '{"sample":true}')`
   }
+  // Sample diver profile so the equipment board auto-fill is visible in demos.
+  await sql`UPDATE customers SET diver_profile = ${JSON.stringify({ agency: 'PADI', level: 'Open Water', dives: 25, equipment: { choices: { mask: 'own', snorkel: 'own', fins: 'own', boots: 'rent', wetsuit: 'rent', bcd: 'rent', regulator: 'own', computer: 'own', smb: 'own', torch: 'rent', camera: 'none', other: 'none' }, wetsuit: 'M', bcd: 'M', footwear: '42', footwearUnit: 'EU', fitNote: '', otherNote: '' } })}::json WHERE id = ${CUSTOMER}`
   console.log('Seeded DEMO bookings BKG-DEMO-01 (confirmed, TRP-004) + BKG-DEMO-02 (completed, past sample trip) under CUS-001. Expected /myokim: total 1360, available 1000.')
 }
 

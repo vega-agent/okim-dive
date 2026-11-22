@@ -31,8 +31,10 @@ export async function saveDiverProfile(form: FormData): Promise<string> {
       for (const { booking,trip } of affected) {
         if (!activeUpcoming(booking.status,trip.status,trip.travelStart)) continue
         if (changed) {
-          await tx.update(bookings).set({ declarations:{ ...booking.declarations,certAgency:agency,certLevel:level,loggedDives:dives },eligibilityStatus:'pending' }).where(eq(bookings.id,booking.id))
-          await tx.insert(auditLog).values({ id:randomUUID(),actorUserId:session.user.id,action:'diver_eligibility_review_required',entity:'booking',entityId:booking.id,meta:{ old:{ certAgency:booking.declarations.certAgency,certLevel:booking.declarations.certLevel,loggedDives:booking.declarations.loggedDives,eligibilityStatus:booking.eligibilityStatus },new:{ agency,level,dives,eligibilityStatus:'pending' },notifyIris:true } })
+          // Owner 2026-11-22: no eligibility reset — declarations are self-declared
+          // under the truthfulness disclaimer; sync the data, notify Iris (info only).
+          await tx.update(bookings).set({ declarations:{ ...booking.declarations,certAgency:agency,certLevel:level,loggedDives:dives } }).where(eq(bookings.id,booking.id))
+          await tx.insert(auditLog).values({ id:randomUUID(),actorUserId:session.user.id,action:'diver_declarations_changed',entity:'booking',entityId:booking.id,meta:{ old:{ certAgency:booking.declarations.certAgency,certLevel:booking.declarations.certLevel,loggedDives:booking.declarations.loggedDives },new:{ agency,level,dives },notifyIris:true } })
         }
         if (JSON.stringify(previous.equipment) !== JSON.stringify(equipment)) await tx.insert(auditLog).values({ id:randomUUID(),actorUserId:session.user.id,action:'diver_equipment_profile_changed',entity:'booking',entityId:booking.id,meta:{ old:previous.equipment ?? null,new:equipment,notifyIris:true,bookingSnapshotUnchanged:true } })
       }

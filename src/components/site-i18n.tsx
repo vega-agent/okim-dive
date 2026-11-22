@@ -98,17 +98,13 @@ export default function SiteI18n() {
 
     // New page after client-side navigation: record its English title, then re-apply.
     // Deferred a tick on navigation so Next's metadata effect has set the new title first.
+    // Decision #33: all surfaces follow the browsing language; the stored customer
+    // locale is for emails, not display pinning.
     const reapply = () => {
       document.body.dataset.enTitle = document.title
       let savedLanguage = 'en'
       try { savedLanguage = localStorage.getItem('okim-language') || 'en' } catch { /* Use visible English fallback. */ }
-      // Signed-in app pages pin the customer's locale for the WHOLE page
-      // (chrome + self-localized content agree); marketing keeps the browser pref.
-      const pinned = document.querySelector('[data-page-locale]')?.getAttribute('data-page-locale')
-      const target = pinned === 'zh' || pinned === 'en'
-        ? pinned
-        : (mountedRef.current ? languageRef.current : savedLanguage)
-      applyLanguage(target)
+      applyLanguage(mountedRef.current ? languageRef.current : savedLanguage)
       mountedRef.current = true
     }
     const timer = mountedRef.current ? window.setTimeout(reapply, 0) : (reapply(), 0)

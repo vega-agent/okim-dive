@@ -2,8 +2,8 @@
 
 import { useLocale } from '@/lib/use-locale'
 
-export default function ReceiptView({ receipt }: { receipt: { number: string; paymentId: string; claimId: string | null; bookingId: string; customerName: string; amount: string; currency: string; verifiedAt: string; kind: string; locale: 'en' | 'zh' } }) {
-  const locale = useLocale(receipt.locale)
+export default function ReceiptView({ receipt }: { receipt: { number: string; paymentId: string; claimId: string | null; bookingId: string; customerName: string; amount: string; currency: string; verifiedAt: string; kind: string } }) {
+  const locale = useLocale()
   const t = (en: string, zh: string) => locale === 'zh' ? zh : en
   const kinds: Record<string, [string, string]> = { deposit: ['Deposit', '订金'], balance: ['Balance', '尾款'], full: ['Full payment', '全款'], refund: ['Refund', '退款'] }
   return <div className="invoice-doc" data-locale-managed>

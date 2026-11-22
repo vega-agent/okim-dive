@@ -6,6 +6,7 @@
  * provisioned in the session callback (database strategy fires post-verify).
  */
 import NextAuth, { AuthError } from 'next-auth'
+import { localEmailsDisabled } from '@/lib/local-email-gate'
 import { DrizzleAdapter } from '@auth/drizzle-adapter'
 import Resend from 'next-auth/providers/resend'
 import { Resend as ResendClient } from 'resend'
@@ -92,6 +93,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       from: process.env.EMAIL_FROM ?? 'Okim Dive <onboarding@resend.dev>',
       maxAge: 15 * 60, // §3: short expiry
       async sendVerificationRequest({ identifier, url, provider, expires }) {
+        if (localEmailsDisabled()) return
         const email = identifier.toLowerCase()
         await checkSendRate(email, expires)
         const client = new ResendClient(provider.apiKey as string)

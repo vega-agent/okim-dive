@@ -3,7 +3,7 @@ export const SIZES = ['XS','S','M','L','XL','XXL','Other','Unsure']
 export type Equipment = { choices: Record<string, 'own' | 'rent' | 'none'>; wetsuit: string; bcd: string; footwear: string; footwearUnit: string; fitNote: string; otherNote: string }
 export function equipmentFromProfile(raw: unknown): Equipment {
   const p = (raw ?? {}) as Partial<Equipment>
-  return { choices: Object.fromEntries(ITEMS.map(([id]) => [id, p.choices?.[id] === 'own' ? 'own' : 'rent'])), wetsuit:p.wetsuit ?? 'Unsure', bcd:p.bcd ?? 'Unsure', footwear:p.footwear ?? 'Unsure', footwearUnit:p.footwearUnit ?? 'EU', fitNote:p.fitNote ?? '', otherNote:p.otherNote ?? '' }
+  return { choices: Object.fromEntries(ITEMS.map(([id]) => [id, p.choices?.[id] === 'own' ? 'own' : p.choices?.[id] === 'none' ? 'none' : 'rent'])), wetsuit:p.wetsuit ?? 'Unsure', bcd:p.bcd ?? 'Unsure', footwear:p.footwear ?? 'Unsure', footwearUnit:p.footwearUnit ?? 'EU', fitNote:p.fitNote ?? '', otherNote:p.otherNote ?? '' }
 }
 export function parseEquipment(raw: unknown): Equipment | null {
   if (!raw || typeof raw !== 'object') return null

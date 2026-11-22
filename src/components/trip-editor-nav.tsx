@@ -2,8 +2,8 @@
 import { useLocale } from '@/lib/use-locale'
 import { contentCompleteness, tripDisplayState, type SerializedTrip } from '@/lib/trip-display'
 
-/** Persistent trip header linking Settings ↔ Content with completion badges. */
-export default function TripEditorNav({ trip, active, consumed }: { trip: SerializedTrip; active: 'settings' | 'content'; consumed: number }) {
+/** Persistent trip header linking Settings ↔ Content ↔ Messages with completion badges. */
+export default function TripEditorNav({ trip, active, consumed }: { trip: SerializedTrip; active: 'settings' | 'content' | 'messages'; consumed: number }) {
   const locale = useLocale()
   const t = (en: string, zh: string) => locale === 'zh' ? zh : en
   const state = tripDisplayState(trip, consumed, trip.capacity)
@@ -26,6 +26,7 @@ export default function TripEditorNav({ trip, active, consumed }: { trip: Serial
           <span className={`completion-badge${zh.missingRequired.length ? ' incomplete' : ''}`}>中文 {zh.done}/{zh.total}</span>
         </span>
       </a>
+      <a href={`/portal/trips/${trip.id}/messages`} aria-current={active === 'messages' ? 'page' : undefined}>{t('Messages', '消息')}</a>
     </nav>
   </header>
 }

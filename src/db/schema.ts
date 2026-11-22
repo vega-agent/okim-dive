@@ -151,7 +151,7 @@ export const bookings = pgTable('bookings', {
   productType: text('product_type', { enum: ['trip', 'course'] }).notNull().default('trip'),
   productId: text('product_id').notNull(),
   status: text('status', {
-    enum: ['awaiting_deposit', 'payment_claimed', 'deposit_verified', 'confirmed', 'completed', 'refund_flagged', 'cancelled', 'eligibility_declined'],
+    enum: ['awaiting_deposit', 'payment_claimed', 'deposit_verified', 'confirmed', 'completed', 'refund_flagged', 'cancelled', 'eligibility_declined', 'expired'],
   }).notNull().default('awaiting_deposit'),
   eligibilityStatus: text('eligibility_status', { enum: ['pending', 'approved', 'declined'] }).notNull().default('pending'),
   policyVersionId: text('policy_version_id').references(() => policyVersions.id),
@@ -166,6 +166,10 @@ export const bookings = pgTable('bookings', {
   completedAt: timestamp('completed_at', { mode: 'date' }),
   cancelledAt: timestamp('cancelled_at', { mode: 'date' }),
   cancelReason: text('cancel_reason'),
+  // 14-day deposit soft-hold (decision #22, seamless flow S1–S2): reserves one
+  // slot from creation; reminder 3 days before expiry; sweep releases unpaid.
+  holdExpiresAt: timestamp('hold_expires_at', { mode: 'date' }),
+  reminderSentAt: timestamp('reminder_sent_at', { mode: 'date' }),
 })
 
 /* ---------- Payment claims + payments ---------- */
@@ -286,6 +290,33 @@ export const briefings = pgTable('briefings', {
   source: text('source').notNull().default('qwenwork-handoff'),
   createdAt: timestamp('created_at', { mode: 'date' }).notNull().defaultNow(),
 })
+
+/* ---------- Trip messages (Luma-style stream, TRIP-MESSAGES-SPEC 2026-11-22) ----------
+   On-platform delivery only for now (channel='platform'); email is a post-production
+   option. Publish = human approval; edits/deletes audited with before-text.
+   Audience filtered at VIEW time: late bookers see earlier matching messages. */
+
+export const tripMessages = pgTable('trip_messages', {
+  id: text('id').primaryKey(), // MSG-001
+  tripId: text('trip_id').notNull().references(() => trips.id),
+  label: text('label').notNull(), // free tag for sorting: Briefing, Checklist, Weather…
+  subjectEn: text('subject_en').notNull(),
+  subjectZh: text('subject_zh').notNull(),
+  bodyEn: text('body_en').notNull(),
+  bodyZh: text('body_zh').notNull(),
+  audience: text('audience', { enum: ['confirmed', 'all_active'] }).notNull().default('confirmed'),
+  channel: text('channel').notNull().default('platform'),
+  publishedBy: text('published_by'),
+  publishedAt: timestamp('published_at', { mode: 'date' }).notNull().defaultNow(),
+  updatedAt: timestamp('updated_at', { mode: 'date' }).notNull().defaultNow(),
+  deletedAt: timestamp('deleted_at', { mode: 'date' }),
+}, (t) => [index('trip_messages_trip').on(t.tripId)])
+
+export const messageReads = pgTable('message_reads', {
+  messageId: text('message_id').notNull().references(() => tripMessages.id),
+  customerId: text('customer_id').notNull().references(() => customers.id),
+  seenAt: timestamp('seen_at', { mode: 'date' }).notNull().defaultNow(),
+}, (t) => [uniqueIndex('message_read_unique').on(t.messageId, t.customerId)])
 
 export const auditLog = pgTable('audit_log', {
   id: text('id').primaryKey(),

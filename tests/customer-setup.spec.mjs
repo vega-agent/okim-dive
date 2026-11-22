@@ -6,12 +6,13 @@ import { createHash, randomUUID } from 'node:crypto';
 config({ path: '.env.local' });
 const sql = neon(process.env.DATABASE_URL);
 const TRIP = 'tioman-reef-weekend';
+const BASE = process.env.OKIM_TEST_BASE_URL ?? 'http://localhost:3100';
 
 async function login(page, email) {
   const raw = randomUUID();
   const token = createHash('sha256').update(raw + process.env.AUTH_SECRET).digest('hex');
   await sql`INSERT INTO verification_tokens (identifier, token, expires) VALUES (${email}, ${token}, ${new Date(Date.now() + 900000).toISOString()})`;
-  await page.goto(`/api/auth/callback/resend?callbackUrl=${encodeURIComponent(`http://localhost:3100/book/${TRIP}`)}&token=${raw}&email=${encodeURIComponent(email)}`);
+  await page.goto(`${BASE}/api/auth/callback/resend?callbackUrl=${encodeURIComponent(`${BASE}/book/${TRIP}`)}&token=${raw}&email=${encodeURIComponent(email)}`);
   await page.waitForURL(`**/book/${TRIP}`);
   await page.request.get('/api/auth/session');
 }
@@ -159,11 +160,12 @@ test('email-step name field and fallback card render bilingual with overflow and
     expect(metrics.overflow).toBe(false);
     expect(metrics.small).toBe(0);
 
-    // Fallback card: pending customer, EN then CN via the stored customer locale.
+    // Fallback card: pending customer, EN then CN via the browsing language (#33).
     await login(page, email);
+    await page.evaluate(() => localStorage.setItem('okim-language', 'en'));
     await page.goto(`/book/${TRIP}`);
     await expect(page.locator('.customer-setup h2')).toHaveText('Welcome to Okim Dive');
-    await sql`UPDATE customers SET locale = 'zh' WHERE email = ${email}`;
+    await page.evaluate(() => localStorage.setItem('okim-language', 'zh'));
     await page.reload();
     await expect(page.locator('.customer-setup h2')).toHaveText('欢迎来到 Okim Dive');
     const cnOverflow = await page.evaluate(() => document.documentElement.scrollWidth > window.innerWidth);

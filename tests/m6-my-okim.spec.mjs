@@ -19,7 +19,7 @@ async function login(page, email) {
 async function call(page, name, fields) {
   await page.goto('/portal');
   const ids = await page.locator('form').evaluateAll(forms => forms.map(f => ({ text: f.textContent, id: [...f.querySelectorAll('input')].find(i => i.name.startsWith('$ACTION_ID_'))?.name.slice(11) })));
-  const labels = { recordPayment: 'Record payment', verifyPayment: 'Verify against bank record', refundPayment: 'Record completed external refund', redeemPoints: 'Apply points before payment', completeBooking: 'Record trip completion', reviewEligibility: 'Approve eligibility' };
+  const labels = { confirmReceived: 'Received', verifyPayment: 'Verify against bank record', refundPayment: 'Record completed external refund', redeemPoints: 'Apply points before payment', completeBooking: 'Complete individual booking' };
   const id = ids.find(f => f.text.includes(labels[name]))?.id || actions[name];
   expect(id, `compiled reference for ${name}`).toBeTruthy();
   actions[name] = id;
@@ -28,7 +28,7 @@ async function call(page, name, fields) {
 
 async function fixture(page) {
   const prefix = `M6-${randomUUID()}`;
-  const email = `${prefix.toLowerCase()}@example.invalid`;
+  const email = `${prefix.toLowerCase()}@example.com`;
   await login(page, email);
   const [customer] = await sql`SELECT id FROM customers WHERE email = ${email}`;
   const instructor = process.env.AUTH_INSTRUCTOR_EMAILS.split(',')[0].trim();
@@ -43,11 +43,11 @@ async function fixture(page) {
     return id;
   };
   const pay = async (id, amount, kind = 'deposit') => {
-    await call(page, 'recordPayment', { bookingId: id, amount: String(amount), currency: 'MYR', kind, reference: id, paidOn: '2026-01-01', operationKey: randomUUID() });
-    const [claim] = await sql`SELECT id FROM payment_claims WHERE booking_id = ${id} AND status = 'pending' ORDER BY submitted_at DESC LIMIT 1`;
-    expect(claim).toBeTruthy();
-    await call(page, 'verifyPayment', { claimId: claim.id });
-    return `PAY-${claim.id}`;
+    // Seamless portal: Received records + verifies in one act (points v2: zero award).
+    await call(page, 'confirmReceived', { bookingId: id, amount: String(amount), kind, paidOn: '2026-01-01', operationKey: randomUUID() });
+    const [p] = await sql`SELECT id FROM payments WHERE booking_id = ${id} AND kind <> 'refund' ORDER BY verified_at DESC LIMIT 1`;
+    expect(p).toBeTruthy();
+    return p.id;
   };
   const extraEmails = [];
   const cleanup = async () => {
@@ -84,30 +84,36 @@ test('M6 My Okim: auth gate, read-only upcoming bookings, invoice/receipt links,
     const a = await f.booking();
     const rival = `${f.prefix}-rival`;
     const rivalName = `Fictional rival ${f.prefix}`;
-    await sql`INSERT INTO customers (id, name, email) VALUES (${rival}, ${rivalName}, ${f.prefix.toLowerCase()+'-rival@example.invalid'})`;
+    await sql`INSERT INTO customers (id, name, email) VALUES (${rival}, ${rivalName}, ${f.prefix.toLowerCase()+'-rival@example.com'})`;
     const b = await f.booking('awaiting_deposit', rival);
     const payment = await f.pay(a, 30);
     await login(page, f.email);
     await page.goto('/myokim');
     await expect(page.locator('main h1')).toHaveText('My Okim');
-    // Upcoming is the default tab after login.
+    // Upcoming is the default tab after login; tabs and card heads carry the
+    // diving icon set as wayfinding.
     await expect(page.getByRole('tab', { name: /Upcoming trips/ })).toHaveAttribute('aria-selected', 'true');
-    const card = page.locator('article').filter({ hasText: a });
+    await expect(page.locator('.my-tab .my-tab-icon')).toHaveCount(4);
+    await expect(page.locator('#my-panel-upcoming .my-subcard-head h3 img')).toHaveCount(3);
+    const card = page.locator('.my-subcard').filter({ hasText: a });
     await expect(card).toContainText('Fictional transaction test');
     await expect(card.locator('.status-badge').filter({ hasText: 'Confirmed' })).toBeVisible();
     await expect(card).toContainText('Pay the balance by the due date.');
     await expect(card).toContainText('Sample trip');
     await expect(page.locator('main')).not.toContainText(b);
     await expect(page.locator('main')).not.toContainText(rivalName);
-    expect(await page.locator('article form').count()).toBe(0);
-    // Read-only: the only buttons are tab navigation and help toggles.
-    expect(await page.locator('article button:not(.portal-help-toggle):not(.my-tab):not(.my-show-all)').count()).toBe(0);
-    // Equipment sits beside its booking on Upcoming only — never under Past/Points.
-    await expect(page.locator('#my-panel-upcoming').getByRole('heading', { name: `${a} · Equipment`, exact: true })).toBeVisible();
+    // Bookings/points stay read-only: no forms in those panels.
+    for (const panel of ['upcoming', 'past', 'points']) expect(await page.locator(`#my-panel-${panel} form`).count()).toBe(0);
+    // Three sub-cards per booking + small disclaimer; reference explained once.
+    await expect(page.locator('#my-panel-upcoming .my-subcard')).toHaveCount(3);
+    await expect(page.locator(`#equipment-${a}`)).toBeVisible();
+    await expect(page.locator(`#sizes-${a}`)).toBeVisible();
+    await expect(page.locator('#my-panel-upcoming .my-disclaimer')).toContainText('self-declared');
+    await expect(page.locator('#my-panel-upcoming')).toContainText('use it as your bank transfer reference.');
     await page.locator('#my-tab-past').click();
-    expect(await page.locator('#my-panel-past section.booking-card').count()).toBe(0);
+    expect(await page.locator('#my-panel-past .my-subcard').count()).toBe(0);
     await page.locator('#my-tab-points').click();
-    expect(await page.locator('#my-panel-points section.booking-card').count()).toBe(0);
+    expect(await page.locator('#my-panel-points .my-subcard').count()).toBe(0);
     // Profile is the fourth tab; deep link opens it.
     await page.locator('#my-tab-profile').click();
     await expect(page.locator('#profile h2')).toHaveText('Diver profile');
@@ -117,7 +123,7 @@ test('M6 My Okim: auth gate, read-only upcoming bookings, invoice/receipt links,
     await card.locator(`a[href="/invoice/${a}"]`).click();
     await expect(page.locator('.invoice-doc')).toContainText('MYR 30.00');
     await page.goto('/myokim');
-    await page.locator(`article a[href="/receipt/${payment}"]`).click();
+    await page.locator(`#my-panel-upcoming a[href="/receipt/${payment}"]`).click();
     await expect(page.locator('.invoice-doc')).toContainText('MYR 30.00');
   } finally { await f.cleanup(); }
 });
@@ -131,19 +137,17 @@ test('M6 My Okim: ledger-derived balance through earn, completion unlock, redemp
     await login(page, f.email);
     await page.goto('/myokim');
     await openTab(page, /Points/);
+    // Points v2 (#29): payments award nothing before individual completion.
     expect(await stats(page)).toEqual([
-      { label: 'Total balance', value: '30' },
+      { label: 'Total balance', value: '0' },
       { label: 'Available to redeem', value: '0' },
     ]);
-    await expect(page.locator('.portal-table')).toContainText('+30');
-    await expect(page.locator('.portal-table')).toContainText('RM 30.00');
     await openTab(page, /Upcoming trips/);
-    await expect(page.locator('article').filter({ hasText: a })).toContainText('Confirmed');
-    // Unlock: eligibility approved + travel ended + completion recorded by Iris.
+    await expect(page.locator('.my-subcard').filter({ hasText: a })).toContainText('Confirmed');
+    // Unlock: travel ended + individual completion recorded by Iris (participation confirmed).
     await login(page, f.instructor);
-    await call(page, 'reviewEligibility', { bookingId: a, decision: 'approved' });
     await sql`UPDATE trips SET travel_end = ${new Date(Date.now()-86400000).toISOString()} WHERE id = ${f.trip}`;
-    await call(page, 'completeBooking', { bookingId: a });
+    await call(page, 'completeBooking', { bookingId: a, participated: 'on' });
     await login(page, f.email);
     await page.goto('/myokim');
     // Completed booking moves to the compact Past trips tab.
@@ -153,32 +157,40 @@ test('M6 My Okim: ledger-derived balance through earn, completion unlock, redemp
     await expect(pastRow.locator('.status-badge').filter({ hasText: 'Completed' })).toBeVisible();
     await expect(page.locator('#my-panel-upcoming')).not.toContainText(a);
     await openTab(page, /Points/);
-    expect((await stats(page))[1].value).toBe('30');
+    // Awarded once on completion, immediately usable.
+    expect(await stats(page)).toEqual([
+      { label: 'Total balance', value: '30' },
+      { label: 'Available to redeem', value: '30' },
+    ]);
+    await expect(page.locator('.portal-table')).toContainText('+30');
+    await expect(page.locator('.portal-table')).toContainText('RM 30.00');
     // Redemption applied by Iris at invoice time reduces available and total.
     await login(page, f.instructor);
     await call(page, 'redeemPoints', { bookingId: b, points: '20', operationKey: randomUUID() });
     await login(page, f.email);
     await page.goto('/myokim');
-    await expect(page.locator('article').filter({ hasText: b })).toContainText('−MYR 1.00');
+    await expect(page.locator('.my-subcard').filter({ hasText: b })).toContainText('−MYR 1.00');
     await openTab(page, /Points/);
     expect(await stats(page)).toEqual([
       { label: 'Total balance', value: '10' },
       { label: 'Available to redeem', value: '10' },
     ]);
     await expect(page.locator('.portal-table')).toContainText('-20');
-    // Refund reverses points proportionally; the refunded booking returns to
-    // Upcoming (needs attention) and its lot re-locks.
+    // Refund reverses earned points proportionally. A completed booking stays
+    // Completed (Past trips); redeemed points are never restored (#30).
     await login(page, f.instructor);
     await call(page, 'refundPayment', { paymentId: payment, amount: '10', reason: 'Fictional M6 refund', operationKey: randomUUID() });
     await login(page, f.email);
     await page.goto('/myokim');
-    await expect(page.locator('article').filter({ hasText: a })).toContainText('A refund is under review — Iris will contact you.');
+    await openTab(page, /Past trips/);
+    await expect(page.locator('.my-past-row').filter({ hasText: a }).locator('.status-badge').filter({ hasText: 'Completed' })).toBeVisible();
     await openTab(page, /Points/);
     expect(await stats(page)).toEqual([
       { label: 'Total balance', value: '0' },
       { label: 'Available to redeem', value: '0' },
     ]);
     await expect(page.locator('.portal-table')).toContainText('Reversed');
+    expect(await sql`SELECT id FROM points_ledger WHERE customer_id = ${f.customer} AND note LIKE 'restore:%'`).toHaveLength(0);
     // Expired lots count in the derived total but never in available.
     await sql`INSERT INTO points_ledger (id, customer_id, booking_id, type, points, expires_at) VALUES (${f.prefix+'-expired'}, ${f.customer}, ${a}, 'earned', 100, ${new Date(Date.now()-86400000).toISOString()})`;
     await page.reload();
@@ -219,11 +231,61 @@ test('M6 My Okim: no Chinese leaks on any EN tab (options and cutoffs included)'
   } finally { await f.cleanup(); }
 });
 
-test('M6 My Okim: empty states, past-trip cap, pinned bilingual locale, toggle persistence, design measurements', async ({ page }, testInfo) => {
+test('M6 equipment board: three columns auto-fill from profile, tap-move, drag, save', async ({ page }) => {
+  const f = await fixture(page);
+  try {
+    const a = await f.booking();
+    await sql`UPDATE customers SET diver_profile = ${JSON.stringify({ equipment: { choices: { mask: 'own', other: 'own' } } })}::json WHERE id = ${f.customer}`;
+    await login(page, f.email);
+    await page.goto('/myokim');
+    const board = page.locator(`#equipment-${a}`);
+    await expect(board.locator('.eq-col')).toHaveCount(3);
+    // Auto-fill: profile own items land in Bring, everything else in Rent.
+    await expect(board.locator('.eq-count')).toHaveText(['2', '10', '0']);
+    await expect(board.locator('.eq-col').nth(0).locator('.eq-pill')).toHaveCount(2);
+    // Bulk actions are icon buttons in column headers with hover explanations;
+    // Reset sits at the Equipment head right.
+    await expect(board.getByRole('button', { name: 'Bring all', exact: true })).toHaveAttribute('data-tip', 'Move every item to Bring');
+    await expect(board.getByRole('button', { name: 'Rent all', exact: true })).toHaveAttribute('data-tip', 'Move every item to Rent');
+    await expect(board.getByRole('button', { name: 'Remove all', exact: true })).toHaveAttribute('data-tip', 'Mark every item not needed');
+    await expect(board.getByRole('button', { name: 'Reset from profile', exact: true })).toBeVisible();
+    // Sizes: four cells, Other note below, Save right-aligned at the end.
+    const sizesCard = page.locator(`#sizes-${a}`);
+    await expect(sizesCard.locator('.eq-size-cell')).toHaveCount(3);
+    await expect(sizesCard.locator('textarea')).toHaveCount(2);
+    const rightGap = await sizesCard.evaluate(el => { const btn = el.querySelector('.my-save-row button'); return Math.round(el.getBoundingClientRect().right - btn.getBoundingClientRect().right); });
+    expect(rightGap).toBeLessThanOrEqual(24);
+    // Tap a pill -> destination menu -> move to No need.
+    await board.locator(`#${a}-pill-mask`).click();
+    await expect(board.locator('.eq-menu')).toBeVisible();
+    await board.locator('.eq-menu button', { hasText: 'No need' }).click();
+    await expect(board.locator('.eq-count')).toHaveText(['1', '10', '1']);
+    expect(JSON.parse(await board.locator('input[name=equipment]').inputValue()).choices.mask).toBe('none');
+    // Drag a pill from Rent to Bring (desktop HTML5 drag). Settle layout and
+    // scroll first: dragAndDrop measures boxes before scrolling, which can
+    // otherwise start the drag on the wrong pill.
+    await board.scrollIntoViewIfNeeded();
+    await page.waitForTimeout(400);
+    await page.dragAndDrop(`#${a}-pill-snorkel`, `#equipment-${a} .eq-col >> nth=0`);
+    await expect(board.locator('.eq-count')).toHaveText(['2', '9', '1']);
+    // Save persists the board state.
+    const sizes = page.locator(`#sizes-${a}`);
+    await sizes.getByRole('button', { name: 'Save booking equipment', exact: true }).click();
+    await expect(sizes.getByRole('status')).toContainText('Saved');
+    await expect.poll(async () => (await sql`SELECT equipment FROM bookings WHERE id = ${a}`)[0].equipment.choices.snorkel).toBe('own');
+    // CN headers + menu.
+    await page.locator('[data-lang-toggle]').click();
+    await expect(board.locator('.eq-col h4').first()).toContainText('自带');
+    await board.locator(`#${a}-pill-mask`).click();
+    await expect(board.locator('.eq-menu button').first()).toHaveText('自带');
+  } finally { await f.cleanup(); }
+});
+
+test('M6 My Okim: empty states, past-trip cap, browsing-language locale, toggle persistence, design measurements', async ({ page }, testInfo) => {
   const f = await fixture(page);
   try {
     // Fresh customer with no bookings sees empty states and the trips CTA.
-    const emptyEmail = `${f.prefix.toLowerCase()}-empty@example.invalid`;
+    const emptyEmail = `${f.prefix.toLowerCase()}-empty@example.com`;
     f.extraEmails.push(emptyEmail);
     await login(page, emptyEmail);
     await page.goto('/myokim');
@@ -233,7 +295,7 @@ test('M6 My Okim: empty states, past-trip cap, pinned bilingual locale, toggle p
     await expect(page.locator('#my-panel-past .portal-empty')).toContainText('No past trips yet');
     await openTab(page, /Points/);
     await expect(page.locator('#my-panel-points .portal-empty')).toContainText('No points activity yet');
-    // Customer with a confirmed booking: pinned EN, then real toggle to CN persists.
+    // Customer with a confirmed booking: browsing EN, then real toggle to CN persists.
     const a = await f.booking();
     await login(page, f.instructor);
     await f.pay(a, 30);
@@ -264,7 +326,7 @@ test('M6 My Okim: empty states, past-trip cap, pinned bilingual locale, toggle p
       await expect(page.getByRole('tab', { name: lang === 'en' ? /Past trips/ : /往期行程/ })).toBeVisible();
       await expect(page.getByRole('tab', { name: lang === 'en' ? /^Points/ : /我的积分/ })).toBeVisible();
       await expect(page.locator('#my-panel-upcoming h2')).toHaveText(lang === 'en' ? 'Upcoming trips' : '即将出行');
-      await expect(page.locator('article').filter({ hasText: a }).locator('.status-badge').first()).toHaveText(lang === 'en' ? 'Confirmed' : '已确认');
+      await expect(page.locator('.my-subcard').filter({ hasText: a }).locator('.status-badge').first()).toHaveText(lang === 'en' ? 'Confirmed' : '已确认');
       await openTab(page, lang === 'en' ? /^Points/ : /我的积分/);
       await expect(page.locator('#my-panel-points h2')).toHaveText(lang === 'en' ? 'My Rewards' : '我的积分');
       const help = page.locator('#my-panel-points .portal-help-toggle');
@@ -305,8 +367,20 @@ test('M6 My Okim: empty states, past-trip cap, pinned bilingual locale, toggle p
     }));
     expect(profileLayout.scroll).toBeLessThanOrEqual(profileLayout.viewport);
     expect(profileLayout.small).toBe(0);
-    // Pinned locale survives reload (customer preference, not browser preference).
+    // Profile spans the same width as the tab bar (owner: widths must match).
+    const widths = await page.evaluate(() => ({ profile: document.querySelector('#profile form').getBoundingClientRect().width, subcard: document.querySelector('#profile .my-subcard').getBoundingClientRect().width, tabs: document.querySelector('.my-tabs').getBoundingClientRect().width, h2: parseFloat(getComputedStyle(document.querySelector('#profile h2')).fontSize) }));
+    expect(Math.abs(widths.profile - widths.tabs)).toBeLessThanOrEqual(2);
+    expect(Math.abs(widths.subcard - widths.tabs)).toBeLessThanOrEqual(2);
+    expect(widths.h2).toBeLessThanOrEqual(26);
+    await expect(page.locator('#profile .my-subcard')).toHaveCount(3);
+    // #33: display follows the browsing language, not the stored customer locale.
+    await sql`UPDATE customers SET locale = 'zh' WHERE id = ${f.customer}`;
+    await page.evaluate(() => localStorage.setItem('okim-language', 'en'));
     await page.reload();
+    await expect(page.locator('main h1')).toHaveText('My Okim');
+    // Toggling persists the choice to the customer profile (email language).
+    await page.locator('[data-lang-toggle]').click();
+    await expect.poll(async () => (await sql`SELECT locale FROM customers WHERE id = ${f.customer}`)[0].locale).toBe('zh');
     await expect(page.locator('main h1')).toHaveText('我的 Okim');
     await page.locator('[data-lang-toggle]').click();
     await expect.poll(async () => (await sql`SELECT locale FROM customers WHERE id = ${f.customer}`)[0].locale).toBe('en');

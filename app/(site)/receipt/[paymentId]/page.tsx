@@ -16,5 +16,5 @@ export default async function ReceiptPage({ params }: { params: { paymentId: str
   if (!booking || (session.user.role !== 'instructor' && session.user.customerId !== booking.customerId)) notFound()
   const [customer] = await db.select().from(customers).where(eq(customers.id, booking.customerId))
   if (!customer) notFound()
-  return <main className="ocean-journey invoice-page" data-page-locale={customer.locale}><section className="trips-section"><div className="container"><ReceiptView receipt={{ number: payment.receiptNo, paymentId: payment.id, claimId: payment.claimId, bookingId: booking.id, customerName: customer.name, amount: payment.amount, currency: payment.currency, verifiedAt: payment.verifiedAt.toISOString(), kind: payment.kind, locale: customer.locale }} /></div></section></main>
+  return <main className="ocean-journey invoice-page"><section className="trips-section"><div className="container"><ReceiptView receipt={{ number: payment.receiptNo, paymentId: payment.id, claimId: payment.claimId, bookingId: booking.id, customerName: customer.name, amount: payment.amount, currency: payment.currency, verifiedAt: payment.verifiedAt.toISOString(), kind: payment.kind }} /></div></section></main>
 }

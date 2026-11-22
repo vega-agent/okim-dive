@@ -1,10 +1,11 @@
 'use server'
 
 /**
- * M4 booking server actions (MVP-SPEC §5).
- * Slot-hold rule: creating a booking does NOT reserve capacity — availability is
- * re-checked by Iris at deposit verification (M5). No payment claim/upload here:
- * evidence travels via WhatsApp (decision #20); Iris records payments in the portal.
+ * M4 booking server actions (MVP-SPEC §5), updated for the seamless journey
+ * (S1–S2, 2026-11-22): creating a booking soft-holds ONE slot for 14 days
+ * (decision #22) and emails the transfer prompt; Iris's "Received" click in the
+ * portal confirms against the bank record. No payment claim/upload here:
+ * evidence travels via WhatsApp (decision #20).
  */
 import { auth, signIn } from '@/auth'
 import { db } from '@/db'
@@ -12,11 +13,13 @@ import { auditLog, bookings, customers, invoices, policyVersions, signupNames, t
 import { and, desc, eq, gt, ne, sql } from 'drizzle-orm'
 import { randomUUID } from 'crypto'
 import { parseEquipment } from './diver-equipment'
+import { slotsConsumed } from './trip-display'
+import { sendDepositPromptEmail } from './emails'
 
 export type MagicLinkResult = { status: 'sent' | 'cooldown' | 'rate_limited' | 'name_taken' | 'error' }
 export type BookingResult =
-  | { status: 'created'; bookingId: string; invoiceNumber: string; deposit: string; balance: string; currency: string; balanceDue: string | null }
-  | { status: 'unauthenticated' | 'invalid' | 'trip_unavailable' | 'error' }
+  | { status: 'created'; bookingId: string; invoiceNumber: string; deposit: string; balance: string; currency: string; balanceDue: string | null; holdDue: string | null }
+  | { status: 'unauthenticated' | 'invalid' | 'trip_unavailable' | 'trip_full' | 'error' }
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
 
@@ -37,11 +40,19 @@ export async function setCustomerName(formData: FormData): Promise<NameSetupResu
   if (!session?.user?.customerId || !db) return { status: 'unauthenticated' }
   const name = String(formData.get('name') ?? '').trim().slice(0, 200)
   if (name.length < 2) return { status: 'invalid' }
+  // Idempotent: re-submitting the already-set name never writes a second audit
+  // row (known double-submit flake, logged by the My Okim chat 2026-11-21).
+  const [current] = await db.select({ name: customers.name }).from(customers).where(eq(customers.id, session.user.customerId)).limit(1)
+  if (current && current.name === name) return { status: 'saved' }
   const clash = await db.select({ id: customers.id }).from(customers)
     .where(and(sql`lower(${customers.name}) = ${name.toLowerCase()}`, ne(customers.id, session.user.customerId))).limit(1)
   if (clash.length) return { status: 'taken' }
   try {
-    await db.update(customers).set({ name }).where(eq(customers.id, session.user.customerId))
+    // Conditional update: a concurrent duplicate submission changes no row and
+    // writes no second audit entry (race-safe idempotency).
+    const changed = await db.update(customers).set({ name })
+      .where(and(eq(customers.id, session.user.customerId), ne(customers.name, name))).returning({ id: customers.id })
+    if (!changed.length) return { status: 'saved' }
   } catch {
     return { status: 'taken' } // concurrent setup won the race for this name
   }
@@ -144,10 +155,19 @@ export async function createBooking(slug: string, formData: FormData): Promise<B
     const trip = tripRows[0]
     if (!trip) return { status: 'trip_unavailable' }
 
+    // S2/#22: a booking soft-holds one slot for 14 days — block creation when
+    // the hold math says full; the trip page offers Register interest instead.
+    const existing = await db.select({ status: bookings.status }).from(bookings)
+      .where(and(eq(bookings.productId, trip.id), eq(bookings.productType, 'trip')))
+    if (slotsConsumed(existing.map(b => b.status)) >= trip.capacity) return { status: 'trip_full' }
+
     const policies = await db.select().from(policyVersions).orderBy(desc(policyVersions.version))
     const refund = policies.find((p) => p.kind === 'refund')
     const terms = policies.find((p) => p.kind === 'terms')
     if (!refund || !terms) return { status: 'error' }
+    if (formData.get('refund_version_id') !== refund.id || formData.get('terms_version_id') !== terms.id) {
+      return { status: 'invalid' }
+    }
 
     const price = Number(trip.priceAmount)
     const deposit = trip.depositType === 'percent'
@@ -167,9 +187,12 @@ export async function createBooking(slug: string, formData: FormData): Promise<B
         productType: 'trip',
         productId: trip.id,
         status: 'awaiting_deposit',
-        eligibilityStatus: 'pending',
+        // Self-declared with truthfulness disclaimer (owner 2026-11-22): no
+        // eligibility approval gate; the column stays for legacy rows.
+        eligibilityStatus: 'approved',
         policyVersionId: refund.id,
         acceptedAt: new Date(),
+        holdExpiresAt: new Date(Date.now() + 14 * 86_400_000),
         depositAmount: deposit.toFixed(2),
         balanceAmount: balance.toFixed(2),
         currency: trip.currency,
@@ -191,7 +214,18 @@ export async function createBooking(slug: string, formData: FormData): Promise<B
     })
     const invoiceNumber = `INV-${new Date().getFullYear()}-${invoiceId.replace('INV-', '')}`
 
-    // Booking declarations and equipment never mutate the saved diver profile.
+    // S1: transfer prompt email after commit; failure never fails the booking.
+    const holdDue = new Date(Date.now() + 14 * 86_400_000)
+    const [customer] = await db.select().from(customers).where(eq(customers.id, session.user.customerId!))
+    if (customer) {
+      const locale = customer.locale === 'zh' ? 'zh' : 'en'
+      const ok = await sendDepositPromptEmail({
+        to: customer.email, locale, customerName: customer.name,
+        tripTitle: locale === 'zh' ? trip.titleZh || trip.titleEn : trip.titleEn,
+        bookingId, amount: deposit.toFixed(2), currency: trip.currency, dueDate: holdDue.toISOString(),
+      })
+      await db.insert(auditLog).values({ id: randomUUID(), actorUserId: session.user.id, action: 'deposit_prompt_notified', entity: 'booking', entityId: bookingId, meta: { emailsSent: ok ? 1 : 0, emailsFailed: ok ? 0 : 1 } })
+    }
 
     return {
       status: 'created',
@@ -201,6 +235,7 @@ export async function createBooking(slug: string, formData: FormData): Promise<B
       balance: balance.toFixed(2),
       currency: trip.currency,
       balanceDue: balanceDue ? balanceDue.toISOString().slice(0, 10) : null,
+      holdDue: holdDue.toISOString().slice(0, 10),
     }
   } catch (error) {
     console.error('[booking] create failed.', error)

@@ -12,9 +12,10 @@ import { useEffect, useState } from 'react'
 export type Locale = 'en' | 'zh'
 
 /**
- * `initial` pins the starting locale (signed-in app surfaces use the customer's
- * stored locale per MVP-SPEC §11, not the browser preference); without it the
- * hook reads the site-wide browser preference. `onChange` fires on toggle.
+ * `initial` pins the starting locale (rarely needed since decision #33 — app
+ * surfaces follow the browsing language); without it the hook reads the
+ * site-wide browser preference. `onChange` fires on toggle; signed-in surfaces
+ * persist it to the customer's stored locale for transactional emails.
  */
 export function useLocale(initial?: Locale, onChange?: (locale: Locale) => void): Locale {
   const [locale, setLocale] = useState<Locale>(initial ?? 'en')

@@ -13,6 +13,13 @@ export type Locale = 'en' | 'zh'
 /** Statuses that consume a slot (decision #22). Completed trips are history, not occupancy. */
 export const SLOT_STATUSES = ['awaiting_deposit', 'payment_claimed', 'deposit_verified', 'confirmed'] as const
 
+/** Trip-message audience → booking statuses (TRIP-MESSAGES-SPEC #2, view-time filter). */
+export type MessageBookingStatus = 'awaiting_deposit' | 'payment_claimed' | 'deposit_verified' | 'confirmed'
+export const messageAudienceStatuses = (audience: string): MessageBookingStatus[] =>
+  audience === 'all_active'
+    ? ['awaiting_deposit', 'payment_claimed', 'deposit_verified', 'confirmed']
+    : ['deposit_verified', 'confirmed']
+
 export function slotsConsumed(bookingStatuses: string[]): number {
   return bookingStatuses.filter(s => (SLOT_STATUSES as readonly string[]).includes(s)).length
 }

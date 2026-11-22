@@ -11,7 +11,7 @@ import EquipmentEditor from './equipment-editor'
 import { useLocale, pick } from '@/lib/use-locale'
 import { requestMagicLink, createBooking, setCustomerLocale, checkSignupEmail, type BookingResult } from '@/lib/booking-actions'
 
-type PolicyText = { version: number; bodyEn: string; bodyZh: string }
+type PolicyText = { id: string; version: number; bodyEn: string; bodyZh: string }
 
 export type BookingWizardProps = {
   slug: string
@@ -22,7 +22,6 @@ export type BookingWizardProps = {
   depositTextZh: string | null
   authenticated: boolean
   customerName: string
-  customerLocale: 'en' | 'zh'
   diverProfile?: { agency?:string; level?:string; dives?:number; phone?:string }
   equipmentProfile?: unknown
   sessionEmail: string
@@ -78,16 +77,19 @@ const L = {
   termsHeading: ['Terms of booking', '预订条款'],
   version: ['Version', '版本'],
   acceptLabel: ['I accept the refund policy and terms shown above.', '我接受上述退款政策与条款。'],
+  truthDisclaimer: ['Declaration: the information you provide must be true, complete and accurate at the point of registration. You are responsible for its truthfulness; Iris relies on it for trip planning and safety. Tell Iris immediately if anything changes.', '声明：你所提供的信息在登记时必须真实、完整、准确。你须对其真实性负责；Iris 依赖这些资料进行行程规划与安全保障。如有任何变更，请立即告知 Iris。'],
   submitBooking: ['Create booking', '创建预订'],
   submitting: ['Creating…', '创建中…'],
   invalidMsg: ['Please complete all required fields and accept the policies.', '请填写所有必填项并接受政策。'],
   unavailableMsg: ['This trip is not open for booking right now.', '此行程目前不可预订。'],
+  fullMsg: ['This trip is full. Register your interest on the trip page and Iris will contact you if a slot opens.', '此行程已满。请在行程页登记意向，如有空位 Iris 会联系你。'],
   unauthMsg: ['Your sign-in expired. Start again with your email.', '登录已过期，请重新用邮箱开始。'],
   doneTitle: ['Booking received', '预订已收到'],
-  doneIntro: ['Your booking is awaiting deposit. A slot is confirmed only after Iris verifies your deposit, subject to availability.', '你的预订等待订金。只有在 Iris 核实订金后、且仍有名额时，名额才会确认。'],
+  doneIntro: ['Your booking is holding a slot for 14 days. Transfer the deposit by the due date below — Iris confirms your booking once she matches your transfer in the bank record, and a confirmation email with your receipt follows.', '你的预订已保留名额 14 天。请在下方截止日期前转账订金——Iris 核对银行到账后即确认预订，确认邮件与收据随即送达。'],
   bookingIdLabel: ['Booking ID (use as transfer reference)', '预订编号（用作转账备注）'],
   invoiceLabel: ['Invoice', '发票'],
   depositLabel: ['Deposit due now', '现在应付订金'],
+  holdDueLabel: ['Transfer deposit by', '订金转账截止'],
   balanceLabel: ['Balance', '尾款'],
   balanceDueLabel: ['Balance due by', '尾款截止日期'],
   payTitle: ['How to pay', '如何付款'],
@@ -101,9 +103,10 @@ const L = {
 } as const
 
 export default function BookingWizard(props: BookingWizardProps) {
-  // Signed-in: the customer's stored locale wins (default EN); toggling persists it.
+  // Decision #33: display follows the browsing language; toggling while
+  // signed in persists the customer's stored locale (used for emails).
   const locale = useLocale(
-    props.authenticated ? props.customerLocale : undefined,
+    undefined,
     props.authenticated ? (next) => void setCustomerLocale(next) : undefined,
   )
   const t = (pair: readonly [string, string]) => pick(locale, pair[0], pair[1])
@@ -165,6 +168,7 @@ export default function BookingWizard(props: BookingWizardProps) {
     if (res.status === 'created') { setResult(res); setStep('confirmed') }
     else if (res.status === 'invalid') setNotice(t(L.invalidMsg))
     else if (res.status === 'trip_unavailable') setNotice(t(L.unavailableMsg))
+    else if (res.status === 'trip_full') setNotice(t(L.fullMsg))
     else if (res.status === 'unauthenticated') { setNotice(t(L.unauthMsg)); setStep('email') }
     else setNotice(t(L.errorMsg))
   }
@@ -219,6 +223,8 @@ export default function BookingWizard(props: BookingWizardProps) {
 
         {step === 'details' && (
           <form onSubmit={submitDetails}>
+            <input type="hidden" name="refund_version_id" value={props.refund.id} />
+            <input type="hidden" name="terms_version_id" value={props.terms.id} />
             <input type="hidden" name="locale" defaultValue="en" />
             <h3>{t(L.detailsTitle)}</h3>
             <p className="booking-intro">{t(L.detailsIntro)}</p>
@@ -267,6 +273,7 @@ export default function BookingWizard(props: BookingWizardProps) {
             </div>
             {notice && <p className="form-status form-status-error" role="alert">{notice}</p>}
             <EquipmentEditor profile={props.equipmentProfile} locale={locale} />
+            <p className="my-disclaimer">{t(L.truthDisclaimer)}</p>
             <button type="submit" className="btn btn-primary" disabled={pending}>{pending ? t(L.submitting) : t(L.submitBooking)}</button>
           </form>
         )}
@@ -279,6 +286,7 @@ export default function BookingWizard(props: BookingWizardProps) {
               <div><dt>{t(L.bookingIdLabel)}</dt><dd className="booking-id">{result.bookingId}</dd></div>
               <div><dt>{t(L.invoiceLabel)}</dt><dd>{result.invoiceNumber}</dd></div>
               <div><dt>{t(L.depositLabel)}</dt><dd>{result.currency} {result.deposit}</dd></div>
+              {result.holdDue && <div><dt>{t(L.holdDueLabel)}</dt><dd>{result.holdDue}</dd></div>}
               <div><dt>{t(L.balanceLabel)}</dt><dd>{result.currency} {result.balance}</dd></div>
               {result.balanceDue && <div><dt>{t(L.balanceDueLabel)}</dt><dd>{result.balanceDue}</dd></div>}
             </dl>

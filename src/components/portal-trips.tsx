@@ -1,6 +1,7 @@
 'use client'
 import { useLocale } from '@/lib/use-locale'
 import { duplicateTrip } from '@/lib/trip-actions'
+import { completeTrip } from '@/lib/seamless-actions'
 import { tripDisplayState } from '@/lib/trip-display'
 import CardHelp from '@/components/portal-card-help'
 
@@ -50,6 +51,8 @@ export default function PortalTrips({ trips }: { trips: PortalTrip[] }) {
       </tr></thead>
       <tbody>{trips.map(trip => {
         const state = tripDisplayState(trip, trip.consumed, trip.capacity)
+        const ended = !!trip.travelEnd && new Date(trip.travelEnd) <= new Date()
+        const completable = ended && trip.bookingCount > 0 && !['draft', 'cancelled'].includes(trip.status)
         return <tr key={trip.id}>
           <td data-label={t('Trip', '行程')}>
             <strong>{locale === 'zh' ? trip.titleZh || trip.titleEn : trip.titleEn}</strong>
@@ -66,6 +69,10 @@ export default function PortalTrips({ trips }: { trips: PortalTrip[] }) {
                 <input type="hidden" name="tripId" value={trip.id} />
                 <button className="btn btn-secondary">{t('Duplicate', '复制')}</button>
               </form>
+              {completable && <form action={completeTrip}>
+                <input type="hidden" name="tripId" value={trip.id} />
+                <button className="btn btn-primary">{t('Close trip (no booking awards)', '结束行程（不发放预订积分）')}</button>
+              </form>}
             </div>
           </td>
         </tr>

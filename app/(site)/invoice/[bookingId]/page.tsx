@@ -45,11 +45,10 @@ export default async function InvoicePage({ params }: { params: { bookingId: str
 
   return (
     <>
-      <main className="ocean-journey invoice-page" data-page-locale={customer.locale}>
+      <main className="ocean-journey invoice-page">
         <section className="trips-section">
           <div className="container">
             <InvoiceView
-              locale={customer.locale}
               invoiceNumber={invoice.number}
               issuedAt={invoice.issuedAt.toISOString().slice(0, 10)}
               bookingId={booking.id}

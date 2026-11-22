@@ -45,5 +45,8 @@ export async function publishPolicyVersion(form: FormData) {
   await db.insert(auditLog).values({ id: randomUUID(), actorUserId: actor, action: 'policy_version_published', entity: 'policy_version', entityId: result.id, meta: { kind, version: result.version } })
   revalidatePath('/portal')
   revalidatePath('/book')
+  revalidatePath('/terms')
+  revalidatePath('/privacy')
+  revalidatePath('/refund-policy')
   redirect(`/portal/policies/${kind}?published=${result.version}`)
 }

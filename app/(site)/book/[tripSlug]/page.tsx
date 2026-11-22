@@ -30,14 +30,12 @@ export default async function BookPage({ params }: { params: { tripSlug: string 
   let diverProfile: {agency?:string;level?:string;dives?:number;phone?:string} | undefined
   let equipmentProfile: unknown
   let customerName = ''
-  let customerLocale: 'en' | 'zh' = 'en'
   if (session?.user?.customerId) {
     const rows = await db.select({ name: customers.name, locale: customers.locale, profile: customers.diverProfile, phone: customers.phone }).from(customers)
       .where(eq(customers.id, session.user.customerId)).limit(1)
     diverProfile = {...rows[0]?.profile,phone:rows[0]?.phone ?? undefined}
     equipmentProfile = rows[0]?.profile?.equipment
     customerName = rows[0]?.name ?? ''
-    customerLocale = rows[0]?.locale ?? 'en'
   }
 
   const bookable = trip.status === 'open'
@@ -53,11 +51,11 @@ export default async function BookPage({ params }: { params: { tripSlug: string 
           <p className="hero-subtitle">One diver per booking. Your slot is confirmed after deposit verification.</p>
         </div>
       </section>
-      <main className="ocean-journey" data-page-locale={session?.user ? customerLocale : undefined}>
+        <main className="ocean-journey">
         <section className="trips-section">
           <div className="container">
             {bookable ? (
-              needsSetup ? <CustomerSetup locale={customerLocale} /> : <BookingWizard
+              needsSetup ? <CustomerSetup /> : <BookingWizard
                 slug={trip.slug}
                 titleEn={trip.titleEn}
                 titleZh={trip.titleZh}
@@ -68,10 +66,9 @@ export default async function BookPage({ params }: { params: { tripSlug: string 
                 diverProfile={diverProfile}
                 equipmentProfile={equipmentProfile}
                 customerName={customerName}
-                customerLocale={customerLocale}
                 sessionEmail={session?.user?.email ?? ''}
-                refund={{ version: refund.version, bodyEn: refund.bodyEn, bodyZh: refund.bodyZh }}
-                terms={{ version: terms.version, bodyEn: terms.bodyEn, bodyZh: terms.bodyZh }}
+                refund={{ id: refund.id, version: refund.version, bodyEn: refund.bodyEn, bodyZh: refund.bodyZh }}
+                terms={{ id: terms.id, version: terms.version, bodyEn: terms.bodyEn, bodyZh: terms.bodyZh }}
               />
             ) : (
               <div className="booking-shell">

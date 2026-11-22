@@ -10,7 +10,7 @@ import { randomUUID } from 'node:crypto';
 // expires = sentAt + 15min; the current request's row is excluded by expires.
 config({ path: '.env.local' });
 const sql = neon(process.env.DATABASE_URL);
-const BASE = 'http://localhost:3100';
+const BASE = process.env.OKIM_TEST_BASE_URL ?? 'http://localhost:3100';
 const TRIP = 'tioman-reef-weekend';
 const TTL = 15 * 60 * 1000;
 
@@ -37,6 +37,7 @@ test('magic-link cooldown enforced server-side and survives reload', async ({ pa
     await expect(page.locator('.form-status-error')).toContainText('Please wait a moment before requesting another link.', { timeout: 20_000 });
   } finally {
     await sql`DELETE FROM verification_tokens WHERE identifier = ${email}`;
+    await sql`DELETE FROM signup_names WHERE email = ${email}`;
   }
 });
 
@@ -51,6 +52,7 @@ test('magic-link hourly cap enforced server-side', async ({ page }) => {
     await expect(page.locator('.form-status-error')).toContainText('Too many links requested. Try again later or contact us.', { timeout: 20_000 });
   } finally {
     await sql`DELETE FROM verification_tokens WHERE identifier = ${email}`;
+    await sql`DELETE FROM signup_names WHERE email = ${email}`;
   }
 });
 
@@ -66,5 +68,6 @@ test('fresh address still receives a magic link (real Resend send)', async ({ pa
     expect(rows[0].n).toBe(1);
   } finally {
     await sql`DELETE FROM verification_tokens WHERE identifier = ${email}`;
+    await sql`DELETE FROM signup_names WHERE email = ${email}`;
   }
 });

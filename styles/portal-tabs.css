@@ -1,0 +1,73 @@
+/* Portal tabs + compact rows — M5 portal redesign (2026-11-22, owner decisions:
+   4 action-first tabs, capped lists, identifiers explained once).
+   Mirrors the approved My Okim tab language (DESIGN-SYSTEM §13/§14);
+   portal-scoped file so the equipment chat's redesign.css stays untouched. */
+
+.portal-tabs { position: sticky; top: 88px; z-index: 50; display: flex; flex-wrap: wrap; gap: .4rem; padding: .5rem; margin-bottom: 1.2rem; background: rgba(255, 255, 255, .96); border: 1px solid var(--whisper-border); border-radius: 12px; box-shadow: var(--soft-shadow); }
+.portal-tab { display: inline-flex; align-items: center; gap: .45rem; min-height: 44px; padding: .4rem .95rem; border: 1px solid transparent; border-radius: 999px; background: transparent; font-family: var(--font-body); font-size: .9rem; font-weight: 700; color: var(--ocean-deep); cursor: pointer; }
+.portal-tab:hover, .portal-tab:focus-visible { background: rgba(168, 218, 220, .35); }
+.portal-tab:focus-visible { outline: 2px solid var(--deep-water); outline-offset: 2px; }
+.portal-tab[aria-selected="true"] { background: var(--ocean-deep); color: #fff; }
+.portal-tab-count { display: inline-flex; align-items: center; justify-content: center; min-width: 22px; height: 22px; padding: 0 .4rem; border-radius: 999px; background: rgba(168, 218, 220, .4); color: var(--ocean-deep); font-size: .75rem; font-weight: 700; }
+.portal-tab[aria-selected="true"] .portal-tab-count { background: rgba(255, 255, 255, .22); color: #fff; }
+.portal-tab-icon { width: 20px; height: 20px; flex: 0 0 auto; }
+.portal-tab[aria-selected="true"] .portal-tab-icon { filter: brightness(0) invert(1); }
+
+/* Compact booking rows (Bookings tab) — white sub-card, header band per §13.
+   Condensed 2026-11-22 (owner: more listings visible); Withdraw right-aligned. */
+.portal-booking-compact { border: 1px solid var(--whisper-border); border-radius: 10px; background: #fff; padding: .6rem .9rem; display: grid; gap: .3rem; }
+.portal-booking-compact + .portal-booking-compact { margin-top: .45rem; }
+.portal-booking-compact-head { display: flex; flex-wrap: wrap; align-items: center; gap: .5rem; }
+.portal-booking-compact-head h3 { margin: 0; font-family: var(--font-body); font-size: 1rem; font-weight: 700; color: var(--ocean-deep); overflow-wrap: anywhere; }
+.portal-withdraw { margin-left: auto; }
+.portal-withdraw .btn { min-height: 44px; }
+.portal-booking-meta { margin: 0; font-size: .875rem; font-weight: 400; color: var(--driftwood); overflow-wrap: anywhere; }
+.portal-booking-compact details { margin: 0; }
+.portal-booking-compact .portal-eligibility { margin-top: .2rem; }
+
+/* Declarations: labelled grid, 400 body weight (§13 v1.5 discipline) */
+.portal-declarations-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(210px, 1fr)); gap: .5rem .9rem; margin: .6rem 0; }
+.portal-declarations-grid > div { display: grid; gap: .1rem; min-width: 0; }
+.portal-declarations-grid dt { font-size: .75rem; font-weight: 400; color: var(--driftwood); }
+.portal-declarations-grid dd { margin: 0; font-size: .9rem; font-weight: 400; color: var(--ocean-deep); overflow-wrap: anywhere; }
+
+/* Bookings filters: status pills reuse .kind-pills; trip select beside them */
+.portal-bookings-filters { display: flex; flex-wrap: wrap; align-items: center; gap: .8rem; margin: .8rem 0; }
+.portal-trip-filter { display: inline-flex; align-items: center; gap: .5rem; font-size: .875rem; font-weight: 400; color: var(--driftwood); }
+.portal-trip-filter select { min-height: 44px; }
+
+/* Actions tab: compact review rows */
+.portal-review-row { display: flex; flex-wrap: wrap; align-items: center; gap: .5rem .9rem; }
+.portal-review-main { display: grid; gap: .1rem; flex: 1 1 220px; min-width: 0; }
+.portal-review-main strong { font-size: .95rem; overflow-wrap: anywhere; }
+
+/* Booking-request cards (seamless flow S1): Received + hold controls */
+.portal-request-actions { display: flex; flex-wrap: wrap; align-items: center; gap: .5rem; }
+.portal-request-actions form { display: inline-flex; gap: .5rem; }
+.portal-hold-extend { margin-left: auto; }
+.portal-request details { margin: 0; }
+.portal-request details + details { margin-top: .35rem; }
+@media (max-width: 640px) {
+  .portal-hold-extend { margin-left: 0; }
+}
+
+/* Register-interest form on full trip pages (S2) — same stylesheet is imported
+   by the trip page; reuses §4 form inputs + .portal-consent from redesign.css */
+.trip-interest { width: 100%; text-align: left; }
+.trip-interest h3 { margin: 0 0 .4rem; font-family: var(--font-body); font-size: 1.05rem; font-weight: 700; color: var(--ocean-deep); }
+.trip-interest .booking-form { margin-top: .8rem; }
+
+.portal-show-all { margin-top: .9rem; }
+
+@media (max-width: 640px) {
+  .portal-tabs { top: 72px; }
+  .portal-declarations-grid { grid-template-columns: 1fr; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .portal-tab { transition: none; }
+}
+
+/* Individual completion confirmation (#29): ≥44px touch targets per §4. */
+.portal-complete { display: flex; flex-wrap: wrap; align-items: center; gap: .5rem; }
+.portal-complete label { display: inline-flex; align-items: center; gap: .55rem; min-height: 44px; font-size: .85rem; font-weight: 600; color: var(--ocean-deep); cursor: pointer; }
+.portal-complete input[type="checkbox"] { width: 44px; height: 44px; margin: 0; flex: none; accent-color: var(--ocean-deep); cursor: pointer; }

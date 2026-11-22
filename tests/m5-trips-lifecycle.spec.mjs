@@ -175,13 +175,12 @@ test('M5 trip lifecycle: create, bilingual gate, derive/override, capacity floor
     });
     expect((await sql`SELECT capacity FROM trips WHERE id = ${f.trip}`)[0].capacity).toBe(2);
 
-    // Pay + verify b1 → confirmed, points earned.
-    await call(page, '/portal', 'Record payment', { bookingId: b1, amount: '36', currency: 'MYR', kind: 'deposit', reference: b1, paidOn: '2026-01-01', operationKey: randomUUID() });
-    const [claim] = await sql`SELECT id FROM payment_claims WHERE booking_id = ${b1} AND status = 'pending'`;
-    await call(page, '/portal', 'Verify against bank record', { claimId: claim.id });
+    // One-click Received (seamless flow S1): records + verifies atomically,
+    // re-checks capacity, awards no points. Replaces the old record+verify pair.
+    await call(page, '/portal', 'Received', { bookingId: b1, amount: '36', kind: 'deposit', paidOn: '2026-01-01', operationKey: randomUUID() });
     expect((await sql`SELECT status FROM bookings WHERE id = ${b1}`)[0].status).toBe('confirmed');
-    const earned = (await sql`SELECT points FROM points_ledger WHERE booking_id = ${b1} AND type = 'earned'`)[0];
-    expect(earned.points).toBe(36);
+    const earned = await sql`SELECT points FROM points_ledger WHERE booking_id = ${b1} AND type = 'earned'`;
+    expect(earned).toEqual([]);
     const reversedBefore = (await sql`SELECT count(*)::int n FROM points_ledger WHERE booking_id = ${b1} AND type = 'reversed'`)[0].n;
 
     // Cancel cascade: paid → refund_flagged, unpaid → cancelled, points UNTOUCHED, diver emailed.
@@ -197,11 +196,12 @@ test('M5 trip lifecycle: create, bilingual gate, derive/override, capacity floor
     // quota can block sends — the audited attempt (sent or failed) is the contract.
     expect(Number(notified.meta.emailsSent) + Number(notified.meta.emailsFailed)).toBeGreaterThanOrEqual(1);
 
-    // Recording the external refund reverses points via the EXISTING M5 path.
-    const paymentId = `PAY-${claim.id}`;
-    await call(page, '/portal', 'Record completed external refund', { paymentId, amount: '36', reason: 'Trip cancelled: fictional weather advisory', operationKey: randomUUID() });
-    const reversed = (await sql`SELECT points FROM points_ledger WHERE booking_id = ${b1} AND type = 'reversed'`)[0];
-    expect(reversed.points).toBe(-36);
+    // Recording the external refund before completion: no earned points exist
+    // (#29 completion-only), so nothing reverses — the ledger stays empty.
+    const [payment] = await sql`SELECT id FROM payments WHERE booking_id = ${b1} AND kind <> 'refund'`;
+    await call(page, '/portal', 'Record completed external refund', { paymentId: payment.id, amount: '36', reason: 'Trip cancelled: fictional weather advisory', operationKey: randomUUID() });
+    expect((await sql`SELECT count(*)::int n FROM points_ledger WHERE booking_id = ${b1} AND type = 'reversed'`)[0].n).toBe(reversedBefore);
+    expect((await sql`SELECT count(*)::int n FROM points_ledger WHERE booking_id = ${b1}`)[0].n).toBe(0);
 
     // Duplicate → deletable draft; the cancelled original with bookings is not deletable.
     await call(page, '/portal', 'Duplicate', { tripId: f.trip }, { name: 'tripId', value: f.trip });

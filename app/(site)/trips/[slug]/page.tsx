@@ -5,9 +5,12 @@ import type { Metadata } from 'next'
 import { notFound } from 'next/navigation'
 import { eq, and } from 'drizzle-orm'
 import { db } from '@/db'
-import { trips } from '@/db/schema'
+import { bookings, trips } from '@/db/schema'
+import { slotsConsumed } from '@/lib/trip-display'
+import { sweepHolds } from '@/lib/seamless-actions'
 import SiteFooter from '@/components/site-footer'
 import TripDetail from '@/components/trip-detail'
+import '../../../../styles/portal-tabs.css'
 
 export const dynamic = 'force-dynamic'
 
@@ -24,17 +27,25 @@ export async function generateMetadata({ params }: { params: { slug: string } })
   return { title: `${trip.titleEn} - Okim Dive`, description: trip.summaryEn ?? undefined }
 }
 
-export default async function TripPage({ params }: { params: { slug: string } }) {
+export default async function TripPage({ params, searchParams }: { params: { slug: string }; searchParams: { interest?: string } }) {
   const trip = await getTrip(params.slug)
   if (!trip) notFound()
+  await sweepHolds()
+  const rows = db ? await db.select({ status: bookings.status }).from(bookings).where(and(eq(bookings.productId, trip.id), eq(bookings.productType, 'trip'))) : []
+  const consumed = slotsConsumed(rows.map(r => r.status))
+  const interestState = searchParams.interest === 'registered' ? 'registered' : searchParams.interest === 'error' ? 'error' : null
 
   return (
     <>
       <TripDetail trip={{
+        id: trip.id,
         slug: trip.slug,
         status: trip.status,
         sample: trip.sample,
         currency: trip.currency,
+        capacity: trip.capacity,
+        consumed,
+        interestState,
         titleEn: trip.titleEn, titleZh: trip.titleZh,
         locationEn: trip.locationEn, locationZh: trip.locationZh,
         summaryEn: trip.summaryEn, summaryZh: trip.summaryZh,
