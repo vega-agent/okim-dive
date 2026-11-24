@@ -1,32 +1,62 @@
 'use client'
-import { useState } from 'react'
+import { useRef, useState } from 'react'
 import { useLocale } from '@/lib/use-locale'
-import { updateTripSettings, setLaunchState, cancelTrip, deleteDraft } from '@/lib/trip-actions'
-import { CERT_OPTIONS, publishBlockers, tripDisplayState, type SerializedTrip } from '@/lib/trip-display'
+import { updateTripSettings, setLaunchState, deleteDraft } from '@/lib/trip-actions'
+import { CERT_OPTIONS, publishBlockers, type SerializedTrip } from '@/lib/trip-display'
+import { COUNTRIES, COUNTRY_KEYS, matchSite, type CountryKey } from '@/lib/locations'
 import TripEditorNav from '@/components/trip-editor-nav'
 import CardHelp from '@/components/portal-card-help'
+import PortalDialog from '@/components/portal-dialog'
+import TranslateButton from '@/components/translate-button'
+import DepositEditor, { type DepositRow } from '@/components/deposit-editor'
+import IconAction, { icons } from '@/components/icon-action'
 
-export default function TripSettingsEditor({ trip, consumed, bookingCount }: { trip: SerializedTrip; consumed: number; bookingCount: number }) {
+export default function TripSettingsEditor({ trip, consumed, bookingCount, deposits }: { trip: SerializedTrip; consumed: number; bookingCount: number; deposits: { amount: string; dueDate: string | null }[] }) {
   const locale = useLocale()
   const t = (en: string, zh: string) => locale === 'zh' ? zh : en
   const [currency, setCurrency] = useState(trip.currency)
+  const titleEnRef = useRef<HTMLInputElement>(null)
+  const titleZhRef = useRef<HTMLInputElement>(null)
+  const [countryKey, setCountryKey] = useState<CountryKey>((trip.locationKey as CountryKey) in COUNTRIES ? trip.locationKey as CountryKey : 'malaysia')
+  const loc = COUNTRIES[countryKey]
+  const [diveSite, setDiveSite] = useState(trip.diveSiteEn ?? '')
+  const diveSiteZhRef = useRef<HTMLInputElement>(null)
+  const site = matchSite(diveSite)
+  const tzOffset = (tz: string) => {
+    try { return new Intl.DateTimeFormat('en', { timeZone: tz, timeZoneName: 'shortOffset' }).formatToParts(new Date()).find(p => p.type === 'timeZoneName')?.value ?? '' } catch { return '' }
+  }
   const [price, setPrice] = useState(String(trip.priceAmount))
-  const [depositType, setDepositType] = useState(trip.depositType)
-  const [depositValue, setDepositValue] = useState(String(trip.depositValue))
+  const [dialog, setDialog] = useState<null | 'closed' | 'draft' | 'delete'>(null)
+  const [depRows, setDepRows] = useState<DepositRow[]>(deposits.length ? deposits.map(d => ({ amount: Number(d.amount) ? d.amount : '', dueDate: d.dueDate ?? '' })) : [{ amount: '', dueDate: '' }])
   const priceN = Number(price) || 0
-  const depositN = Number(depositValue) || 0
-  const deposit = depositType === 'percent' ? Math.round(priceN * depositN) / 100 : Math.min(depositN, priceN)
-  const balance = Math.round((priceN - deposit) * 100) / 100
+  const depTotal = Math.round(depRows.reduce((s, r) => s + (Number(r.amount) || 0), 0) * 100) / 100
+  const balance = Math.round((priceN - depTotal) * 100) / 100
   const money = (n: number) => `${currency} ${n.toFixed(2)}`
   const slugLocked = trip.status !== 'draft' || trip.published || bookingCount > 0
-  const blockers = publishBlockers(trip)
-  const state = tripDisplayState(trip, consumed, trip.capacity)
+  const blockers = publishBlockers(trip, deposits)
+  const flag = (key: string) => {
+    const hits = blockers.filter(b => b.fields?.includes(key))
+    return { cls: hits.length ? ' field-blocked' : '', tip: hits.length ? hits.map(b => t(b.en, b.zh)).join(' · ') : undefined }
+  }
+  const fPrice = flag('price'), fDep = flag('deposits'), fStart = flag('travelStart'), fEnd = flag('travelEnd'), fCap = flag('capacity')
+  const fTitleEn = flag('content:title:en'), fTitleZh = flag('content:title:zh'), fSiteEn = flag('content:location:en'), fSiteZh = flag('content:location:zh')
   const cancelled = trip.status === 'cancelled'
   const deletable = trip.status === 'draft' && !trip.published && bookingCount === 0
   const dateValue = (iso: string | null) => iso ? iso.slice(0, 10) : ''
+  const blockedTip = t('Complete the highlighted fields first', '请先完成标记的字段')
+  const openName = t('Open for booking', '开放预订')
+  const navActions = cancelled ? undefined : <>
+    <IconAction type="submit" form="trip-settings-form" tip={t('Save settings', '保存设置')}>{icons.save}</IconAction>
+    <form action={setLaunchState}><input type="hidden" name="tripId" value={trip.id} />
+      <IconAction type="submit" name="state" value="open" disabled={blockers.length > 0} tip={blockers.length ? `${openName} — ${blockedTip}` : openName}>{icons.open}</IconAction>
+    </form>
+    {trip.status !== 'draft' && <IconAction tip={t('Close trip', '关闭行程')} onClick={() => setDialog('closed')}>{icons.close}</IconAction>}
+    {bookingCount === 0 && trip.status !== 'draft' && <IconAction tip={t('Back to draft', '回到草稿')} onClick={() => setDialog('draft')}>{icons.draft}</IconAction>}
+    {deletable && <IconAction danger tip={t('Delete draft', '删除草稿')} onClick={() => setDialog('delete')}>{icons.trash}</IconAction>}
+  </>
 
   return <main className="ocean-journey portal trip-editor" data-locale-managed><div className="container">
-    <TripEditorNav trip={trip} active="settings" consumed={consumed} />
+    <TripEditorNav trip={trip} active="settings" consumed={consumed} actions={navActions} />
 
     {bookingCount > 0 && !cancelled && <p className="portal-warning" role="status">
       {t(`${bookingCount} booking(s) on this trip — price/date changes affect new bookings only; existing invoices keep their snapshot. Capacity cannot drop below ${consumed} held/confirmed slots.`,
@@ -34,31 +64,69 @@ export default function TripSettingsEditor({ trip, consumed, bookingCount }: { t
     </p>}
     {cancelled && <p className="portal-warning" role="status">{t('This trip is cancelled and read-only. Duplicate it to relaunch.', '本行程已取消，只读。如需重新发布，请复制。')}</p>}
 
-    <form action={updateTripSettings} key={trip.updatedAt} className="trip-editor-form">
+    <form id="trip-settings-form" action={updateTripSettings} key={trip.updatedAt} className="trip-editor-form">
       <input type="hidden" name="tripId" value={trip.id} />
 
       <section className="portal-card">
         <div className="portal-card-head">
           <h2>{t('Identity', '基本信息')}</h2>
           <CardHelp id="identity-help" label={t('Help: identity', '帮助：基本信息')}>
-            <p>{t('The slug is the public URL. It locks once the trip is launched or has bookings, because links get shared.', 'slug 是公开网址。行程发布后或有预订时即锁定，因为链接会被分享。')}</p>
+            <p>{t('The public URL is auto-generated from the trip name — never hand-typed, so no typos or duplicate names. It locks once the trip is launched or has bookings, because links get shared.', '公开网址由行程名称自动生成——无需手填，避免拼写错误或重名。行程发布后或有预订时即锁定，因为链接会被分享。')}</p>
           </CardHelp>
         </div>
         <div className="booking-form portal-form">
-          <label className="span-2">{t('Slug (public URL)', 'Slug（公开网址）')}
-            <input name="slug" defaultValue={trip.slug} disabled={slugLocked || cancelled} maxLength={100} placeholder={t('auto-generated-from-the-trip-name', '由行程名称自动生成')} />
+          <div className={`translate-field span-2${fTitleEn.cls}`} data-tip={fTitleEn.tip}>
+            <label htmlFor="trip-title-en"><span>{t('Trip name (English)', '行程名称（英文）')}{fTitleEn.tip && <span className="blocker-dot" aria-hidden="true" />}</span></label>
+            <input id="trip-title-en" name="titleEn" ref={titleEnRef} defaultValue={trip.titleEn} required maxLength={200} disabled={cancelled} placeholder={t('e.g. Tioman Reef Weekend', '例如：Tioman Reef Weekend')} />
+            <TranslateButton from="zh" to="en" getTexts={() => [titleZhRef.current?.value ?? '']} onResults={([v]) => { if (v && titleEnRef.current) titleEnRef.current.value = v }} />
+          </div>
+          <div className={`translate-field span-2${fTitleZh.cls}`} data-tip={fTitleZh.tip}>
+            <label htmlFor="trip-title-zh"><span>{t('Trip name (Chinese)', '行程名称（中文）')}{fTitleZh.tip && <span className="blocker-dot" aria-hidden="true" />}</span></label>
+            <input id="trip-title-zh" name="titleZh" ref={titleZhRef} defaultValue={trip.titleZh} maxLength={200} disabled={cancelled} placeholder={t('Chinese trip name', '例如：刁曼岛珊瑚礁周末')} />
+            <TranslateButton from="en" to="zh" getTexts={() => [titleEnRef.current?.value ?? '']} onResults={([v]) => { if (v && titleZhRef.current) titleZhRef.current.value = v }} />
+          </div>
+          <p className="portal-hint span-2">{t('Public URL', '公开网址')}: <strong>/trips/{trip.slug}</strong>{slugLocked ? ` · ${t('locked — launched or has bookings', '已锁定——已发布或有预订')}` : ` · ${t('auto from the trip name until launch', '发布前随行程名称自动更新')}`}</p>
+        </div>
+      </section>
+
+      <section className="portal-card">
+        <div className="portal-card-head">
+          <h2>{t('Location', '地点')}</h2>
+          <CardHelp id="location-help" label={t('Help: location', '帮助：地点')}>
+            <p>{t('Pick the country (Asia) and type the dive site — local currency, timezone, nearest airport and jetty/transfer display automatically for known sites.', '选择国家（亚洲）并填写潜点——当地货币、时区、最近机场与码头接驳信息对已知潜点自动显示。')}</p>
+          </CardHelp>
+        </div>
+        <div className="booking-form portal-form">
+          <label className="span-2">{t('Country', '国家')}
+            <select name="locationKey" value={countryKey} onChange={e => setCountryKey(e.target.value as CountryKey)} disabled={cancelled}>
+              {COUNTRY_KEYS.map(k => <option key={k} value={k}>{t(COUNTRIES[k].nameEn, COUNTRIES[k].nameZh)}</option>)}
+            </select>
           </label>
-          {slugLocked && <p className="portal-hint span-2">{t('Slug locked — the trip is launched or has bookings.', 'Slug 已锁定——行程已发布或有预订。')}</p>}
-          <label className="span-2 portal-consent"><input type="checkbox" name="sample" defaultChecked={trip.sample} disabled={cancelled} />{t('Sample trip — honest label shown to divers until facts are confirmed', '示例行程——在事实确认前向潜水员展示诚实标注')}</label>
+          <div className={`translate-field${fSiteEn.cls}`} data-tip={fSiteEn.tip}>
+            <label htmlFor="dive-site-en"><span>{t('Dive site (English)', '潜点（英文）')}{fSiteEn.tip && <span className="blocker-dot" aria-hidden="true" />}</span></label>
+            <input id="dive-site-en" name="diveSiteEn" value={diveSite} onChange={e => setDiveSite(e.target.value)} maxLength={200} disabled={cancelled} placeholder={t('e.g. Tioman Island', '例如：Tioman Island')} />
+            <TranslateButton from="zh" to="en" getTexts={() => [diveSiteZhRef.current?.value ?? '']} onResults={([v]) => { if (v) setDiveSite(v) }} />
+          </div>
+          <div className={`translate-field${fSiteZh.cls}`} data-tip={fSiteZh.tip}>
+            <label htmlFor="dive-site-zh"><span>{t('Dive site (Chinese)', '潜点（中文）')}{fSiteZh.tip && <span className="blocker-dot" aria-hidden="true" />}</span></label>
+            <input id="dive-site-zh" name="diveSiteZh" ref={diveSiteZhRef} defaultValue={trip.diveSiteZh ?? ''} maxLength={200} disabled={cancelled} placeholder={t('Chinese dive site name', '例如：刁曼岛')} />
+            <TranslateButton from="en" to="zh" getTexts={() => [diveSite]} onResults={([v]) => { if (v && diveSiteZhRef.current) diveSiteZhRef.current.value = v }} />
+          </div>
+          <dl className="location-facts span-2">
+            <div><dt>{t('Local currency', '当地货币')}</dt><dd>{loc.localCurrency}</dd></div>
+            <div><dt>{t('Timezone', '时区')}</dt><dd>{loc.timezone} ({tzOffset(loc.timezone)})</dd></div>
+            <div><dt>{t('Nearest airport', '最近机场')}</dt><dd>{site ? t(site.airportEn, site.airportZh) : '—'}</dd></div>
+            <div><dt>{t('Jetty & transfer', '码头与接驳')}</dt><dd>{site ? t(site.jettyEn, site.jettyZh) : '—'}</dd></div>
+          </dl>
+          {!site && diveSite.trim() !== '' && <p className="portal-hint span-2">{t('Airport and jetty info display automatically for known sites; new sites are added to the reference list.', '已知潜点会自动显示机场与码头信息；新潜点需加入参考清单。')}</p>}
         </div>
       </section>
 
       <section className="portal-card">
         <h2>{t('Schedule', '日期')}</h2>
         <div className="booking-form portal-form">
-          <label>{t('Departure', '出发日期')}<input name="travelStart" type="date" defaultValue={dateValue(trip.travelStart)} disabled={cancelled} /></label>
-          <label>{t('Trip timezone (IANA)', '行程时区（IANA）')}<input name="departureTimezone" required defaultValue={trip.departureTimezone} disabled={cancelled} placeholder="Asia/Kuala_Lumpur" /></label>
-          <label>{t('Return', '结束日期')}<input name="travelEnd" type="date" defaultValue={dateValue(trip.travelEnd)} disabled={cancelled} /></label>
+          <label className={fStart.cls.trim() || undefined} data-tip={fStart.tip}><span>{t('Departure', '出发日期')}{fStart.tip && <span className="blocker-dot" aria-hidden="true" />}</span><input name="travelStart" type="date" defaultValue={dateValue(trip.travelStart)} disabled={cancelled} /></label>
+          <label className={fEnd.cls.trim() || undefined} data-tip={fEnd.tip}><span>{t('Return', '结束日期')}{fEnd.tip && <span className="blocker-dot" aria-hidden="true" />}</span><input name="travelEnd" type="date" defaultValue={dateValue(trip.travelEnd)} disabled={cancelled} /></label>
         </div>
       </section>
 
@@ -75,26 +143,23 @@ export default function TripSettingsEditor({ trip, consumed, bookingCount }: { t
               {['MYR', 'SGD', 'USD'].map(c => <option key={c} value={c}>{c}</option>)}
             </select>
           </label>
-          <label>{t('Price per person', '每人价格')}<input name="priceAmount" type="number" min="0" step="0.01" value={price} onChange={e => setPrice(e.target.value)} disabled={cancelled} placeholder="0.00" /></label>
-          <div className="portal-field span-2">
-            <span className="portal-field-label" id="deposit-type-label">{t('Deposit type', '订金类型')}</span>
-            <div className="kind-pills" role="radiogroup" aria-labelledby="deposit-type-label">
-              {[['percent', 'Percent', '百分比'], ['fixed', 'Fixed amount', '固定金额']].map(([value, en, zh]) =>
-                <label key={value} className="kind-pill"><input type="radio" name="depositType" value={value} checked={depositType === value} onChange={() => setDepositType(value)} disabled={cancelled} /><span>{t(en, zh)}</span></label>)}
-            </div>
+          <label className={fPrice.cls.trim() || undefined} data-tip={fPrice.tip}><span>{t('Price per person', '每人价格')}{fPrice.tip && <span className="blocker-dot" aria-hidden="true" />}</span><input name="priceAmount" type="number" min="0" step="0.01" value={price} onChange={e => setPrice(e.target.value)} disabled={cancelled} placeholder="0.00" /></label>
+          <div className={`portal-field span-2${fDep.cls}`} data-tip={fDep.tip}>
+            <span className="portal-field-label">{t('Deposits (fixed amounts)', '订金（固定金额）')}{fDep.tip && <span className="blocker-dot" aria-hidden="true" />}</span>
+            <DepositEditor rows={depRows} onChange={setDepRows} disabled={cancelled}
+              depositLabel={t('Deposit', '订金')} dueLabel={t('Due date', '截止日期')}
+              addLabel={t('Add second deposit', '添加第二笔订金')} removeLabel={t('Remove second deposit', '移除第二笔订金')} />
           </div>
-          <label>{depositType === 'percent' ? t('Deposit percent', '订金百分比') : t('Deposit amount', '订金金额')}
-            <input name="depositValue" type="number" min="0" step="0.01" value={depositValue} onChange={e => setDepositValue(e.target.value)} disabled={cancelled} placeholder="0" /></label>
-          <label>{t('Balance due (days before departure)', '尾款期限（出发前天数）')}<input name="balanceDueDays" type="number" min="0" step="1" defaultValue={trip.balanceDueDays} disabled={cancelled} /></label>
-          <label>{t('RM rate (points conversion)', 'RM 汇率（积分换算）')}<input name="rmRate" type="number" min="0.0001" step="0.0001" defaultValue={trip.rmRate} disabled={cancelled} /></label>
-          <p className="portal-currency span-2">{t('Deposit', '订金')} {money(deposit)} · {t('Balance', '尾款')} {money(balance)}</p>
+          <label className={flag('balanceDueDate').cls.trim() || undefined} data-tip={flag('balanceDueDate').tip}><span>{t('Final payment due date', '尾款截止日期')}{flag('balanceDueDate').tip && <span className="blocker-dot" aria-hidden="true" />}</span><input name="balanceDueDate" type="date" defaultValue={trip.balanceDueDate ?? ''} disabled={cancelled || balance === 0} /></label>
+          <p className="portal-hint">{t('Points rate', '积分汇率')}: {Number(trip.rmRate).toFixed(4)} · {t('fixed when the trip was created', '行程创建时锁定')}</p>
+          <p className="portal-currency span-2">{t('Deposits total', '订金合计')} {money(depTotal)} · {t('Balance', '尾款')} {money(balance)}</p>
         </div>
       </section>
 
       <section className="portal-card">
         <h2>{t('Capacity', '名额')}</h2>
         <div className="booking-form portal-form">
-          <label>{t('Total slots', '总名额')}<input name="capacity" type="number" min="1" step="1" defaultValue={trip.capacity} disabled={cancelled} /></label>
+          <label className={fCap.cls.trim() || undefined} data-tip={fCap.tip}><span>{t('Total slots', '总名额')}{fCap.tip && <span className="blocker-dot" aria-hidden="true" />}</span><input name="capacity" type="number" min="1" step="1" defaultValue={trip.capacity} disabled={cancelled} /></label>
           <label>{t('Minimum participants', '最低成团人数')}<input name="minParticipants" type="number" min="1" step="1" defaultValue={trip.minParticipants} disabled={cancelled} /></label>
           <p className="portal-hint span-2">{t(`${consumed} slot(s) currently held or confirmed. Minimum participants is reviewed manually by Iris — no auto-cancellation.`, `当前已占用 ${consumed} 个名额。最低成团人数由 Iris 人工审核——不会自动取消。`)}</p>
         </div>
@@ -120,64 +185,32 @@ export default function TripSettingsEditor({ trip, consumed, bookingCount }: { t
         </div>
       </section>
 
-      {!cancelled && <button className="btn btn-primary trip-editor-save">{t('Save settings', '保存设置')}</button>}
     </form>
 
-    {!cancelled && <section className="portal-card">
-      <div className="portal-card-head">
-        <h2>{t('Launch', '发布')}</h2>
-        <CardHelp id="launch-help" label={t('Help: launch', '帮助：发布')}>
-          <p>{t('Current state', '当前状态')}: {t(state.en, state.zh)}</p>
-          <ol>
-            <li>{t('Open for booking: live trip page with the book button.', '开放预订：行程页上线并显示预订按钮。')}</li>
-            <li>{t('Inquiries only: live trip page with the contact form, no booking.', '仅接受咨询：行程页上线并显示联系表单，不可预订。')}</li>
-            <li>{t('Closed: hidden from the public site; existing bookings and payments stay serviceable.', '关闭：从公开网站隐藏；已有预订和付款仍可处理。')}</li>
-            <li>{t('Draft: hidden, editable slug; only before any booking exists.', '草稿：隐藏，slug 可编辑；仅限尚无预订时。')}</li>
-          </ol>
-        </CardHelp>
-      </div>
-      {blockers.length > 0 && <div className="portal-warning" role="status">
-        <strong>{t('Publishing is blocked until:', '发布前请先完成：')}</strong>
-        <ul>{blockers.map((b, i) => <li key={i}>{t(b.en, b.zh)}</li>)}</ul>
-      </div>}
-      <form action={setLaunchState} className="portal-eligibility">
+    <PortalDialog open={dialog === 'closed'} title={t('Close trip', '关闭行程')} closeLabel={t('Close', '关闭')} onClose={() => setDialog(null)}>
+      <form action={setLaunchState} className="booking-form" onSubmit={() => setDialog(null)}>
         <input type="hidden" name="tripId" value={trip.id} />
-        <button name="state" value="open" className="btn btn-primary" disabled={blockers.length > 0}>{t('Open for booking', '开放预订')}</button>
-        <button name="state" value="inquiries" className="btn btn-secondary" disabled={blockers.length > 0}>{t('Inquiries only', '仅接受咨询')}</button>
-        <button name="state" value="closed" className="btn btn-secondary" disabled={trip.status === 'draft'}>{t('Close trip', '关闭行程')}</button>
-        <button name="state" value="draft" className="btn btn-secondary" disabled={bookingCount > 0 || trip.status === 'draft'}>{t('Back to draft', '回到草稿')}</button>
+        <input type="hidden" name="state" value="closed" />
+        <p className="portal-hint">{t('The trip page is hidden from the public site. Existing bookings and payments stay serviceable.', '行程页将从公开网站隐藏。已有预订和付款仍可处理。')}</p>
+        <button className="btn btn-primary">{t('Close trip', '关闭行程')}</button>
       </form>
-    </section>}
+    </PortalDialog>
 
-    {!cancelled && <section className="portal-card">
-      <div className="portal-card-head">
-        <h2>{t('Cancel trip', '取消行程')}</h2>
-        <CardHelp id="cancel-help" label={t('Help: cancel trip', '帮助：取消行程')}>
-          <p>{t('For weather, minimum participants not met, or operator issues.', '适用于天气、未达成团人数或运营问题。')}</p>
-          <ol>
-            <li>{t('Paid bookings are flagged for full refund; unpaid bookings are cancelled.', '已付款预订标记为全额退款；未付款预订直接取消。')}</li>
-            <li>{t('Every affected diver is emailed in their language.', '每位受影响潜水员都会收到其语言的邮件通知。')}</li>
-            <li>{t('Then record each external refund in Financial ops — points reverse automatically there.', '随后在财务操作中记录每笔外部退款——积分会在该处自动冲正。')}</li>
-          </ol>
-        </CardHelp>
-      </div>
-      <form action={cancelTrip} className="booking-form portal-form">
+    <PortalDialog open={dialog === 'draft'} title={t('Back to draft', '回到草稿')} closeLabel={t('Close', '关闭')} onClose={() => setDialog(null)}>
+      <form action={setLaunchState} className="booking-form" onSubmit={() => setDialog(null)}>
         <input type="hidden" name="tripId" value={trip.id} />
-        <label className="span-2">{t('Cancellation reason (shown to divers)', '取消原因（向潜水员展示）')}
-          <input name="reason" required maxLength={500} placeholder={t('e.g. insufficient participants / weather advisory', '例如：人数不足／天气预警')} />
-        </label>
-        <label className="span-2 portal-consent"><input type="checkbox" name="confirm" required />{t('I understand all active bookings will be flagged for refund or cancelled, and divers will be emailed.', '我了解所有进行中的预订将被标记退款或取消，并会邮件通知潜水员。')}</label>
-        <button className="btn btn-secondary span-2">{t('Cancel this trip', '取消此行程')}</button>
+        <input type="hidden" name="state" value="draft" />
+        <p className="portal-hint">{t('The trip is hidden from the public site. Only possible while no booking exists.', '行程将从公开网站隐藏。仅限尚无预订时可用。')}</p>
+        <button className="btn btn-primary">{t('Back to draft', '回到草稿')}</button>
       </form>
-    </section>}
+    </PortalDialog>
 
-    {deletable && <section className="portal-card">
-      <h2>{t('Delete draft', '删除草稿')}</h2>
-      <p className="portal-hint">{t('Only unpublished drafts without bookings can be deleted. A full snapshot is kept in the audit log.', '仅可删除无预订的未发布草稿。审计日志会保留完整快照。')}</p>
-      <form action={deleteDraft}>
+    <PortalDialog open={dialog === 'delete'} title={t('Delete draft', '删除草稿')} closeLabel={t('Close', '关闭')} onClose={() => setDialog(null)}>
+      <form action={deleteDraft} className="booking-form" onSubmit={() => setDialog(null)}>
         <input type="hidden" name="tripId" value={trip.id} />
-        <button className="btn btn-secondary">{t('Delete this draft', '删除此草稿')}</button>
+        <p className="portal-hint">{t('Only unpublished drafts without bookings can be deleted. A full snapshot is kept in the audit log.', '仅可删除无预订的未发布草稿。审计日志会保留完整快照。')}</p>
+        <button className="btn btn-danger-solid">{t('Delete this draft', '删除此草稿')}</button>
       </form>
-    </section>}
+    </PortalDialog>
   </div></main>
 }

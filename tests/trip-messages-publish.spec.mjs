@@ -1,3 +1,5 @@
+import { openReviewSession } from './support/review-session.mjs'
+import { stagedBookingRows, deleteStagedBookingRows } from './support/staged-booking.mjs'
 import { test, expect } from '@playwright/test';
 import { config } from 'dotenv';
 import { neon } from '@neondatabase/serverless';
@@ -31,10 +33,10 @@ async function publish(page, tripId, fields) {
 test('trip messages actions: bilingual gate, publish, view-time audience, edit/delete audit, zero emails', async ({ page, browser }) => {
   const prefix = `msgP-${randomUUID()}`;
   const tripId = `${prefix}-trip`;
-  const emailPaid = `${prefix.toLowerCase()}-paid@okimdive.com`;
-  const emailHold = `${prefix.toLowerCase()}-hold@okimdive.com`;
-  const instructor = process.env.AUTH_INSTRUCTOR_EMAILS.split(',')[0].trim();
+  const emailPaid = `${prefix.toLowerCase()}-paid@example.com`;
+  const emailHold = `${prefix.toLowerCase()}-hold@example.com`;
   const ids = { paid: null, hold: null };
+  const instructorSessions = []
   try {
     await login(page, emailPaid);
     ids.paid = (await sql`SELECT id FROM customers WHERE email = ${emailPaid}`)[0].id;
@@ -42,11 +44,12 @@ test('trip messages actions: bilingual gate, publish, view-time audience, edit/d
     await login(page, emailHold);
     ids.hold = (await sql`SELECT id FROM customers WHERE email = ${emailHold}`)[0].id;
     await sql`UPDATE customers SET name = ${prefix + ' Hold'} WHERE id = ${ids.hold}`;
-    await login(page, instructor);
+    instructorSessions.push(await openReviewSession(page));
     await sql`INSERT INTO trips (id, slug, title_en, title_zh, status, published, price_amount, deposit_value, capacity, travel_start, travel_end, sample) VALUES (${tripId}, ${prefix.toLowerCase()}, 'Fictional Publish Trip', '虚构发布行程', 'open', false, 100, 30, 4, ${new Date(Date.now() + 10 * 86400000).toISOString()}, ${new Date(Date.now() + 12 * 86400000).toISOString()}, true)`;
-    await sql`INSERT INTO bookings (id, customer_id, product_id, status, currency, deposit_amount, balance_amount, declarations) VALUES
-      (${prefix + '-bp'}, ${ids.paid}, ${tripId}, 'confirmed', 'MYR', 30, 70, '{}'),
-      (${prefix + '-bh'}, ${ids.hold}, ${tripId}, 'awaiting_deposit', 'MYR', 30, 70, '{}')`;
+    await sql.transaction([
+      ...stagedBookingRows(sql,{id:prefix+'-bp',customerId:ids.paid,tripId,status:'confirmed'}),
+      ...stagedBookingRows(sql,{id:prefix+'-bh',customerId:ids.hold,tripId}),
+    ])
 
     // Gate: missing Chinese body never publishes.
     await publish(page, tripId, { label: 'Briefing', subjectEn: 'S', subjectZh: '标题', bodyEn: 'Body', bodyZh: '', audience: 'confirmed' });
@@ -106,10 +109,11 @@ test('trip messages actions: bilingual gate, publish, view-time audience, edit/d
     expect(await paidPage2.locator(`#messages-${prefix}-bp`).getByText('Jetty at 9am').count()).toBe(0);
     await paidCtx2.close();
   } finally {
+    for (const dispose of instructorSessions) await dispose()
     await sql`DELETE FROM message_reads WHERE customer_id IN (${ids.paid}, ${ids.hold})`;
     await sql`DELETE FROM audit_log WHERE entity_id IN (SELECT id FROM trip_messages WHERE trip_id = ${tripId})`;
     await sql`DELETE FROM trip_messages WHERE trip_id = ${tripId}`;
-    await sql`DELETE FROM bookings WHERE id IN (${prefix + '-bp'}, ${prefix + '-bh'})`;
+    await sql.transaction(deleteStagedBookingRows(sql,[prefix+'-bp',prefix+'-bh']))
     await sql`DELETE FROM trips WHERE id = ${tripId}`;
     for (const [e, id] of [[emailPaid, ids.paid], [emailHold, ids.hold]]) {
       await sql`DELETE FROM customers WHERE id = ${id}`;

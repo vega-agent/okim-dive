@@ -1,22 +1,32 @@
 'use client'
-
 import { useLocale } from '@/lib/use-locale'
+import type { readReceipt } from '@/lib/payment-documents'
 
-export default function ReceiptView({ receipt }: { receipt: { number: string; paymentId: string; claimId: string | null; bookingId: string; customerName: string; amount: string; currency: string; verifiedAt: string; kind: string } }) {
+export default function ReceiptView({ receipt }: { receipt: NonNullable<Awaited<ReturnType<typeof readReceipt>>> }) {
   const locale = useLocale()
   const t = (en: string, zh: string) => locale === 'zh' ? zh : en
-  const kinds: Record<string, [string, string]> = { deposit: ['Deposit', '订金'], balance: ['Balance', '尾款'], full: ['Full payment', '全款'], refund: ['Refund', '退款'] }
-  return <div className="invoice-doc" data-locale-managed>
-    <div className="invoice-head"><div><p className="invoice-brand">Okim Dive</p><h1>{t('Receipt', '收据')} {receipt.number}</h1></div><button type="button" className="btn btn-primary no-print" onClick={() => window.print()}>{t('Print / save as PDF', '打印／保存为 PDF')}</button></div>
+  const money = (n: number) => receipt.currency + ' ' + (n / 100).toFixed(2)
+  const refund = receipt.kind === 'refunded'
+  const recorded = new Intl.DateTimeFormat(locale === 'zh' ? 'zh-CN' : 'en-GB', { dateStyle:'medium',timeStyle:'short',timeZone:'UTC' }).format(new Date(receipt.recordedAt)) + ' UTC'
+  return <article className="invoice-doc" data-locale-managed>
+    <div className="invoice-head"><div><p className="invoice-brand">Okim Dive</p>
+      <h1>{refund ? t('Refund receipt','退款收据') : t('Receipt','收据')} {receipt.number}</h1></div>
+      <button type="button" className="btn btn-primary no-print" onClick={() => window.print()}>{t('Print / save as PDF','打印／保存为 PDF')}</button></div>
     <dl className="invoice-meta">
-      <div><dt>{t('Customer', '客户')}</dt><dd>{receipt.customerName}</dd></div>
-      <div><dt>{t('Booking ID', '预订编号')}</dt><dd>{receipt.bookingId}</dd></div>
-      <div><dt>{t('Payment ID', '付款编号')}</dt><dd>{receipt.paymentId}</dd></div>
-      {receipt.claimId && <div><dt>{t('Claim ID', '付款记录编号')}</dt><dd>{receipt.claimId}</dd></div>}
-      <div><dt>{t('Verified on', '核实日期')}</dt><dd>{receipt.verifiedAt}</dd></div>
-      <div><dt>{t('Payment kind', '付款类型')}</dt><dd>{t(...(kinds[receipt.kind] ?? [receipt.kind, receipt.kind]))}</dd></div>
-      <div><dt>{t('Verified amount', '已核实金额')}</dt><dd>{receipt.currency} {receipt.amount}</dd></div>
+      {receipt.customerName && <div><dt>{t('Customer','客户')}</dt><dd>{receipt.customerName}</dd></div>}
+      <div><dt>{t('Booking reference','预订编号')}</dt><dd>{receipt.bookingId}</dd></div>
+      <div><dt>{refund ? t('Refund date','退款日期') : t('Payment date','付款日期')}</dt><dd>{receipt.paidOn}</dd></div>
+      <div><dt>{t('Recorded','登记时间')}</dt><dd>{recorded}</dd></div>
+      <div><dt>{refund ? t('Amount refunded','本次退款') : t('Amount received','本次实收')}</dt><dd>{money(receipt.amountMinor)}</dd></div>
     </dl>
-    <p className="invoice-notice">{t('This receipt records an instructor-verified external transaction. It does not confirm eligibility or reserve a slot.', '本收据记录教练已核实的外部交易，不代表资格获批或名额确认。')}</p>
-  </div>
+    <table className="invoice-table"><thead><tr><th>{t('Stage','付款阶段')}</th><th>{t('Amount','金额')}</th></tr></thead>
+      <tbody>{receipt.allocations.map(a => <tr key={a.position}><td>{a.kind === 'final' ? t('Final payment','尾款') : t('Deposit ','订金 ') + a.position}</td><td>{money(a.amountMinor)}</td></tr>)}</tbody></table>
+    <h2>{t('Booking totals when recorded','登记时的预订金额')}</h2>
+    <dl className="invoice-meta">
+      <div><dt>{t('Total received','累计已收')}</dt><dd>{money(receipt.grossReceivedMinor)}</dd></div>
+      <div><dt>{t('Total refunded','累计已退')}</dt><dd>{money(receipt.refundedMinor)}</dd></div>
+      <div><dt>{t('Net received','实收净额')}</dt><dd>{money(receipt.netReceivedMinor)}</dd></div>
+      {!refund && <div><dt>{t('Balance at recording','登记时的余额')}</dt><dd>{money(receipt.outstandingMinor)}</dd></div>}
+    </dl>
+  </article>
 }

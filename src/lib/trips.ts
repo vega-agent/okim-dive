@@ -16,6 +16,7 @@ import { trips } from '@/db/schema'
 
 export type Trip = {
   id: string
+  detailHref?: string
   title: string
   location: string
   status: string
@@ -50,6 +51,7 @@ const STATUS_LABELS: Record<string, string> = {
 function rowToTrip(row: TripRow): Trip {
   return {
     id: row.slug,
+    detailHref: row.status === 'open' || row.status === 'full' ? '/trips/' + encodeURIComponent(row.slug) : undefined,
     title: row.titleEn,
     location: row.locationEn ?? '',
     status: row.sample ? 'Sample trip' : (STATUS_LABELS[row.status] ?? row.status),

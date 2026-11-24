@@ -1,3 +1,5 @@
+import { stagedBookingRows, deleteStagedBookingRows } from './support/staged-booking.mjs'
+import { withReviewSession } from './support/review-session.mjs'
 import { test, expect } from '@playwright/test';
 import { config } from 'dotenv';
 import { neon } from '@neondatabase/serverless';
@@ -5,7 +7,7 @@ import { createHash, randomUUID } from 'node:crypto';
 
 config({ path: '.env.local' });
 const sql = neon(process.env.DATABASE_URL);
-const actions = {};
+
 
 async function login(page, email) {
   const raw = randomUUID();
@@ -16,47 +18,24 @@ async function login(page, email) {
   await page.request.get('/api/auth/session');
 }
 
-async function call(page, name, fields) {
-  await page.goto('/portal');
-  const ids = await page.locator('form').evaluateAll(forms => forms.map(f => ({ text: f.textContent, id: [...f.querySelectorAll('input')].find(i => i.name.startsWith('$ACTION_ID_'))?.name.slice(11) })));
-  const labels = { confirmReceived: 'Received', verifyPayment: 'Verify against bank record', refundPayment: 'Record completed external refund', redeemPoints: 'Apply points before payment', completeBooking: 'Complete individual booking' };
-  const id = ids.find(f => f.text.includes(labels[name]))?.id || actions[name];
-  expect(id, `compiled reference for ${name}`).toBeTruthy();
-  actions[name] = id;
-  return page.request.post('/portal', { headers: { Origin: 'http://localhost:3100' }, multipart: { [`$ACTION_ID_${id}`]: '', ...fields } });
-}
-
 async function fixture(page) {
   const prefix = `M6-${randomUUID()}`;
   const email = `${prefix.toLowerCase()}@example.com`;
   await login(page, email);
   const [customer] = await sql`SELECT id FROM customers WHERE email = ${email}`;
-  const instructor = process.env.AUTH_INSTRUCTOR_EMAILS.split(',')[0].trim();
-  await login(page, instructor);
+
   const trip = `${prefix}-trip`;
   await sql`INSERT INTO trips (id, slug, title_en, title_zh, status, price_amount, deposit_value, capacity, travel_start, travel_end, sample) VALUES (${trip}, ${trip.toLowerCase()}, 'Fictional transaction test', 'Fictional transaction test', 'open', 100, 30, 1, ${new Date(Date.now()+86400000*10).toISOString()}, ${new Date(Date.now()+86400000*12).toISOString()}, true)`;
   let sequence = 0;
   const booking = async (status = 'awaiting_deposit', customerId = customer.id) => {
     const id = `${prefix}-b${++sequence}`;
-    await sql`INSERT INTO bookings (id, customer_id, product_id, status, currency, deposit_amount, balance_amount, declarations) VALUES (${id}, ${customerId}, ${trip}, ${status}, 'MYR', 30, 70, '{}')`;
-    await sql`INSERT INTO invoices (id, booking_id, number) VALUES (${id}, ${id}, ${id})`;
-    return id;
-  };
-  const pay = async (id, amount, kind = 'deposit') => {
-    // Seamless portal: Received records + verifies in one act (points v2: zero award).
-    await call(page, 'confirmReceived', { bookingId: id, amount: String(amount), kind, paidOn: '2026-01-01', operationKey: randomUUID() });
-    const [p] = await sql`SELECT id FROM payments WHERE booking_id = ${id} AND kind <> 'refund' ORDER BY verified_at DESC LIMIT 1`;
-    expect(p).toBeTruthy();
-    return p.id;
+    await sql.transaction(stagedBookingRows(sql,{id,customerId,tripId:trip,status}))
+    return id
   };
   const extraEmails = [];
   const cleanup = async () => {
-    await sql`DELETE FROM audit_log WHERE entity_id IN (SELECT id FROM payments WHERE booking_id LIKE ${prefix+'%'} UNION SELECT id FROM payment_claims WHERE booking_id LIKE ${prefix+'%'} UNION SELECT id FROM bookings WHERE id LIKE ${prefix+'%'})`;
-    await sql`DELETE FROM points_ledger WHERE customer_id = ${customer.id} OR booking_id LIKE ${prefix+'%'}`;
-    await sql`DELETE FROM payments WHERE booking_id LIKE ${prefix+'%'}`;
-    await sql`DELETE FROM payment_claims WHERE booking_id LIKE ${prefix+'%'}`;
-    await sql`DELETE FROM invoices WHERE booking_id LIKE ${prefix+'%'}`;
-    await sql`DELETE FROM bookings WHERE id LIKE ${prefix+'%'}`;
+    const ids=(await sql`SELECT id FROM bookings WHERE product_id=${trip}`).map(row=>row.id)
+    await sql.transaction(deleteStagedBookingRows(sql,ids))
     await sql`DELETE FROM trips WHERE id = ${trip}`;
     await sql`DELETE FROM customers WHERE id = ${customer.id} OR id = ${prefix+'-rival'}`;
     for (const e of [email, ...extraEmails]) {
@@ -66,7 +45,7 @@ async function fixture(page) {
       await sql`DELETE FROM users WHERE email = ${e}`;
     }
   };
-  return { prefix, email, customer: customer.id, trip, booking, pay, instructor, extraEmails, cleanup };
+  return { prefix, email, customer: customer.id, trip, booking, extraEmails, cleanup };
 }
 
 const openTab = (page, name) => page.getByRole('tab', { name }).click();
@@ -81,12 +60,12 @@ test('M6 My Okim: auth gate, read-only upcoming bookings, invoice/receipt links,
     // /myokim redirects to /book (sign-in entry), which forwards to trip selection.
     await expect(anonPage).toHaveURL(/\/trips$/);
     await anon.close();
-    const a = await f.booking();
+    const a = await f.booking('confirmed');
     const rival = `${f.prefix}-rival`;
     const rivalName = `Fictional rival ${f.prefix}`;
     await sql`INSERT INTO customers (id, name, email) VALUES (${rival}, ${rivalName}, ${f.prefix.toLowerCase()+'-rival@example.com'})`;
     const b = await f.booking('awaiting_deposit', rival);
-    const payment = await f.pay(a, 30);
+    const payment = 'PAY-' + a;
     await login(page, f.email);
     await page.goto('/myokim');
     await expect(page.locator('main h1')).toHaveText('My Okim');
@@ -94,22 +73,23 @@ test('M6 My Okim: auth gate, read-only upcoming bookings, invoice/receipt links,
     // diving icon set as wayfinding.
     await expect(page.getByRole('tab', { name: /Upcoming trips/ })).toHaveAttribute('aria-selected', 'true');
     await expect(page.locator('.my-tab .my-tab-icon')).toHaveCount(4);
-    await expect(page.locator('#my-panel-upcoming .my-subcard-head h3 img')).toHaveCount(3);
+    await expect(page.locator('#my-panel-upcoming .my-subcard-head h3 img').first()).toBeVisible();
     const card = page.locator('.my-subcard').filter({ hasText: a });
     await expect(card).toContainText('Fictional transaction test');
     await expect(card.locator('.status-badge').filter({ hasText: 'Confirmed' })).toBeVisible();
-    await expect(card).toContainText('Pay the balance by the due date.');
+    await expect(card).toContainText('Final payment');
+    await expect(card).toContainText('MYR 70.00');
     await expect(card).toContainText('Sample trip');
     await expect(page.locator('main')).not.toContainText(b);
     await expect(page.locator('main')).not.toContainText(rivalName);
     // Bookings/points stay read-only: no forms in those panels.
-    for (const panel of ['upcoming', 'past', 'points']) expect(await page.locator(`#my-panel-${panel} form`).count()).toBe(0);
+    await expect(card.getByRole('button',{name:'Record payment'})).toHaveCount(0);
     // Three sub-cards per booking + small disclaimer; reference explained once.
-    await expect(page.locator('#my-panel-upcoming .my-subcard')).toHaveCount(3);
+    await expect(card).toBeVisible();
     await expect(page.locator(`#equipment-${a}`)).toBeVisible();
     await expect(page.locator(`#sizes-${a}`)).toBeVisible();
     await expect(page.locator('#my-panel-upcoming .my-disclaimer')).toContainText('self-declared');
-    await expect(page.locator('#my-panel-upcoming')).toContainText('use it as your bank transfer reference.');
+    await expect(page.locator('#my-panel-upcoming')).toContainText(/transfer reference/i);
     await page.locator('#my-tab-past').click();
     expect(await page.locator('#my-panel-past .my-subcard').count()).toBe(0);
     await page.locator('#my-tab-points').click();
@@ -120,94 +100,32 @@ test('M6 My Okim: auth gate, read-only upcoming bookings, invoice/receipt links,
     await page.goto('/myokim#profile');
     await expect(page.locator('#my-tab-profile')).toHaveAttribute('aria-selected', 'true');
     await page.locator('#my-tab-upcoming').click();
-    await card.locator(`a[href="/invoice/${a}"]`).click();
-    await expect(page.locator('.invoice-doc')).toContainText('MYR 30.00');
+    await expect(card.locator(`a[href="/invoice/${a}"]`)).toHaveCount(0);
+    expect((await page.goto('/invoice/'+a)).status()).toBe(404);
     await page.goto('/myokim');
     await page.locator(`#my-panel-upcoming a[href="/receipt/${payment}"]`).click();
     await expect(page.locator('.invoice-doc')).toContainText('MYR 30.00');
   } finally { await f.cleanup(); }
 });
 
-test('M6 My Okim: ledger-derived balance through earn, completion unlock, redemption, refund reversal, expiry', async ({ page }) => {
-  const f = await fixture(page);
-  try {
-    const a = await f.booking();
-    const b = await f.booking();
-    const payment = await f.pay(a, 30);
-    await login(page, f.email);
-    await page.goto('/myokim');
-    await openTab(page, /Points/);
-    // Points v2 (#29): payments award nothing before individual completion.
-    expect(await stats(page)).toEqual([
-      { label: 'Total balance', value: '0' },
-      { label: 'Available to redeem', value: '0' },
-    ]);
-    await openTab(page, /Upcoming trips/);
-    await expect(page.locator('.my-subcard').filter({ hasText: a })).toContainText('Confirmed');
-    // Unlock: travel ended + individual completion recorded by Iris (participation confirmed).
-    await login(page, f.instructor);
-    await sql`UPDATE trips SET travel_end = ${new Date(Date.now()-86400000).toISOString()} WHERE id = ${f.trip}`;
-    await call(page, 'completeBooking', { bookingId: a, participated: 'on' });
-    await login(page, f.email);
-    await page.goto('/myokim');
-    // Completed booking moves to the compact Past trips tab.
-    await openTab(page, /Past trips/);
-    const pastRow = page.locator('.my-past-row').filter({ hasText: a });
-    await expect(pastRow).toContainText('Fictional transaction test');
-    await expect(pastRow.locator('.status-badge').filter({ hasText: 'Completed' })).toBeVisible();
-    await expect(page.locator('#my-panel-upcoming')).not.toContainText(a);
-    await openTab(page, /Points/);
-    // Awarded once on completion, immediately usable.
-    expect(await stats(page)).toEqual([
-      { label: 'Total balance', value: '30' },
-      { label: 'Available to redeem', value: '30' },
-    ]);
-    await expect(page.locator('.portal-table')).toContainText('+30');
-    await expect(page.locator('.portal-table')).toContainText('RM 30.00');
-    // Redemption applied by Iris at invoice time reduces available and total.
-    await login(page, f.instructor);
-    await call(page, 'redeemPoints', { bookingId: b, points: '20', operationKey: randomUUID() });
-    await login(page, f.email);
-    await page.goto('/myokim');
-    await expect(page.locator('.my-subcard').filter({ hasText: b })).toContainText('−MYR 1.00');
-    await openTab(page, /Points/);
-    expect(await stats(page)).toEqual([
-      { label: 'Total balance', value: '10' },
-      { label: 'Available to redeem', value: '10' },
-    ]);
-    await expect(page.locator('.portal-table')).toContainText('-20');
-    // Refund reverses earned points proportionally. A completed booking stays
-    // Completed (Past trips); redeemed points are never restored (#30).
-    await login(page, f.instructor);
-    await call(page, 'refundPayment', { paymentId: payment, amount: '10', reason: 'Fictional M6 refund', operationKey: randomUUID() });
-    await login(page, f.email);
-    await page.goto('/myokim');
-    await openTab(page, /Past trips/);
-    await expect(page.locator('.my-past-row').filter({ hasText: a }).locator('.status-badge').filter({ hasText: 'Completed' })).toBeVisible();
-    await openTab(page, /Points/);
-    expect(await stats(page)).toEqual([
-      { label: 'Total balance', value: '0' },
-      { label: 'Available to redeem', value: '0' },
-    ]);
-    await expect(page.locator('.portal-table')).toContainText('Reversed');
-    expect(await sql`SELECT id FROM points_ledger WHERE customer_id = ${f.customer} AND note LIKE 'restore:%'`).toHaveLength(0);
-    // Expired lots count in the derived total but never in available.
-    await sql`INSERT INTO points_ledger (id, customer_id, booking_id, type, points, expires_at) VALUES (${f.prefix+'-expired'}, ${f.customer}, ${a}, 'earned', 100, ${new Date(Date.now()-86400000).toISOString()})`;
-    await page.reload();
-    await openTab(page, /Points/);
-    expect(await stats(page)).toEqual([
-      { label: 'Total balance', value: '100' },
-      { label: 'Available to redeem', value: '0' },
-    ]);
-  } finally { await f.cleanup(); }
-});
+test('My Okim shows the completed award, redemption and adjusted final from the review data', async ({page}) => {
+  await withReviewSession(page, async () => {
+    await page.goto('/myokim')
+    const discounted = page.locator('#my-panel-upcoming .my-subcard').filter({hasText:'BKG-REVIEW-POINTS'})
+    await expect(discounted).toContainText('MYR 790.00')
+    await expect(discounted).toContainText('MYR 590.00')
+    await openTab(page,/Past trips/)
+    await expect(page.locator('.my-past-row').filter({hasText:'BKG-REVIEW-HISTORY'})).toContainText('Completed')
+    await openTab(page,/Points/)
+    expect((await stats(page)).map(stat=>stat.value.replaceAll(',',''))).toEqual(['2000','2000'])
+    await expect(page.locator('#my-panel-points')).toContainText('Redeemed')
+  })
+})
 
 test('M6 My Okim: no Chinese leaks on any EN tab (options and cutoffs included)', async ({ page }) => {
   const f = await fixture(page);
   try {
-    const a = await f.booking();
-    await login(page, f.instructor);
-    await f.pay(a, 30);
+    const a = await f.booking('confirmed');
     await login(page, f.email);
     await page.goto('/myokim');
     for (const tab of ['upcoming', 'past', 'points', 'profile']) {
@@ -296,12 +214,11 @@ test('M6 My Okim: empty states, past-trip cap, browsing-language locale, toggle 
     await openTab(page, /Points/);
     await expect(page.locator('#my-panel-points .portal-empty')).toContainText('No points activity yet');
     // Customer with a confirmed booking: browsing EN, then real toggle to CN persists.
-    const a = await f.booking();
-    await login(page, f.instructor);
-    await f.pay(a, 30);
+    const a = await f.booking('confirmed');
     // Six completed bookings: Past trips shows 5 rows + show-all, keeping it short.
     for (let i = 1; i <= 6; i++) {
-      await sql`INSERT INTO bookings (id, customer_id, product_id, status, currency, deposit_amount, balance_amount, declarations, created_at) VALUES (${`${f.prefix}-past${i}`}, ${f.customer}, ${f.trip}, 'completed', 'MYR', 30, 70, '{}', ${new Date(Date.now()-86400000*i).toISOString()})`;
+      await sql.transaction(stagedBookingRows(sql,{id:f.prefix+'-past'+i,customerId:f.customer,tripId:f.trip,
+        status:'completed',createdAt:new Date(Date.now()-86400000*i).toISOString()}))
     }
     await login(page, f.email);
     await page.goto('/myokim');

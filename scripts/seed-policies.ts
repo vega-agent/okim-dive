@@ -1,16 +1,15 @@
 /**
  * M4 seed: policy versions v1 (refund / privacy / terms).
- * Owner-approved for demo use 2026-11-20 (MVP-SPEC decision #21); final wording
- * pending Iris confirmation. Each body carries a visible draft note.
+ * Candidate copy for a clean demo database. Publication to an existing database
+ * requires a separately approved new version.
  * Versioned: bookings snapshot the accepted version; edits create NEW versions.
- * Run: node scripts/seed-policies.ts   (idempotent upsert by kind+version)
+ * Run: node scripts/seed-policies.ts   (insert-only by kind+version)
  */
 import { config } from 'dotenv'
 config({ path: '.env.local' })
 
 import { neon } from '@neondatabase/serverless'
 import { drizzle } from 'drizzle-orm/neon-http'
-import { and, eq } from 'drizzle-orm'
 import { policyVersions } from '../src/db/schema.ts'
 
 const connectionString = process.env.DATABASE_URL
@@ -20,22 +19,27 @@ if (!connectionString) {
 }
 const db = drizzle(neon(connectionString))
 
-const DRAFT_EN = 'Demo wording approved by the owner. Final text is pending instructor confirmation.'
-const DRAFT_ZH = '演示措辞已经营者批准，最终文本待教练确认。'
+const DRAFT_EN = 'Draft for instructor review.'
+const DRAFT_ZH = '草案，待教练审核。'
 
 const refundEn = `${DRAFT_EN}
 
 Refunds — Okim Dive
 
 How refunds work
-All payments are made externally (bank transfer or PayNow) using your Booking ID as the transfer reference. After paying, send your transfer screenshot to Iris via WhatsApp. Iris checks the payment against the bank record and confirms your slot only after the deposit is verified, subject to availability.
+All payments are made externally (bank transfer or PayNow) using your Booking ID as the transfer reference. After paying, send your transfer screenshot to Iris via WhatsApp. Iris checks the payment against the bank record. A successful booking reserves one place. Iris confirms it when she verifies the full first deposit.
+
+Payment schedule
+A trip may require one or two fixed deposits, each due on a stated date, with the balance (the trip price minus all deposits) due on its own stated date. The full schedule — each amount and its due date — is shown before you book and on your booking card. If you book after a stage's due date has passed, that stage is due immediately. Deposits are non-refundable on diver-initiated exits (see below); the balance is refundable.
 
 Refund situations
-1. Iris cancels the trip (weather, minimum participants not met, operator issues): full refund of deposit and balance. Any Okim Points earned from this booking are reversed.
-2. The trip fills up after your payment is verified: full refund, or an alternative departure agreed with you. Points reversed if refunded.
-3. You paid but your eligibility declaration is declined: full refund. Points reversed.
-4. You cancel on or before the balance deadline stated on your invoice: the balance is refunded; the deposit is forfeited (it covers boat and administration commitments).
-5. You cancel after the balance deadline, or do not show: no refund. Iris may, at her discretion, offer a transfer to a future trip.
+1. Iris cancels the trip (weather, minimum participants not met, operator issues): full refund of everything you paid, including all deposits.
+2. Iris cancels your booking because you cannot take part safely: full refund of all payments.
+3. The trip is postponed: you may accept the new dates (your place, payments and agreed payment schedule carry over) or exit with a full refund of everything paid, including deposits.
+4. You cancel (withdraw) or do not show: all deposits are forfeited — they cover boat and administration commitments and are non-refundable. Any balance you paid is refunded. An unpaid balance is waived.
+
+Missed deposit stages
+A due date passing does not release your place. Iris reviews missed payments. If she cancels your booking for non-payment, paid deposits are retained and any paid final-stage amount is refundable.
 
 Requesting a refund
 Contact Iris through the contact page or WhatsApp with your Booking ID. Refunds are executed externally by Iris and recorded against your booking. The refund policy version you accepted at booking governs your booking, even if this page is later updated.`
@@ -45,14 +49,19 @@ const refundZh = `${DRAFT_ZH}
 退款政策 — Okim Dive
 
 退款如何运作
-所有款项均通过外部方式支付（银行转账或 PayNow），并以你的预订编号（Booking ID）作为转账备注。付款后，请通过 WhatsApp 将转账截图发给 Iris。Iris 会核对银行记录，只有在订金核实后、且仍有名额的情况下，才会确认你的名额。
+所有款项均通过外部方式支付（银行转账或 PayNow），并以你的预订编号（Booking ID）作为转账备注。付款后，请通过 WhatsApp 将转账截图发给 Iris。Iris 会核对银行记录。预订成功即为你保留一个名额。Iris 核实首笔订金全部到账后，名额即获确认。
+
+付款时间表
+行程可能要求一至两笔固定订金，每笔须在指定日期缴付；尾款（行程价格减去全部订金）则在其指定日期缴付。完整时间表——每笔金额及其截止日期——会在预订前及你的预订卡上显示。若你在某一期截止日期之后才预订，该期须立即缴付。订金在潜水员主动退出的情形下不予退还（见下文）；尾款可退还。
 
 退款情形
-1. Iris 取消行程（天气、未达成团人数、运营商问题）：全额退还订金与尾款。该预订已获得的 Okim 积分将被冲回。
-2. 你的付款核实后行程已满：全额退款，或与你协商改期。退款时积分冲回。
-3. 已付款但资格申报未获批准：全额退款，积分冲回。
-4. 你在发票所载尾款截止日期当日或之前取消：退还尾款；订金不予退还（用于覆盖船只与行政承诺）。
-5. 你在尾款截止日期之后取消或未出席：不予退款。Iris 可酌情安排转入未来行程。
+1. Iris 取消行程（天气、未达成团人数、运营商问题）：全额退还你所支付的一切款项，包括全部订金。
+2. 若因不适合安全参加行程，Iris 取消你的预订：全额退还所有已付款项。
+3. 行程延期：你可接受新日期（名额、已付款项和原定付款安排保留），或退出并获全额退还所支付的一切款项，包括订金。
+4. 你取消（退出）或未出席：全部订金不予退还——订金用于覆盖船只与行政承诺，属不可退还。你所支付的任何尾款将获退还。未缴付的尾款予以豁免。
+
+逾期未缴的订金期
+付款逾期仍保留名额，由 Iris 审核。若因未付款而取消预订，已付订金不退，已付尾款可退。
 
 申请退款
 请通过联系页面或 WhatsApp 联系 Iris，并提供预订编号。退款由 Iris 在外部执行并记录在你的预订下。即使本页面日后更新，你的预订仍适用预订时所接受的退款政策版本。`
@@ -100,19 +109,19 @@ const termsEn = `${DRAFT_EN}
 Terms of Booking — Okim Dive
 
 1. Booking and slot confirmation
-A booking is a request until the deposit is verified. An awaiting-deposit booking does not reserve a slot: another diver may take the remaining space until Iris verifies your deposit, at which point availability is re-checked. If the trip filled meanwhile, your payment is recorded and flagged for refund or an agreed alternative.
+A successful booking reserves your place immediately. Iris confirms it after verifying the full first deposit. Iris reviews missed payments individually.
 
-2. Payments
-Payments are external (bank transfer or PayNow) with your Booking ID as reference. Send the transfer screenshot to Iris via WhatsApp. The balance is due by the deadline on your invoice.
+2. Payments and schedule
+Payments are external (bank transfer or PayNow) with your Booking ID as reference. Send the transfer screenshot to Iris via WhatsApp. A trip may require one or two fixed deposits, each due on a stated date; the balance (trip price minus all deposits) is due on its own stated date. The full schedule is shown before you book and on your booking card. A stage whose due date has passed when you book is due immediately. Deposits are non-refundable on diver-initiated exits; the balance is refundable (see the refund policy).
 
 3. Eligibility and safety
-You must meet the trip's requirements and declare them truthfully. Iris reviews declarations and makes all dive-suitability decisions. A confirmed slot does not imply eligibility approval. If you are declined after paying, you receive a full refund.
+Check the trip requirements and give accurate information about your experience and health. Discuss any concerns with Iris before diving. If Iris cancels your booking because you cannot take part safely, all payments are refundable.
 
 4. Refunds
-The refund policy version you accept at booking governs your booking.
+The refund policy version you accept at booking governs your booking. In short: deposits are non-refundable when you cancel, do not show, or have your slot released for non-payment; any balance paid is refunded on cancellation or no-show; if Iris cancels or you decline a postponement you receive a full refund including deposits.
 
 5. Okim Points
-Points are earned only on instructor-verified payments (1 point per RM 1 of the verified amount, converted at the trip's rate), usable only after the trip completes, expire after 12 months, and are reversed on refunds. Points never override eligibility or safety requirements.
+After your trip, Iris completes your individual booking once participation and full payment are confirmed. Points are based on net verified cash at each payment’s recorded rate, one point per whole RM. They are usable immediately and expire 12 calendar months after completion. Later refunds reverse the corresponding points. Before your first payment, ask Iris to apply available points toward the final stage, up to 20% of the original price.
 
 6. Liability
 Diving carries inherent risks. Final waiver and liability wording is pending legal review and instructor confirmation; this demo text does not replace it.
@@ -125,19 +134,19 @@ const termsZh = `${DRAFT_ZH}
 预订条款 — Okim Dive
 
 1. 预订与名额确认
-订金核实前，预订仅为申请。待付订金的预订不保留名额：在 Iris 核实你的订金之前，其他潜水员可能订走剩余名额；核实时将重新检查名额。若期间行程已满，你的付款仍会被记录，并标记为退款或协商替代方案。
+预订成功后即为你保留名额。Iris 核实首笔订金全部到账后确认预订。由 Iris 逐一审核逾期付款。
 
-2. 付款
-付款通过外部方式（银行转账或 PayNow），以预订编号为备注。请通过 WhatsApp 将转账截图发给 Iris。尾款须于发票所载截止日期前缴清。
+2. 付款与时间表
+付款通过外部方式（银行转账或 PayNow），以预订编号为备注。请通过 WhatsApp 将转账截图发给 Iris。行程可能要求一至两笔固定订金，每笔须在指定日期缴付；尾款（行程价格减去全部订金）在其指定日期缴付。完整时间表会在预订前及你的预订卡上显示。若预订时某期截止日期已过，该期须立即缴付。订金在潜水员主动退出的情形下不予退还；尾款可退还（见退款政策）。
 
 3. 资格与安全
-你须满足行程要求并如实申报。Iris 审核申报并作出所有潜水适宜性决定。名额确认不代表资格获批。若付款后被拒，可获全额退款。
+请核对行程要求，并如实申报你的潜水经验与健康状况。如有疑问，请在潜水前与 Iris 沟通。若因不适合安全参加行程而由 Iris 取消预订，所有已付款项均可退还。
 
 4. 退款
-以你在预订时接受的退款政策版本为准。
+以你在预订时接受的退款政策版本为准。简言之：当你取消、未出席或因未付款而被释放名额时，订金不予退还；取消或未出席时，已缴尾款获退还；若 Iris 取消行程或你不接受改期，你可获全额退款，包括订金。
 
 5. Okim 积分
-积分仅来自教练核实的付款（按行程汇率折算，每 RM 1 得 1 分），仅可在行程完成后使用，12 个月后过期，退款时冲回。积分绝不能绕过资格或安全要求。
+行程结束后，Iris 核实你已参加且款项付清，再将个人预订标记为完成。积分按每笔付款的登记汇率及实收净额计算，每满 RM 1 得 1 分。积分可立即使用，自个人预订完成起 12 个日历月后到期。后续退款会冲回对应积分。首次付款前可请 Iris 使用可用积分抵扣尾款，最多抵扣行程原价的 20%。
 
 6. 责任
 潜水固有风险。最终免责与责任条款待法律审阅及教练确认；本演示文本不能替代正式条款。
@@ -153,16 +162,11 @@ const policies = [
 
 async function main() {
   for (const p of policies) {
-    const existing = await db.select({ id: policyVersions.id }).from(policyVersions)
-      .where(and(eq(policyVersions.kind, p.kind), eq(policyVersions.version, 1))).limit(1)
-    const id = existing[0]?.id ?? `POL-${p.kind.toUpperCase()}-001`
-    await db.insert(policyVersions).values({
-      id, kind: p.kind, version: 1, bodyEn: p.bodyEn, bodyZh: p.bodyZh, createdBy: 'owner-demo-approval',
-    }).onConflictDoUpdate({
-      target: [policyVersions.kind, policyVersions.version],
-      set: { bodyEn: p.bodyEn, bodyZh: p.bodyZh },
-    })
-    console.log(`seeded ${p.kind} policy v1 (${id})`)
+    const id = `POL-${p.kind.toUpperCase()}-001`
+    const inserted = await db.insert(policyVersions).values({
+      id, kind: p.kind, version: 1, bodyEn: p.bodyEn, bodyZh: p.bodyZh, createdBy: 'demo-seed',
+    }).onConflictDoNothing().returning({ id: policyVersions.id })
+    console.log(inserted.length ? `Seeded draft ${p.kind} v1` : `Retained existing ${p.kind} v1`)
   }
 }
 

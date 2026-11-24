@@ -71,3 +71,200 @@
 .portal-complete { display: flex; flex-wrap: wrap; align-items: center; gap: .5rem; }
 .portal-complete label { display: inline-flex; align-items: center; gap: .55rem; min-height: 44px; font-size: .85rem; font-weight: 600; color: var(--ocean-deep); cursor: pointer; }
 .portal-complete input[type="checkbox"] { width: 44px; height: 44px; margin: 0; flex: none; accent-color: var(--ocean-deep); cursor: pointer; }
+/* ============================================================
+   Portal v2 (2026-11-22, PORTAL-REDESIGN-V2-PLAN V6/V7/V8):
+   trip-centric tabs, folding cards, dialogs, button restyle.
+   All rules scoped to main.portal so marketing pages and the
+   trip pages' .trip-interest form keep their existing look.
+   ============================================================ */
+
+/* --- Buttons (V6): Deep Sea primary, white secondary, no watercolor
+   texture / heavy shadow / lift. Coral only on destructive confirms. --- */
+main.portal .btn {
+  min-height: 44px; padding: .5rem 1.15rem; border: 1px solid transparent; border-radius: 10px;
+  font-family: var(--font-body); font-size: .9rem; font-weight: 700; letter-spacing: .01em;
+  background-image: none; box-shadow: none; transform: none;
+  transition: background-color .18s ease, border-color .18s ease, color .18s ease;
+}
+main.portal .btn.btn-primary { background-color: var(--ocean-deep); border-color: var(--ocean-deep); color: #fff; }
+main.portal .btn.btn-primary:hover, main.portal .btn.btn-primary:focus-visible {
+  background-color: var(--ocean-mid); border-color: var(--ocean-mid); color: #fff; transform: none; box-shadow: none;
+}
+main.portal .btn.btn-secondary { background-color: #fff; border-color: rgba(38, 70, 83, .3); color: var(--ocean-deep); }
+main.portal .btn.btn-secondary:hover, main.portal .btn.btn-secondary:focus-visible {
+  background-color: var(--sand); border-color: var(--ocean-mid); color: var(--ocean-deep); transform: none; box-shadow: none;
+}
+main.portal .btn.btn-danger-solid { background-color: #d42f3d; border-color: #d42f3d; color: #fff; }
+main.portal .btn.btn-danger-solid:hover, main.portal .btn.btn-danger-solid:focus-visible {
+  background-color: #b02532; border-color: #b02532; color: #fff; transform: none; box-shadow: none;
+}
+main.portal .btn:focus-visible { outline: 2px solid var(--deep-water, #457b9d); outline-offset: 2px; }
+main.portal .btn:disabled, main.portal .btn:disabled:hover { background-image: none; opacity: .55; transform: none; box-shadow: none; }
+main.portal .btn.btn-compact { min-height: 44px; padding: .4rem .8rem; font-size: .85rem; }
+/* Launch card: quiet lifecycle actions under the primary launch buttons;
+   each opens a confirm dialog (cancel/delete carry reason/consent inside). */
+.trip-lifecycle-row { display: flex; flex-wrap: wrap; gap: .5rem; margin-top: 1rem; padding-top: 1rem; border-top: 1px solid rgba(38, 70, 83, .12); }
+.portal-dialog .booking-form { margin-block: 0; }
+
+/* --- Folding cards (V7): native details, 56px head, count + chevron --- */
+main.portal .portal-fold {
+  background: #fff; border: 1px solid var(--whisper-border); border-radius: 12px;
+  box-shadow: var(--soft-shadow); margin-bottom: 1rem; scroll-margin-top: 160px;
+}
+main.portal .portal-fold > summary.portal-fold-head {
+  display: flex; align-items: center; gap: .6rem; min-height: 56px; padding: .7rem 1.1rem;
+  cursor: pointer; list-style: none;
+}
+main.portal .portal-fold > summary.portal-fold-head::-webkit-details-marker { display: none; }
+main.portal .portal-fold > summary.portal-fold-head:hover { background: rgba(168, 218, 220, .14); }
+main.portal .portal-fold > summary.portal-fold-head:focus-visible { outline: 2px solid var(--ocean-mid); outline-offset: -2px; }
+main.portal .portal-fold-head h2 {
+  margin: 0; flex: 1 1 auto; min-width: 0; font-family: var(--font-heading);
+  font-size: 1.15rem; font-weight: 500; line-height: 1.3; color: var(--ocean-deep);
+}
+html[lang="zh-CN"] main.portal .portal-fold-head h2 { font-family: var(--font-chinese-heading); font-weight: 600; letter-spacing: 0; }
+.portal-fold-icon { width: 20px; height: 20px; flex: 0 0 auto; }
+.portal-fold-count {
+  display: inline-flex; align-items: center; justify-content: center; min-width: 22px; height: 22px;
+  padding: 0 .4rem; border-radius: 999px; background: rgba(168, 218, 220, .4);
+  color: var(--ocean-deep); font-size: .75rem; font-weight: 700; flex: none;
+}
+.portal-fold-chevron {
+  width: 9px; height: 9px; flex: none; margin-left: .15rem;
+  border-right: 2px solid var(--ocean-mid); border-bottom: 2px solid var(--ocean-mid);
+  transform: rotate(45deg); transition: transform .18s ease;
+}
+.portal-fold[open] > summary .portal-fold-chevron, .portal-trip-manifest[open] > summary .portal-fold-chevron { transform: rotate(225deg); }
+main.portal .portal-fold-body { padding: .9rem 1.1rem 1.1rem; border-top: 1px solid var(--whisper-border); }
+.portal-fold-help { display: flex; justify-content: flex-end; margin: -.2rem 0 .4rem; }
+
+/* --- Trip cards (V3) --- */
+.portal-trips-top { display: flex; flex-wrap: wrap; align-items: flex-start; justify-content: space-between; gap: .6rem 1rem; margin-bottom: 1rem; }
+.portal-trips-top .portal-hint { flex: 1 1 320px; margin: 0; }
+.portal-trip-card {
+  border: 1px solid var(--whisper-border); border-radius: 12px; background: #fff;
+  box-shadow: var(--soft-shadow); padding: .9rem 1.1rem; display: grid; gap: .4rem;
+}
+.portal-trip-card + .portal-trip-card, .portal-past-trips .portal-trip-card + .portal-trip-card { margin-top: .8rem; }
+.portal-trip-head { display: flex; flex-wrap: wrap; align-items: center; gap: .5rem; }
+.portal-trip-head h3 { margin: 0; font-family: var(--font-body); font-size: 1.1rem; font-weight: 700; color: var(--ocean-deep); overflow-wrap: anywhere; }
+.portal-trip-facts { margin: 0; font-size: .875rem; font-weight: 400; color: var(--driftwood, #6c757d); overflow-wrap: anywhere; }
+.portal-trip-actions { display: flex; flex-wrap: wrap; align-items: center; gap: .5rem; margin-top: .2rem; }
+.portal-trip-actions form { display: inline-flex; }
+.portal-trip-manifest { margin-top: .3rem; }
+.portal-trip-manifest > summary {
+  display: flex; align-items: center; gap: .5rem; min-height: 44px; padding: .3rem .2rem;
+  cursor: pointer; list-style: none; font-size: .9rem; font-weight: 700; color: var(--ocean-mid);
+}
+.portal-trip-manifest > summary::-webkit-details-marker { display: none; }
+.portal-trip-manifest > summary:hover { color: var(--ocean-deep); }
+.portal-trip-manifest > summary .portal-fold-chevron { margin-left: auto; }
+.portal-trip-rows { display: grid; gap: .45rem; padding-top: .5rem; }
+.portal-past-trips { margin-top: 1rem; }
+
+/* --- Booking rows: right-aligned action cluster --- */
+.portal-row-buttons { margin-left: auto; display: inline-flex; flex-wrap: wrap; gap: .4rem; }
+@media (max-width: 640px) { .portal-row-buttons { margin-left: 0; width: 100%; } }
+
+/* --- Completions group (Actions) --- */
+.portal-completion-group + .portal-completion-group { margin-top: 1rem; }
+.portal-completion-group h3 { margin: 0 0 .45rem; font-family: var(--font-body); font-size: 1rem; font-weight: 700; color: var(--ocean-deep); }
+.portal-completion-meta { font-weight: 400; font-size: .85rem; color: var(--driftwood, #6c757d); }
+.portal-completion-row {
+  display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: .5rem .9rem;
+  min-height: 44px; padding: .4rem .7rem; border: 1px solid var(--whisper-border); border-radius: 8px;
+  font-size: .9rem; font-weight: 400; color: var(--ocean-deep);
+}
+.portal-completion-row + .portal-completion-row { margin-top: .4rem; }
+
+/* --- Money actions --- */
+.portal-money-actions { display: flex; flex-wrap: wrap; gap: .6rem; }
+
+/* --- Diver updates inside the fold --- */
+.portal-updates .portal-update-row, .portal-updates .portal-update-more { margin: 0 0 .35rem; }
+.portal-updates details > summary { min-height: 44px; display: flex; flex-wrap: wrap; align-items: center; gap: .3rem; cursor: pointer; font-size: .9rem; padding: .3rem .2rem; }
+.portal-updates details > summary:hover { color: var(--ocean-mid); }
+.portal-updates h4 { margin: .6rem 0 .2rem; font-size: .85rem; }
+
+/* --- Dialogs (V8): compact trip-dialog language --- */
+dialog.portal-dialog {
+  width: min(600px, calc(100% - 2rem)); max-height: calc(100dvh - 2rem); margin: auto; padding: 0;
+  border: 1px solid var(--whisper-border); border-radius: 16px; background: #fff;
+  color: var(--ocean-deep); box-shadow: 0 24px 80px rgba(10, 35, 66, .28); overflow: hidden;
+}
+dialog.portal-dialog::backdrop { background: rgba(10, 35, 66, .5); }
+.portal-dialog-head {
+  display: flex; align-items: center; justify-content: space-between; gap: 1rem;
+  padding: .8rem 1rem .8rem 1.25rem; background: rgba(168, 218, 220, .18);
+  border-bottom: 1px solid var(--whisper-border);
+}
+.portal-dialog-head h2 { margin: 0; font-family: var(--font-heading); font-size: 1.2rem; font-weight: 500; line-height: 1.3; }
+html[lang="zh-CN"] .portal-dialog-head h2 { font-family: var(--font-chinese-heading); font-weight: 600; letter-spacing: 0; }
+.portal-dialog-close {
+  width: 44px; height: 44px; flex: none; border: 1px solid var(--whisper-border); border-radius: 50%;
+  background: #fff; color: var(--ocean-deep); font-size: 1.4rem; line-height: 1; cursor: pointer;
+}
+.portal-dialog-close:hover, .portal-dialog-close:focus-visible { background: var(--sand); border-color: var(--ocean-mid); }
+.portal-dialog-body { padding: 1rem 1.25rem 1.25rem; overflow-y: auto; max-height: calc(100dvh - 9rem); }
+.portal-dialog-context { margin: 0 0 .6rem; font-size: .875rem; font-weight: 400; color: var(--driftwood, #6c757d); overflow-wrap: anywhere; }
+.portal-dialog-actions { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: .6rem; margin-top: .4rem; }
+.portal-fineprint { margin: .8rem 0 0; font-size: .75rem; font-weight: 400; color: var(--driftwood, #6c757d); line-height: 1.5; }
+main.portal label.portal-complete { display: inline-flex; align-items: center; gap: .55rem; min-height: 44px; font-size: .85rem; font-weight: 600; color: var(--ocean-deep); cursor: pointer; }
+
+@media (max-width: 640px) {
+  dialog.portal-dialog { width: calc(100% - 1rem); }
+  .portal-dialog-body { padding: .9rem 1rem 1rem; }
+  main.portal .portal-fold-body { padding: .8rem .9rem 1rem; }
+  .portal-trip-card { padding: .8rem .9rem; }
+}
+@media (prefers-reduced-motion: reduce) {
+  main.portal .btn, .portal-fold-chevron { transition: none; }
+}
+
+/* Public trip facts — grouped 2×2 cards (owner 2026-11-22: "information
+   display is badly layout"). Replaces the cramped 5-column fact strip. */
+.trip-facts-groups { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1rem; grid-column: 1 / -1; }
+.trip-facts-group { min-width: 0; padding: 1rem 1.1rem; border: 1px solid rgba(23, 59, 74, .12); border-radius: 12px; background: rgba(255, 253, 247, .46); }
+.trip-facts-group h3 { margin: 0 0 .6rem; font-size: 1.05rem; }
+.trip-facts-group dl { margin: 0; display: grid; gap: .55rem; }
+.trip-facts-group dt { color: var(--ocean-mid); font-size: .72rem; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; }
+.trip-facts-group dd { margin: .15rem 0 0; font-weight: 700; line-height: 1.4; overflow-wrap: anywhere; }
+.trip-facts-group dd small { display: block; margin-top: .1rem; color: var(--ocean-mid); font-size: .78rem; font-weight: 400; }
+@media (max-width: 640px) { .trip-facts-groups { grid-template-columns: 1fr; } }
+
+/* Nav icon actions (MVP-SPEC #44): square 44px buttons right-aligned inside
+   the sticky editor nav, instant tooltip like the translate icon. */
+.trip-editor-actions-nav { margin-left: auto; display: flex; align-items: center; gap: .4rem; }
+.trip-editor-actions-nav form { display: inline-flex; }
+.icon-action { position: relative; width: 44px; height: 44px; padding: 0; display: inline-flex; align-items: center; justify-content: center; border: 1px solid rgba(38, 70, 83, .3); border-radius: 10px; background-color: #fff; background-image: none; box-shadow: none; transform: none; color: var(--ocean-deep); cursor: pointer; }
+.icon-action svg { width: 22px; height: 22px; }
+.icon-action:hover, .icon-action:focus-visible { background-color: var(--sand); border-color: var(--ocean-mid); transform: none; box-shadow: none; }
+.icon-action:focus-visible { outline: 2px solid var(--ocean-mid); outline-offset: 2px; }
+.icon-action:disabled { opacity: .5; cursor: not-allowed; }
+.icon-action-danger { color: #d42f3d; border-color: rgba(212, 47, 61, .4); }
+.icon-action-danger:hover, .icon-action-danger:focus-visible { background-color: rgba(212, 47, 61, .08); border-color: #d42f3d; }
+.icon-action::after { content: attr(data-tip); position: absolute; bottom: calc(100% + 6px); right: 0; z-index: 70; width: max-content; max-width: 220px; padding: .45rem .6rem; border-radius: 6px; background: var(--ocean-deep); color: #fff; font-family: var(--font-body); font-size: .75rem; font-weight: 600; line-height: 1.4; text-align: center; opacity: 0; pointer-events: none; transition: opacity .12s ease; }
+.icon-action:hover::after, .icon-action:focus-visible::after { opacity: 1; }
+
+/* Field-level publish blockers (MVP-SPEC #44): amber outline + dot + tooltip
+   on the exact field — replaces the old aggregated Launch warning list. */
+.field-blocked { position: relative; }
+/* Blocker dot: rendered inline at the END of the field's label text (owner
+   2026-11-23) so it sits next to the words instead of floating in the field's
+   top-right corner. A real span is used because these labels are grid/flex
+   containers — a ::after would be laid out as a separate item. */
+.blocker-dot { display: inline-block; width: 8px; height: 8px; margin-left: .45rem; border-radius: 50%; background: #f4a261; vertical-align: middle; }
+.booking-form .field-blocked > input:not([type="hidden"]):not([type="checkbox"]),
+.booking-form .field-blocked > select,
+.booking-form .field-blocked > textarea,
+.booking-form .field-blocked .deposit-editor input,
+.booking-form .field-blocked .list-editor-row input { border-color: #f4a261; }
+.field-blocked::after { content: attr(data-tip); position: absolute; bottom: calc(100% + 4px); right: 0; z-index: 70; width: max-content; max-width: 260px; padding: .45rem .6rem; border-radius: 6px; background: var(--ocean-deep); color: #fff; font-family: var(--font-body); font-size: .75rem; font-weight: 600; line-height: 1.4; text-align: center; opacity: 0; pointer-events: none; transition: opacity .12s ease; }
+.field-blocked:hover::after, .field-blocked:focus-within::after { opacity: 1; }
+@media (prefers-reduced-motion: reduce) { .icon-action, .icon-action::after, .field-blocked::after { transition: none; } }
+
+.portal-dialog .financial-fields { display: contents; }
+.portal-booking-compact .portal-payment-history { margin-top: .55rem; }
+.portal-booking-compact .portal-payment-history > summary { cursor: pointer; min-height: 44px; padding: .65rem 0; }
+.portal-payment-confirmation { margin: .75rem 0; }
+.portal-payment-confirmation a { display: inline-flex; min-height: 44px; align-items: center; }

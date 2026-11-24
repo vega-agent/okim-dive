@@ -45,7 +45,13 @@ for (const [path, en, zh, headEn, headZh] of PAGES) {
 
 test('refund policy renders its numbered situations as an ordered list', async ({ page }) => {
   await page.goto('/refund-policy');
-  await expect(page.locator('.policy-body ol li')).toHaveCount(5);
+  const [published] = await sql`SELECT body_en,body_zh FROM policy_versions WHERE kind='refund' ORDER BY version DESC LIMIT 1`
+  for (const [i, body] of [published.body_en, published.body_zh].entries()) {
+    if (i) await page.locator('[data-lang-toggle]').click()
+    const situations = body.split(/\r?\n/).filter(line=>/^\d+\.\s/.test(line)).map(line=>line.replace(/^\d+\.\s+/, ''))
+    expect(situations.length).toBeGreaterThan(0)
+    await expect(page.locator('.policy-body ol li')).toHaveText(situations)
+  }
 });
 
 test('signed-in navbar leaks no Chinese on EN pages (Profile link included)', async ({ page }) => {
@@ -97,6 +103,8 @@ test('portal EN surfaces contain no Chinese (diver updates included)', async ({ 
     });
     expect(leaks).toEqual([]);
   } finally {
+    const tokenCookie = (await page.context().cookies()).find(c=>c.name==='authjs.session-token')
+    if (tokenCookie) await sql`DELETE FROM sessions WHERE "sessionToken"=${tokenCookie.value}`
     await sql`DELETE FROM verification_tokens WHERE identifier = ${email} AND token = ${token}`;
   }
 });

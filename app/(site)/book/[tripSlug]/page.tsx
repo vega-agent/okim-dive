@@ -1,13 +1,16 @@
 // M4: booking flow entry (MVP-SPEC §10 /book/[tripSlug]).
 import type { Metadata } from 'next'
-import Link from 'next/link'
 import { notFound } from 'next/navigation'
-import { and, desc, eq } from 'drizzle-orm'
+import { and, desc, eq, inArray, sql } from 'drizzle-orm'
 import { auth } from '@/auth'
 import { db } from '@/db'
-import { customers, policyVersions, trips } from '@/db/schema'
+import { bookings, customers, policyVersions } from '@/db/schema'
 import SiteFooter from '@/components/site-footer'
-import BookingWizard from '@/components/booking-wizard'
+import { getPublishedTripOffer } from '@/lib/trip-offer'
+import { SLOT_STATUSES } from '@/lib/trip-display'
+import { localCalendarDate } from '@/lib/payment-schedule'
+import { offerFingerprint } from '@/lib/booking-reservation'
+import BookingWizard, { BookingAvailability, BookingHero } from '@/components/booking-wizard'
 import CustomerSetup from '@/components/customer-setup'
 
 export const dynamic = 'force-dynamic'
@@ -16,10 +19,9 @@ export const metadata: Metadata = { title: 'Book a trip - Okim Dive' }
 
 export default async function BookPage({ params }: { params: { tripSlug: string } }) {
   if (!db) notFound()
-  const tripRows = await db.select().from(trips)
-    .where(and(eq(trips.slug, params.tripSlug), eq(trips.published, true))).limit(1)
-  const trip = tripRows[0]
-  if (!trip) notFound()
+  const offer = await getPublishedTripOffer(params.tripSlug)
+  if (!offer) notFound()
+  const { trip, stages } = offer
 
   const session = await auth()
   const policies = await db.select().from(policyVersions).orderBy(desc(policyVersions.version))
@@ -38,19 +40,19 @@ export default async function BookPage({ params }: { params: { tripSlug: string 
     customerName = rows[0]?.name ?? ''
   }
 
-  const bookable = trip.status === 'open'
+  const today = localCalendarDate(new Date(), trip.departureTimezone)
+  const [occupied] = await db.select({ count: sql<number>`count(*)::int`,
+    mine: sql<boolean>`coalesce(bool_or(${bookings.customerId} = ${session?.user?.customerId ?? null}),false)` })
+    .from(bookings).where(and(eq(bookings.productType, 'trip'), eq(bookings.productId, trip.id), inArray(bookings.status, SLOT_STATUSES.slice())))
+  const beforeDeparture = Boolean(trip.travelStart && today < localCalendarDate(trip.travelStart, trip.departureTimezone))
+  const full = beforeDeparture && (trip.status === 'full' || (trip.status === 'open' && occupied.count >= trip.capacity))
+  const bookable = trip.status === 'open' && !occupied.mine && !full && stages.length > 0 && beforeDeparture
   // '' = name setup pending (unique diver names, owner decision 2026-11-21).
   const needsSetup = Boolean(session?.user?.customerId) && customerName === ''
 
   return (
     <>
-      <section className="page-hero trips-hero">
-        <div className="hero-bg"></div>
-        <div className="hero-content">
-          <h1 className="hero-title">Book your trip</h1>
-          <p className="hero-subtitle">One diver per booking. Your slot is confirmed after deposit verification.</p>
-        </div>
-      </section>
+      <BookingHero />
         <main className="ocean-journey">
         <section className="trips-section">
           <div className="container">
@@ -59,9 +61,9 @@ export default async function BookPage({ params }: { params: { tripSlug: string 
                 slug={trip.slug}
                 titleEn={trip.titleEn}
                 titleZh={trip.titleZh}
-                priceDisplay={trip.costDisplayEn}
-                depositTextEn={trip.depositTextEn}
-                depositTextZh={trip.depositTextZh}
+                priceDisplay={trip.currency + ' ' + Number(trip.priceAmount).toLocaleString('en-GB', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                currency={trip.currency} stages={stages} today={today}
+                acceptedOffer={offerFingerprint(trip, stages)}
                 authenticated={Boolean(session?.user)}
                 diverProfile={diverProfile}
                 equipmentProfile={equipmentProfile}
@@ -71,13 +73,8 @@ export default async function BookPage({ params }: { params: { tripSlug: string 
                 terms={{ id: terms.id, version: terms.version, bodyEn: terms.bodyEn, bodyZh: terms.bodyZh }}
               />
             ) : (
-              <div className="booking-shell">
-                <div className="booking-card">
-                  <h2 className="booking-title">{trip.titleEn}</h2>
-                  <p className="booking-intro">This trip is arranged on request. Tell us your plans and we will confirm the options together.</p>
-                  <Link className="btn btn-primary" href="/contact">Ask about this trip</Link>
-                </div>
-              </div>
+              <BookingAvailability full={full} reserved={occupied.mine}
+                slug={trip.slug} titleEn={trip.titleEn} titleZh={trip.titleZh} />
             )}
           </div>
         </section>

@@ -5,32 +5,27 @@ import type { Metadata } from 'next'
 import { notFound } from 'next/navigation'
 import { eq, and } from 'drizzle-orm'
 import { db } from '@/db'
-import { bookings, trips } from '@/db/schema'
+import { bookings } from '@/db/schema'
 import { slotsConsumed } from '@/lib/trip-display'
-import { sweepHolds } from '@/lib/seamless-actions'
+import { getPublishedTripOffer } from '@/lib/trip-offer'
+import { localCalendarDate } from '@/lib/payment-schedule'
 import SiteFooter from '@/components/site-footer'
 import TripDetail from '@/components/trip-detail'
 import '../../../../styles/portal-tabs.css'
 
 export const dynamic = 'force-dynamic'
 
-async function getTrip(slug: string) {
-  if (!db) return null
-  const rows = await db.select().from(trips)
-    .where(and(eq(trips.slug, slug), eq(trips.published, true))).limit(1)
-  return rows[0] ?? null
-}
-
 export async function generateMetadata({ params }: { params: { slug: string } }): Promise<Metadata> {
-  const trip = await getTrip(params.slug)
+  const offer = await getPublishedTripOffer(params.slug)
+  const trip = offer?.trip
   if (!trip) return { title: 'Trip not found - Okim Dive' }
   return { title: `${trip.titleEn} - Okim Dive`, description: trip.summaryEn ?? undefined }
 }
 
 export default async function TripPage({ params, searchParams }: { params: { slug: string }; searchParams: { interest?: string } }) {
-  const trip = await getTrip(params.slug)
-  if (!trip) notFound()
-  await sweepHolds()
+  const offer = await getPublishedTripOffer(params.slug)
+  if (!offer) notFound()
+  const { trip, stages } = offer
   const rows = db ? await db.select({ status: bookings.status }).from(bookings).where(and(eq(bookings.productId, trip.id), eq(bookings.productType, 'trip'))) : []
   const consumed = slotsConsumed(rows.map(r => r.status))
   const interestState = searchParams.interest === 'registered' ? 'registered' : searchParams.interest === 'error' ? 'error' : null
@@ -42,12 +37,15 @@ export default async function TripPage({ params, searchParams }: { params: { slu
         slug: trip.slug,
         status: trip.status,
         sample: trip.sample,
-        currency: trip.currency,
+        currency: trip.currency, stages, today: localCalendarDate(new Date(), trip.departureTimezone),
+        bookable: Boolean(stages.length && ['open', 'full'].includes(trip.status) && trip.travelStart && localCalendarDate(new Date(), trip.departureTimezone) < localCalendarDate(trip.travelStart, trip.departureTimezone)),
         capacity: trip.capacity,
         consumed,
         interestState,
         titleEn: trip.titleEn, titleZh: trip.titleZh,
         locationEn: trip.locationEn, locationZh: trip.locationZh,
+        airportEn: trip.airportEn, airportZh: trip.airportZh,
+        jettyEn: trip.jettyEn, jettyZh: trip.jettyZh,
         summaryEn: trip.summaryEn, summaryZh: trip.summaryZh,
         travelDatesEn: trip.travelDatesEn, travelDatesZh: trip.travelDatesZh,
         durationEn: trip.durationEn, durationZh: trip.durationZh,

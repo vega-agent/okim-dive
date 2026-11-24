@@ -2,7 +2,7 @@
  * Okim Dive — Drizzle schema (MVP-SPEC §12, one record book).
  * Append-only ledger; human-readable diver-facing IDs (CUS-xxx, BKG-xxx).
  */
-import { pgTable, text, timestamp, integer, numeric, boolean, json, uniqueIndex, index } from 'drizzle-orm/pg-core'
+import { pgTable, text, timestamp, integer, numeric, boolean, json, date, check, primaryKey, uniqueIndex, index } from 'drizzle-orm/pg-core'
 import { sql } from 'drizzle-orm'
 
 /* ---------- Auth.js tables (Drizzle adapter shape) ---------- */
@@ -76,6 +76,13 @@ export const customers = pgTable('customers', {
 
 export const trips = pgTable('trips', {
   departureTimezone: text('departure_timezone').notNull().default('Asia/Kuala_Lumpur'),
+  locationKey: text('location_key').notNull().default('malaysia'),
+  diveSiteEn: text('dive_site_en'),
+  diveSiteZh: text('dive_site_zh'),
+  airportEn: text('airport_en'),
+  airportZh: text('airport_zh'),
+  jettyEn: text('jetty_en'),
+  jettyZh: text('jetty_zh'),
   id: text('id').primaryKey(), // TRP-001
   slug: text('slug').notNull().unique(),
   status: text('status', { enum: ['draft', 'open', 'on_request', 'full', 'departed', 'completed', 'cancelled'] }).notNull().default('draft'),
@@ -83,6 +90,7 @@ export const trips = pgTable('trips', {
   priceAmount: numeric('price_amount', { precision: 10, scale: 2 }).notNull(),
   depositType: text('deposit_type', { enum: ['fixed', 'percent'] }).notNull().default('percent'),
   depositValue: numeric('deposit_value', { precision: 10, scale: 2 }).notNull(),
+  balanceDueDate: date('balance_due_date'),
   balanceDueDays: integer('balance_due_days').notNull().default(30),
   capacity: integer('capacity').notNull().default(1),
   minParticipants: integer('min_participants').notNull().default(1),
@@ -145,6 +153,14 @@ export const trips = pgTable('trips', {
 /* ---------- Bookings (product-agnostic for Phase 2 course booking) ---------- */
 
 export const bookings = pgTable('bookings', {
+  originalPriceAmount: numeric('original_price_amount', { precision: 10, scale: 2 }),
+  departureTimezone: text('departure_timezone'),
+  paymentRevision: integer('payment_revision').notNull().default(0),
+  cancellationKind: text('cancellation_kind', { enum: ['diver_withdrawal', 'nonpayment', 'no_show', 'operator_cancelled', 'postponement_declined'] }),
+  refundEntitlementAmount: numeric('refund_entitlement_amount', { precision: 10, scale: 2 }),
+  refundBaselineAmount: numeric('refund_baseline_amount', { precision: 10, scale: 2 }),
+  requestOperationKey: text('request_operation_key'),
+  acknowledgmentAttemptedAt: timestamp('acknowledgment_attempted_at', { withTimezone: true, mode: 'date' }),
   equipment: json('equipment').$type<Record<string, unknown>>(),
   id: text('id').primaryKey(), // BKG-001
   customerId: text('customer_id').notNull().references(() => customers.id),
@@ -170,7 +186,26 @@ export const bookings = pgTable('bookings', {
   // slot from creation; reminder 3 days before expiry; sweep releases unpaid.
   holdExpiresAt: timestamp('hold_expires_at', { mode: 'date' }),
   reminderSentAt: timestamp('reminder_sent_at', { mode: 'date' }),
-})
+}, (t) => [
+  uniqueIndex('bookings_request_operation_key').on(t.requestOperationKey),
+  check('bookings_schedule_required', sql`${t.originalPriceAmount} IS NOT NULL AND ${t.originalPriceAmount} > 0 AND ${t.originalPriceAmount} < 'Infinity'::numeric AND ${t.departureTimezone} IS NOT NULL AND length(trim(${t.departureTimezone})) > 0`),
+  check('bookings_payment_revision_nonnegative', sql`${t.paymentRevision} >= 0`),
+  check('bookings_cancellation_kind', sql`${t.cancellationKind} IN ('diver_withdrawal','nonpayment','no_show','operator_cancelled','postponement_declined')`),
+  check('bookings_refund_amounts', sql`(${t.cancellationKind} IS NULL AND ${t.refundEntitlementAmount} IS NULL AND ${t.refundBaselineAmount} IS NULL) OR (${t.cancellationKind} IS NOT NULL AND ${t.refundEntitlementAmount} IS NOT NULL AND ${t.refundEntitlementAmount} >= 0 AND ${t.refundEntitlementAmount} < 'Infinity'::numeric AND ${t.refundBaselineAmount} IS NOT NULL AND ${t.refundBaselineAmount} >= 0 AND ${t.refundBaselineAmount} < 'Infinity'::numeric)`),
+])
+
+export const bookingStages = pgTable('booking_stages', {
+  id: text('id').primaryKey(),
+  bookingId: text('booking_id').notNull().references(() => bookings.id),
+  position: integer('position').notNull(),
+  kind: text('kind', { enum: ['deposit', 'final'] }).notNull(),
+  amount: numeric('amount', { precision: 10, scale: 2 }).notNull(),
+  dueDate: date('due_date'),
+}, (t) => [
+  uniqueIndex('booking_stages_booking_position').on(t.bookingId, t.position),
+  check('booking_stages_kind_position', sql`${t.amount} < 'Infinity'::numeric AND ((${t.kind}='deposit' AND ${t.position} IN (1,2) AND ${t.amount}>0) OR (${t.kind}='final' AND ${t.position}=3 AND ${t.amount}>=0))`),
+  check('booking_stages_positive_due', sql`${t.amount}=0 OR ${t.dueDate} IS NOT NULL`),
+])
 
 /* ---------- Payment claims + payments ---------- */
 
@@ -190,6 +225,7 @@ export const paymentClaims = pgTable('payment_claims', {
 })
 
 export const payments = pgTable('payments', {
+  receiptSnapshot: json('receipt_snapshot').$type<Record<string, unknown>>(),
   sourcePaymentId: text('source_payment_id'),
   operationKey: text('operation_key').unique(),
   id: text('id').primaryKey(),
@@ -204,6 +240,15 @@ export const payments = pgTable('payments', {
   verifiedAt: timestamp('verified_at', { mode: 'date' }), // audit: when
   receiptNo: text('receipt_no').unique(),
 }, (t) => [uniqueIndex('payment_claim_once').on(t.claimId)])
+
+export const paymentAllocations = pgTable('payment_allocations', {
+  paymentId: text('payment_id').notNull().references(() => payments.id),
+  stageId: text('stage_id').notNull().references(() => bookingStages.id),
+  amount: numeric('amount', { precision: 10, scale: 2 }).notNull(),
+}, (t) => [
+  primaryKey({ name: 'payment_allocations_pkey', columns: [t.paymentId, t.stageId] }),
+  check('payment_allocations_positive', sql`${t.amount} > 0 AND ${t.amount} < 'Infinity'::numeric`),
+])
 
 export const invoices = pgTable('invoices', {
   id: text('id').primaryKey(),
@@ -270,6 +315,19 @@ export const inquiries = pgTable('inquiries', {
   status: text('status', { enum: ['new', 'handled'] }).notNull().default('new'),
   createdAt: timestamp('created_at', { mode: 'date' }).notNull().defaultNow(),
 })
+
+export const tripDeposits = pgTable('trip_deposits', {
+  id: text('id').primaryKey(),
+  tripId: text('trip_id').notNull().references(() => trips.id),
+  sort: integer('sort').notNull().default(0),
+  amount: numeric('amount', { precision: 10, scale: 2 }).notNull(),
+  dueDate: date('due_date'),
+  dueDays: integer('due_days').notNull(), // days before departure
+}, (t) => [
+  index('trip_deposits_trip').on(t.tripId),
+  uniqueIndex('trip_deposits_trip_sort').on(t.tripId, t.sort),
+  check('trip_deposits_sort_range', sql`${t.sort} IN (0,1)`),
+])
 
 export const tripChecklistItems = pgTable('trip_checklist_items', {
   id: text('id').primaryKey(),

@@ -58,7 +58,7 @@ test('magic-link hourly cap enforced server-side', async ({ page }) => {
 
 test('fresh address still receives a magic link (real Resend send)', async ({ page }, testInfo) => {
   // Email-budget (owner-approved 2026-11-21): one EN real-send canary per suite,
-  // desktop only. Mobile projects skip it; the CN canary lives in m4-booking.
+  // desktop only. Booking regressions in both languages use inserted tokens.
   test.skip(testInfo.project.name !== 'chromium-desktop', 'Real-send canary runs on desktop only (daily email budget).');
   const email = `rl-ok-${randomUUID()}@okimdive.com`;
   try {

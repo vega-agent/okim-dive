@@ -1,11 +1,11 @@
 # Okim Dive - Design System
 
-**Version:** 1.17
+**Version:** 1.34
 **Created:** 2026-01-XX
 **Inspired by:** Stripe, Notion, Airbnb design systems
 **Approved Direction:** Continuous Underwater Editorial / Dive Journal
-**Last Updated:** 2026-11-22
-**Applies to:** migrated Next.js app (public pages + booking flow + instructor portal + My Okim) per `MVP-SPEC.md` v1.0
+**Last Updated:** 2026-11-23
+**Applies to:** migrated Next.js app (public pages + booking flow + instructor portal + My Okim) per `MVP-SPEC.md` and approved change-control through #46
 
 > This document describes the approved implementation direction, not an aspirational alternative. Future pages must extend the current underwater environment rather than introducing a new visual language.
 >
@@ -552,6 +552,91 @@ Status badges are information, not CTAs. Coral stays reserved for primary action
 - **Truthfulness disclaimer** is mandatory fine print (12px, `.my-disclaimer`) on the booking wizard (above submit) and the diver profile (last line): true/complete/accurate at the point of registration, diver responsible, tell Iris immediately on change. Declarations summary reads "Self-declared information", never "approved".
 - **Bookings list condensed:** tighter row padding/gap, cap **10** + show-all (owner: more listings visible; overrides cap-5 for this list only). Legacy `eligibility_declined` displays as "Withdrawn / 已退出" (neutral).
 
+### Portal v2 — trip-centric tabs, folding cards, dialogs (v1.18, owner decisions 2026-11-22)
+- The portal regrouped around the trip (owner approved PORTAL-REDESIGN-V2-PLAN): **Actions 待办 (default) / Trips 行程 / Money 财务 / Settings 设置**. Same tab language as v1.14 (sticky bar, 44px pills, 20px inventory icons, count badges, arrow keys, Deep Sea selected pill). Settings reuses ui-anchor pending a dedicated gear icon.
+- **Actions = only clickable work**: booking-request cards (Received flow unchanged) → refunds to record (refund_flagged bookings, pre-filled refund dialog) → completions to mark (one group per ended trip, per-diver dialog) → inquiries & register interest (trip context shown) → legacy recorded claims when present. Empty = "All caught up". Read-only diver updates moved to a collapsed fold at the bottom of Trips.
+- **Trips = trip workspace**: one white card per trip (upcoming first; past trips in a collapsed fold). Face carries the whole story: dates · slots x/y · confirmed count · completion x/y · messages published + seen x/y (seen = reads by deposit_verified/confirmed divers, matching message-actions). Buttons: Messages (direct link to the composer page — trip-messages chat owns that page), Edit, Duplicate, Close trip. Folded manifest inside each card; per-booking rows expose Info / Equipment / Complete / Withdraw via dialogs. "All bookings" cross-trip flat list (v1.16 filters, cap 10) stays as a collapsed fold; booking anchor IDs (`#booking-…`) exist ONLY in that flat list, never in trip manifests (duplicate-ID rule).
+- **Folding cards (V7)**: native `<details class="portal-fold">` — white card, 56px summary head (optional icon + Fraunces 500 1.15rem title + count pill + rotating chevron), hover mist tint, body separated by a whisper border. Open by default ONLY when the group has actionable items; reference groups (receipts, ledger, diver updates, past trips, manifests, all bookings) start collapsed. (?) help toggles sit at the top-right of the fold body.
+- **Dialogs (V8)**: one native `<dialog class="portal-dialog">` for one-time actions and viewing — compact trip-dialog language (white, 16px radius, mist header band, 44px round ×, deep backdrop, min(600px, 100%−2rem)). Esc / backdrop / × close; closes on submit; server action revalidates. Contents pre-filled from the originating card (expected amount, original payment, booking context) — never re-enter known data. Destructive confirms (Release slot, Withdraw) state the outcome in plain language and use the coral solid button.
+- **Button restyle (V6, app-surface deviation)**: inside `main.portal` only — primary = Deep Sea fill/white text, secondary = white fill + whisper border/Deep Sea text, hover = Ocean Mid fill (primary) / sand tint + mid border (secondary); 44px min, 10px radius, no watercolor texture, no heavy shadow, no lift; `btn-compact` for row clusters; coral (`#d42f3d`) reserved for destructive confirm buttons inside dialogs. Marketing pages keep the coral CTA (§13 status-badge rule unchanged). Overrides live in `styles/portal-tabs.css`; styles.css/redesign.css untouched.
+- Regression: `tests/portal-tabs.spec.mjs` (v2 layout, mutations project, zero sends, full cleanup) + mobile 390px EN/CN rendered checks (folds, dialog geometry, ≥44px targets, computed button styles, zero-CJK, no overflow).
+
+### Translate assist button (v1.19, owner decision 2026-11-22, MVP-SPEC #36)
+- Bilingual authoring surfaces (messages composer, trip content editor, payment-instructions settings) carry a **Translate button** using Chrome's built-in on-device Translator API. Clean v2 button language (white fill + whisper border, 44px, 10px radius, no texture/shadow) via `styles/translate.css` bundled with the component so it looks identical on pages that don't import portal-tabs.css.
+- **Draft, not decision:** output fills the other language's field(s) and a 12px driftwood status line reads "Machine draft — review before saving or publishing" (bilingual, `role="status"`). The both-languages gate and the human save/publish click remain the approval (#32). Download progress shows as static text with a percentage — no spinners/blinking.
+- **Graceful degradation:** feature- and pair-detected (`Translator.availability`); renders nothing when unsupported — the manual two-language flow is unchanged. No error states for missing API, only for failed translation ("retry or type manually").
+- Placement: under the target field(s) in settings/messages; one button per editing language in the trip content card with a fine-print note that it translates the SAVED other language (save edits there first). Difficulty enums and auto-derived display lines are never translated.
+
+### List fields — row inputs with square × / + (v1.20, owner 2026-11-22)
+- Highlights / itinerary / included / additional costs keep one input per item, with **two 44px square buttons at the right of each row: × removes that row, + inserts a row below** (owner: "very common way of adding new items"). No bottom Add button. Clean v2 button language (white fill + whisper border, sand hover) via `styles/list-editor.css` bundled with the component. Server parsing unchanged (repeated inputs). Translate assist fills rows via key-remount.
+
+### Display lines — read-only, facts are the single source (v1.21, owner 2026-11-22, MVP-SPEC #37)
+- Trips are always fixed (boat bookings). The content editor's Display lines card is a **read-only bilingual preview** of `deriveDisplay(facts)` — no Override checkbox, no custom-wording input. Both save actions (Settings + Content) write all 14 display columns from facts, so EN/CN can never drift. Empty facts → "Set the facts in Settings first" hint; the public page shows the derived line (empty until facts exist).
+
+### Location-driven facts; no hand-typed slug/timezone (v1.22, owner 2026-11-22, MVP-SPEC #38)
+- Settings → **Destination select** (curated bilingual locations in `src/lib/locations.ts`: Tioman / Sipadan / Raja Ampat / Other). Choosing one auto-loads currency (select disabled, "Set by the destination"), nearest airport + timezone as a read-only hint; Other reveals manual currency + EN/CN location names. Public trip page shows a **Nearest airport** fact.
+- **Slug input removed** — public URL shown read-only (`/trips/…`), auto-generated from the trip name, regenerated while draft, locked once launched/booked. **Timezone input removed** — day trips need none; derived from location. Location name edited in Settings only (Content editor no longer has it).
+
+### Merged trip creation, country + dive site, dual currency, grouped facts (v1.23, owner 2026-11-22, MVP-SPEC #39 — supersedes v1.22 destination list)
+- **No separate new-trip page**: New trip creates a draft instantly → Settings. Trip name EN/CN editable in Settings Identity (with Translate assist); Content shows the name read-only. Slug read-only everywhere.
+- **Country select (Asia only)** auto-loads local currency + timezone (read-only hint). **Dive site + nearest airport typed per trip** (EN/CN) — no dive-site dropdown. **Payment currency** (what the shop accepts, MYR/SGD/USD) is a separate editable select from the auto local currency.
+- **Public facts = four grouped cards** (When / Where / Cost / Group), 2×2 desktop, 1-col mobile, white sub-cards with uppercase driftwood labels; deposit + balance live in Cost; planning list keeps cancellation + requirements. Replaces the 5-column fact strip.
+
+### Translate icon per field; Sample checkbox removed (v1.24, owner 2026-11-22, MVP-SPEC #40)
+- **Icon, not text button**: every bilingual field ends with a 44px `translate-icon-btn` (new inventory icon `ui-translate.webp` — A/文 speech bubbles, monoline deep-teal, alpha-keyed transparent, 24px inside) with an instant `data-tip` tooltip (v1.8 pattern, right-aligned above). Field + icon lay out as `.translate-field` grid (1fr + 44px; label and draft-status span both columns; textareas top-align the icon). Lists carry the icon at the head right.
+- One click fills THAT field from the other language (content fields/lists from the SAVED other language). Draft/progress/error status line stays under the field. Unsupported browsers render nothing.
+- Settings **Sample-trip checkbox removed**; `trip.sample` is preserved on settings saves. The Content demo fill that used to set it is retired (v1.33, MVP-SPEC #49); Sample badges stay on existing sample trips.
+
+### Location = dive site + country only; auto facts formatted (v1.25, owner 2026-11-22, MVP-SPEC #41 — amends v1.23)
+- Settings Location card inputs: **dive site (EN/CN with translate icons) + country select**. Nothing else is typed. A curated `SITES` reference matched on the typed dive-site name auto-displays **nearest airport + jetty/transfer**; country supplies **local currency + timezone (UTC offset)**. Unknown site → "—" + hint.
+- Auto information renders as `.location-facts`: read-only 2×2 grid (1-col mobile), tinted sub-card, uppercase driftwood labels + 700 values — never a cramped inline hint line. Public trip Where group shows airport + jetty rows from the stored auto-written columns.
+
+### Pricing = fixed deposit schedule; global frozen points rate (v1.26, owner 2026-11-22, MVP-SPEC #42)
+- Pricing card is a tight 2-col grid — no half-empty span-2 gaps. Currency label is just **Currency**; the duplicate "local currency is…" hint is gone (Location card owns that fact).
+- **Deposits are an item list** (`deposit-editor.tsx`): each row = amount + due days before departure, with the same 44px square × / + buttons as the list editors (remove / insert below). Fixed amounts only — percent pills and the percent input are removed. 2+ deposits at different timings supported; summary line shows total deposits + remaining balance. Deposit grid aligns with the card: Amount column = `calc(50% - 8px)` (matches the parent 1fr 1fr / 1rem grid exactly), Due column shortened to `calc(50% - 128px)`, ×/+ flush right; below 640px falls back to equal flexible columns. The `.list-editor-btn` rules are intentionally UNSCOPED so list rows and deposit rows share the identical button language as the translate icon (scoped rules left deposit buttons as browser defaults — misaligned and off-style; fixed same day, verified by a computed-style + row-centering probe).
+- **Points rate is global and frozen per trip**: no per-trip rate input; the card shows a read-only "Points rate … fixed when the trip was created" line. Editing the global rate (portal Settings) affects new trips only.
+- Public Cost group lists each deposit with its due timing; balance = price − sum(deposits).
+
+### Trip Settings lifecycle = one Launch card + dialogs (v1.27, owner 2026-11-22, MVP-SPEC #43)
+- The old Launch / Cancel trip / Delete draft cards merge into **one Launch card**: current-state hint, blockers warning, primary row (Open for booking / Inquiries only), then a quiet `.trip-lifecycle-row` of compact secondary buttons — Close trip · Back to draft · Cancel trip… · Delete draft… — each rendered only when applicable.
+- One-time actions run in `PortalDialog`: Close/Back-to-draft = outcome text + confirm; **Cancel trip = reason field + understanding checkbox + coral `btn-danger-solid` confirm**; Delete draft = audit-snapshot note + coral confirm. Esc / backdrop / × close; no destructive action is ever one bare click on the page.
+- Editor pages (settings + content) now import `portal-tabs.css`, so every button on them uses the clean v2 language (Deep Sea primary, white/border secondary, 44px, no watercolor/cream). The messages page stays sibling-owned.
+- Checkbox fix: the `.booking-form` text-input rule (48px min-height + 12/16px padding) now excludes `[type="checkbox"]` — consent rows (Requirements, wizard declarations, cancel dialog) render natural 16px boxes in tight ≤44px rows, left-aligned with the card grid; previously the padded invisible box bloated and misaligned every consent row.
+
+### Lifecycle actions in the sticky nav; field-level blockers (v1.28, owner 2026-11-22, MVP-SPEC #44 — supersedes v1.27's Launch card)
+- The Launch card is gone. `TripEditorNav` renders a right-aligned `actions` cluster inside the sticky nav (already `position: sticky; top: 88px`), so Save and launch actions stay reachable while scrolling.
+- Actions are **44px square monoline SVG icon buttons** (`icon-action.tsx`) with instant tooltips, same language as the translate icon: Save (Deep Sea filled, wired to the page form via the `form=` attribute), Open for booking (globe), Inquiries only (chat), Close trip (lock), Back to draft (pencil), Delete draft (trash). Launch icons disable while blockers exist; their tooltip then reads "Complete the highlighted fields first".
+- **Blockers indicate on the individual field**, not a list: `Blocker.fields` keys drive `.field-blocked` — amber outline + dot + hover/focus tooltip carrying the exact blocker text. Settings flags price/deposits/dates/capacity/trip names/dive site; Content flags summary + the highlights/itinerary/included lists for the editing language.
+- **Cancel trip lives on the Trips list**: each trip card has a coral x-circle icon opening the same reason + consent + coral-confirm dialog. Close/Back-to-draft/Delete stay as nav-icon dialogs in Settings.
+- Dialog specs must scope to `dialog.portal-dialog[open]` — a closed Cancel dialog is now always present in the Trips tab DOM.
+
+### Editor head is the sticky card; all action icons white; tooltips keep the action name (v1.29, owner 2026-11-23, MVP-SPEC #45 — fixes v1.28)
+- **Dark fill = current location ONLY** (the active tab). v1.28's Deep Sea save icon violated this: `icon-action-primary` is deleted (prop + CSS). Every nav action icon is white + border; danger stays coral outline. Filled Deep Sea remains correct for dialog confirm buttons and the active tab pill.
+- **Sticky belongs to the whole head, not the nav inside it.** `.trip-editor-head:has(.trip-editor-nav)` is the sticky card (top 88px; 72px below 640px; z-index 50; white bg + border/radius/padding); the inner `.trip-editor-nav` is static (no own card chrome). A sticky child confined to a short parent scrolls away with the parent — that was the bug. The policy editor's head (no trip-editor nav) stays static. Applies to Settings/Content/Messages.
+- **Tooltips always name the action.** A disabled state APPENDS the reason after an em dash, never replaces the name: "Open for booking — Complete the highlighted fields first" / "开放预订 — 请先完成标记的字段".
+- **Verify behavior, not just computed styles:** scroll and measure the pinned top, read the rendered tooltip text, pixel-sample screenshots. Smooth-scroll frames fooled the visual reviewer twice; deterministic geometry (head top = 88 at scrollY 800, navbar bottom = 81) is the evidence.
+
+### Confirmed trips only in the editor; Tioman stays On request (v1.30, owner decision 2026-11-23, MVP-SPEC #46)
+- Iris-created trips have **no inquiry launch mode**. The Settings nav keeps Save / Open for booking / Close / Back to draft / Delete as applicable; the Inquiries-only chat icon and form are removed. `setLaunchState` accepts only `draft`, `open`, and `closed`, so no UI or server-action path creates a new `on_request` trip.
+- The existing Tioman record (TRP-001) is the explicit exception: it remains publicly **On request / 按需安排** with the ordinary `/contact` link and no booking CTA. The portal uses that same honest label instead of "Inquiries only". No status or data migration is required.
+- General Contact Us inquiries and the full-trip Register-interest waitlist are separate features and remain unchanged. Opening any editor-created trip still requires all publish blockers to pass and represents Iris's explicit confirmation.
+
+### List rows: field + × + + + Translate on one line (v1.31, owner 2026-11-23, MVP-SPEC #47)
+- The translate icon belongs to the ROW, not the section head. `.list-editor-row` becomes `minmax(0, 1fr) 44px 44px 44px` only when a translate button actually renders (`:has(.translate-icon-btn)`), so the text field, ×, + and Translate share one baseline and the three controls form flush columns at the card's right edge. Browsers without Chrome's Translator API render no button and keep the 3-track row.
+- Translate is per row: it fills that row from the same index in the other language. Do not reintroduce a whole-list "replace everything" control in the section head — that is what put an icon on the label line and broke the row rhythm.
+- ≤480px the field takes the full row and the × / + / Translate cluster wraps to a right-aligned line beneath it (44px targets preserved). 481px+ keeps the single line. Never shrink the field to keep the buttons inline — at 320px that left a 63px field.
+- Bilingual textareas keep the 2-track `translate-field` (textarea + icon); only list rows carry ×/+.
+
+### Blocker dot sits at the end of the field's label (v1.32, owner 2026-11-23, MVP-SPEC #48)
+- The amber publish-blocker dot is an inline `.blocker-dot` span at the END of the field's label text ("Summary ●"), never an absolutely positioned dot in the field's top-right corner — there it floated over the input and, in list rows, beside the ×/+ controls.
+- It must be a real span inside the label: these labels are grid/flex containers, so a `::after` is laid out as a separate item (below the text) instead of following the words. Labels that are themselves grid containers wrap their text in a span first; keep the dot inside that span.
+- 8px, `.45rem` after the last glyph, vertically centred with the text. The amber input outline and the hover/focus tooltip carrying the blocker text are unchanged.
+
+### Demo fill retired (v1.33, owner decision 2026-11-23, MVP-SPEC #49)
+- The Content editor has no "Fill with example" control. Demo copy must never be one click away from a real trip: the DEMO fixture copy, the `demo` state, the hidden `demoFill` field, the bottom action row, and the help bullet are removed, and `updateTripContent` no longer sets `sample = true` or records `demoFill`.
+- `trip.sample` is data only: seeded sample trips keep their "Sample" badge on the public page and portal. Editor saves preserve it and cannot set it.
+- The read-only "Display lines (auto from Settings)" card stays — it is the only way to read the derived dates/price/deposit wording of a draft, which has no public page yet.
+
 ### Currency & points display
 - Every money amount shows its trip currency code/symbol as set per trip (MYR/SGD/USD/…) — never a bare number
 - Okim Points ledger entries show: points, the RM conversion rate snapshot applied, and the RM amount — consistent column order across My Okim and the portal
@@ -562,6 +647,14 @@ Status badges are information, not CTAs. Coral stays reserved for primary action
 - Sand/white background, Deep Sea text, one Coral CTA button maximum per email (the magic-link / primary action)
 - Magic-link emails keep the link on its own line, clickable text, not only "click here"
 - Email content is defined by copy rules in `OKIM-DIVE-VIBE.md`; this section only constrains visuals
+
+### Payment schedules and record-payment dialogs (v1.34, MVP-SPEC #50)
+
+Actions and My Okim show each booked stage, its date, payable amount, received amount and outstanding balance. The final stage shows the original amount and points discount when applicable. The card footer shows booking totals. After a refund, label gross receipts, refunds and net receipts separately. Completed bookings show their final accounting.
+
+Use the existing app card and table styles. On narrow cards, keep currency and figure together, repeat the column labels with their values and stack them when inline spacing is insufficient. Keep stage dates in the booking’s local calendar and use the active browsing language for labels.
+
+The Record payment dialog opens with the suggested amount and bank date. Editing the amount updates the allocation preview. Keep the entered values through a save error, show revised figures after a stale balance, and require a fresh confirmation. A successful save links directly to its receipt. On idle dismissal, return keyboard focus to the opening control.
 
 ## 14. Bilingual Surfaces & Locale Handling (locked, v1.4)
 
@@ -611,5 +704,17 @@ Owner mandate 2026-11-21: **every redesign, layout, or bilingual change must ref
 | 2026-11-22 | 1.15 | §13 booking-request cards + seamless flow (owner S1–S5): one-click Received (record+verify+confirm+email), pre-filled expected amounts, Extend/Release hold controls, Different-amount escape, Register interest on full trips, trip-level Mark completed, wizard hold due date — owner: "too many steps and not linked together… shared DB should be seamless for diver and instructor" | QwenWork (owner: Jeff) |
 | 2026-11-22 | 1.16 | §13 eligibility gate REMOVED (owner: "self declaration… Iris cannot approve if the diver hides information"): truthfulness disclaimers on booking wizard + profile, Withdraw replaces Decline (right-aligned, paid→refund review / unpaid→cancelled), condensed booking rows cap 10, eligibility badges/reviews retired, legacy declined → Withdrawn | QwenWork (owner: Jeff) |
 | 2026-11-22 | 1.17 | §13 trip messages (Luma-style stream, TRIP-MESSAGES-SPEC): diver feed as a My Okim sub-card ("Messages from Iris", ui-contact icon, label badges, static sunset unread dot — no blinking, details-expand marks read, pre-wrap body); instructor composer reuses policy-form pattern (label + audience pills + EN\|CN switch, both textareas mounted) and outbox rows reuse portal-row + label filter pills + seen counts + two-step delete; publish = human approval, on-platform only (no email channel until post-production) | QwenWork (owner: Jeff) |
+| 2026-11-22 | 1.18 | §13 portal v2 (owner-approved PORTAL-REDESIGN-V2-PLAN + MVP-SPEC #35): trip-centric 4 tabs (Actions/Trips/Money/Settings), trip cards with whole-story face + direct Messages link, folding details-cards open only when actionable, native dialogs for one-time actions/viewing pre-filled from the card, portal-scoped button restyle (Deep Sea primary / white secondary / coral destructive-only — app-surface deviation from coral-primary), refund-review + completion action cards, inquiry trip context, diver updates moved to collapsed Trips fold | QwenWork (owner: Jeff) |
+| 2026-11-22 | 1.19 | §13 translate assist button (MVP-SPEC #36, amends #32 no-embedded-AI for this assist): Chrome built-in on-device Translator API fills the other language as a reviewed draft on messages/trip-content/payment-instructions; feature-detected graceful hiding (Chrome/Edge desktop only), static download progress, machine-draft hint, human publish gate unchanged | QwenWork (owner: Jeff) |
+| 2026-11-22 | 1.20 | §13 list rows get square 44px × / + buttons at the right (remove row / insert row below); bottom Add buttons removed; clean v2 button language; server parsing unchanged | QwenWork (owner: Jeff) |
+| 2026-11-22 | 1.21 | §13 display lines become read-only derived previews; Override removed (MVP-SPEC #37, trips always fixed, Settings single source); stored columns synced from facts | QwenWork (owner: Jeff) |
+| 2026-11-22 | 1.22 | §13 location-driven facts (Destination select auto-loads currency/airport/timezone; public Nearest airport fact); slug + timezone inputs removed, URL read-only auto-from-name (MVP-SPEC #38) | QwenWork (owner: Jeff) |
+| 2026-11-22 | 1.23 | §13 new-trip merged into Settings (instant draft, name editable there); country select (Asia) + typed dive site/airport; local vs payment currency; public facts regrouped into When/Where/Cost/Group cards (MVP-SPEC #39, supersedes v1.22 destination list) | QwenWork (owner: Jeff) |
+| 2026-11-22 | 1.24 | §13 translate assist = per-field 44px icon + instant tooltip (new ui-translate icon); bulk translate row removed; Settings Sample-trip checkbox removed, sample flag preserved (MVP-SPEC #40) | QwenWork (owner: Jeff) |
+| 2026-11-22 | 1.25 | §13 Location inputs = dive site + country only; curated SITES match auto-displays airport + jetty/transfer; formatted .location-facts read-only grid; public Where group gains jetty row (MVP-SPEC #41) | QwenWork (owner: Jeff) |
+| 2026-11-22 | 1.26 | §13 Pricing compacted; deposits = fixed-amount item list (×/+ rows, 2+ timings), percent removed; currency label simplified, duplicate hint removed; points rate global + frozen per trip (read-only line); public Cost lists deposit schedule (MVP-SPEC #42) | QwenWork (owner: Jeff) |
+| 2026-11-22 | 1.27 | §13 trip Settings lifecycle = one Launch card + quiet lifecycle row; Close/Back-to-draft/Cancel/Delete in dialogs (cancel carries reason + consent + coral confirm); editor pages import portal-tabs.css so all buttons use the clean v2 language (MVP-SPEC #43) | QwenWork (owner: Jeff) |
+| 2026-11-22 | 1.28 | §13 Launch card removed; lifecycle = right-aligned 44px square icon buttons with tooltips in the sticky editor nav (Save always reachable); blockers mark individual fields (amber outline + dot + tooltip); Cancel trip moved to Trips-list card dialog (MVP-SPEC #44, supersedes v1.27) | QwenWork (owner: Jeff) |
+| 2026-11-23 | 1.34 | §13 staged payment schedules, narrow-card labels and financial dialogs. See the [implementation log](../plans/MULTI-DEPOSIT-EXECUTION-LOG.md) for verification and owner visual acceptance status. |
 
-**Status:** v1.17 active for the Next.js migration on branch `QwenWork-refactor` per `MVP-SPEC.md` v1.0.
+**Status:** v1.34 reflects the owner-authorized workflow on `QwenWork-refactor` through MVP-SPEC #50.

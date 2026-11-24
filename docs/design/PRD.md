@@ -5,7 +5,7 @@
 **Last Updated:** 2026-11-20\
 **Owner:** Jeff\
 **Developer:** Vega (website foundation); QwenWork (portal MVP + Next.js migration)\
-**Companion spec:** `docs/design/MVP-SPEC.md` v1.0 — approved source of truth for booking/portal scope. Where this PRD and the MVP spec differ on portal/booking matters, the MVP spec wins.
+**Companion spec:** `docs/design/MVP-SPEC.md` (change-control through #50) — approved source of truth for booking/portal scope. Where this PRD and the MVP spec differ on portal/booking matters, the MVP spec wins.
 
 ---
 

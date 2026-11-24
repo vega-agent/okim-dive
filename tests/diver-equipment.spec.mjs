@@ -1,3 +1,4 @@
+import { stagedBookingRows, deleteStagedBookingRows } from './support/staged-booking.mjs'
 import { test, expect } from '@playwright/test';
 import { config } from 'dotenv';
 import { neon } from '@neondatabase/serverless';
@@ -13,12 +14,18 @@ test('Diver profile and equipment: propagation, ownership, snapshots, cutoff, po
  await login(page,email);[customer]=await sql`SELECT * FROM customers WHERE email=${email}`;
  await sql`UPDATE customers SET name=${prefix},diver_profile=${JSON.stringify({agency:'PADI',level:'Open Water',dives:10,equipment})}::json WHERE id=${customer.id}`;
  trip=prefix+'-trip';await sql`INSERT INTO trips(id,slug,title_en,title_zh,status,published,price_amount,deposit_value,capacity,travel_start,travel_end,sample,departure_timezone) VALUES(${trip},${trip.toLowerCase()},'Equipment fixture','装备测试','open',true,100,30,50,${new Date(Date.now()+86400000*10).toISOString()},${new Date(Date.now()+86400000*12).toISOString()},true,'Asia/Kuala_Lumpur')`;
+ await sql.transaction([
+   sql`UPDATE trips SET deposit_type='fixed',balance_due_date=current_date+7 WHERE id=${trip}`,
+   sql`INSERT INTO trip_deposits(id,trip_id,sort,amount,due_date,due_days) VALUES(${trip+'-d1'},${trip},0,30,current_date+2,8)`,
+   sql`INSERT INTO trips(id,slug,title_en,title_zh,status,published,price_amount,deposit_value,travel_start,travel_end,sample)
+       SELECT id||'-profile',slug||'-profile',title_en,title_zh,status,false,price_amount,deposit_value,travel_start,travel_end,true FROM trips WHERE id=${trip}`,
+ ])
  const statuses=['awaiting_deposit','payment_claimed','deposit_verified','confirmed','cancelled','eligibility_declined','refund_flagged','completed'];
- for(const status of statuses)await sql`INSERT INTO bookings(id,customer_id,product_id,status,eligibility_status,currency,declarations,equipment) VALUES(${prefix+'-'+status},${customer.id},${trip},${status},'approved','MYR','{"certLevel":"Open Water","loggedDives":10,"medical":false}',${JSON.stringify(equipment)}::json)`;
+ await sql.transaction(statuses.flatMap(status=>stagedBookingRows(sql,{id:prefix+'-'+status,customerId:customer.id,tripId:trip+'-profile',status,equipment,declarations:{certLevel:'Open Water',loggedDives:10,medical:false}})))
  await page.goto('/myokim');await page.locator('#my-tab-profile').click();const profile=page.locator('#profile');await profile.locator('input[name=dives]').fill('35');await profile.locator('input[name=phone]').fill('+6012345678');await profile.getByRole('button',{name:'Save profile',exact:true}).click();await expect(profile.getByRole('status')).toContainText('Saved.');
  const rows=await sql`SELECT status,eligibility_status,declarations,equipment FROM bookings WHERE customer_id=${customer.id}`;
  for(const row of rows){const active=statuses.slice(0,4).includes(row.status);expect(row.eligibility_status).toBe('approved');expect(row.declarations.loggedDives).toBe(active?35:10);expect(row.declarations.medical).toBe(false);expect(row.equipment).toEqual(equipment);}
- await page.goto(`/book/${trip.toLowerCase()}`);await expect(page.locator('select[name=cert_agency]')).toHaveValue('PADI');await expect(page.locator('select[name=cert_level]')).toHaveValue('Open Water');await expect(page.locator('#b-dives')).toHaveValue('35');await page.locator('#b-name').fill(prefix+' booking only');await page.locator('#b-emergency-name').fill('Contact');await page.locator('#b-emergency-phone').fill('12345');await page.locator('#b-dob').fill('1990-01-01');await page.locator('input[name=insurance]').check();await page.locator('input[name=medical]').check();await page.locator('input[name=accept_policy]').check();await page.getByRole('button',{name:'Bring all',exact:true}).click();await page.getByRole('button',{name:'Create booking',exact:true}).click();await expect(page.locator('.booking-id')).toBeVisible();const booking=(await page.locator('.booking-id').textContent()).trim();const [snap]=await sql`SELECT equipment FROM bookings WHERE id=${booking}`;expect(Object.values(snap.equipment.choices).every(c=>c==='own')).toBe(true);const [unchanged]=await sql`SELECT name,diver_profile FROM customers WHERE id=${customer.id}`;expect(unchanged.name).toBe(prefix);expect(unchanged.diver_profile.equipment).toEqual(equipment);
+ await page.goto(`/book/${trip.toLowerCase()}`);await expect(page.locator('select[name=cert_agency]')).toHaveValue('PADI');await expect(page.locator('select[name=cert_level]')).toHaveValue('Open Water');await expect(page.locator('#b-dives')).toHaveValue('35');await page.locator('#b-name').fill(prefix+' booking only');await page.locator('#b-emergency-name').fill('Contact');await page.locator('#b-emergency-phone').fill('12345');await page.locator('#b-dob').fill('1990-01-01');await page.locator('input[name=insurance]').check();await page.locator('input[name=medical]').check();await page.locator('input[name=accept_policy]').check();await page.locator('input[name=accept_deposits]').check();await page.getByRole('button',{name:'Bring all',exact:true}).click();await page.getByRole('button',{name:'Create booking',exact:true}).click();await expect(page.locator('.booking-id')).toBeVisible();const booking=(await page.locator('.booking-id').textContent()).trim();const [snap]=await sql`SELECT equipment FROM bookings WHERE id=${booking}`;expect(Object.values(snap.equipment.choices).every(c=>c==='own')).toBe(true);const [unchanged]=await sql`SELECT name,diver_profile FROM customers WHERE id=${customer.id}`;expect(unchanged.name).toBe(prefix);expect(unchanged.diver_profile.equipment).toEqual(equipment);
  await page.goto('/myokim');const card=page.locator('#equipment-'+booking);await card.getByRole('button',{name:'Remove all',exact:true}).click();expect(JSON.parse(await card.locator('input[name=equipment]').inputValue()).choices.mask).toBe('none');await card.getByRole('button',{name:'Reset from profile',exact:true}).click();await card.getByRole('button',{name:'Rent all',exact:true}).click();const sizes=page.locator('#sizes-'+booking);await sizes.getByRole('button',{name:'Save booking equipment',exact:true}).click();await expect(sizes.getByRole('status')).toContainText('Saved');
  const request=await page.waitForTimeout(100);void request;
  const captured=[];page.on('request',r=>{if(r.method()==='POST'&&r.headers()['next-action'])captured.push({headers:r.headers(),body:r.postData()});});await page.locator('#sizes-'+booking).getByRole('button',{name:'Save booking equipment',exact:true}).click();await expect.poll(()=>captured.length).toBeGreaterThan(0);const action=captured.at(-1);const rivalContext=await browser.newContext();const rival=await rivalContext.newPage();await login(rival,rivalEmail);const denied=await rival.request.post('/myokim',{headers:{'Next-Action':action.headers['next-action'],'Content-Type':action.headers['content-type'],Origin:'http://localhost:3100'},data:action.body});expect(await denied.text()).toContain('unauthenticated');await rivalContext.close();
@@ -32,13 +39,9 @@ test('Diver profile and equipment: propagation, ownership, snapshots, cutoff, po
   if(customer){
    const bids=(await sql`SELECT id FROM bookings WHERE customer_id=${customer.id}`).map(r=>r.id);
    await sql`DELETE FROM audit_log WHERE entity_id=ANY(${bids}) OR entity_id=${customer.id} OR entity_id LIKE ${prefix+'%'}`;
-   await sql`DELETE FROM invoices WHERE booking_id=ANY(${bids})`;
-   await sql`DELETE FROM points_ledger WHERE customer_id=${customer.id}`;
-   await sql`DELETE FROM payment_claims WHERE booking_id=ANY(${bids})`;
-   await sql`DELETE FROM payments WHERE booking_id=ANY(${bids})`;
-   await sql`DELETE FROM bookings WHERE customer_id=${customer.id}`;
+   await sql.transaction(deleteStagedBookingRows(sql,bids))
   }
-  if(trip)await sql`DELETE FROM trips WHERE id=${trip}`;
+  if(trip)await sql.transaction([sql`DELETE FROM trip_deposits WHERE trip_id=${trip}`,sql`DELETE FROM trips WHERE id IN (${trip},${trip+'-profile'})`]);
   for(const e of [email,rivalEmail]){
    await sql`DELETE FROM sessions WHERE "userId" IN (SELECT id FROM users WHERE email=${e})`;
    await sql`DELETE FROM verification_tokens WHERE identifier=${e}`;

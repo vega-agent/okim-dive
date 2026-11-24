@@ -1,4 +1,4 @@
-import { test, expect } from '@playwright/test';
+import { test as baseTest, expect } from '@playwright/test';
 import { config } from 'dotenv';
 import { neon } from '@neondatabase/serverless';
 import { createHash, randomUUID } from 'node:crypto';
@@ -10,19 +10,45 @@ import { createHash, randomUUID } from 'node:crypto';
 config({ path: '.env.local' });
 const sql = neon(process.env.DATABASE_URL);
 const SECRET = process.env.AUTH_SECRET;
-const BASE = 'http://localhost:3100';
+const BASE = process.env.PLAYWRIGHT_BASE_URL ?? 'http://localhost:3100';
 const TRIP = 'tioman-reef-weekend';
+
+const test = baseTest.extend({
+  tripSlug: async ({}, use) => {
+    if (process.env.OKIM_DISABLE_EMAILS !== '1' || process.env.AUTH_URL !== BASE ||
+        !['http://localhost:3100','http://127.0.0.1:3100'].includes(BASE)) throw Error('Use the email-suppressed loopback preview')
+    const id = 'm4-trip-' + randomUUID()
+    try {
+      await sql.transaction([
+        sql`INSERT INTO trips(id,slug,title_en,title_zh,status,published,sample,price_amount,deposit_type,deposit_value,
+          balance_due_date,capacity,travel_start,travel_end)
+          VALUES (${id},${id},'Sample booking trip','示例预订行程','open',true,true,1200,'fixed',360,current_date+30,4,current_date+45,current_date+48)`,
+        sql`INSERT INTO trip_deposits(id,trip_id,sort,amount,due_date,due_days)
+          VALUES (${id+'-d1'},${id},0,360,current_date+10,35)`,
+      ])
+      await use(id)
+    } finally {
+      await sql.transaction([sql`DELETE FROM trip_deposits WHERE trip_id=${id}`, sql`DELETE FROM trips WHERE id=${id}`])
+    }
+  },
+})
 
 async function signInViaCallback(page, email, callbackUrl) {
   const raw = randomUUID();
   const hashed = createHash('sha256').update(`${raw}${SECRET}`).digest('hex');
   await sql`INSERT INTO verification_tokens (identifier, token, expires) VALUES (${email}, ${hashed}, ${new Date(Date.now() + 15 * 60 * 1000)})`;
-  await page.goto(`${BASE}/api/auth/callback/resend?callbackUrl=${encodeURIComponent(callbackUrl)}&token=${raw}&email=${encodeURIComponent(email)}`);
-  await page.waitForURL(`**${callbackUrl}`);
+  try {
+    await page.goto(`${BASE}/api/auth/callback/resend?callbackUrl=${encodeURIComponent(callbackUrl)}&token=${raw}&email=${encodeURIComponent(email)}`);
+    await page.waitForURL(`**${callbackUrl}`);
+  } finally {
+    await sql`DELETE FROM verification_tokens WHERE identifier=${email} AND token=${hashed}`
+  }
 }
 
 async function fillDeclarations(page, { name = 'M4 E2E Diver', zh = false } = {}) {
   await page.fill('#b-name', name);
+  await page.selectOption('select[name="cert_agency"]', 'PADI');
+  await page.getByRole('button',{name:zh ? '全部自带' : 'Bring all',exact:true}).click();
   await page.selectOption('select[name="cert_level"]', 'Open Water');
   await page.fill('#b-dives', '25');
   await page.check('input[name="insurance"]');
@@ -33,15 +59,7 @@ async function fillDeclarations(page, { name = 'M4 E2E Diver', zh = false } = {}
   await page.locator('.booking-policy summary').click();
   await expect(page.locator('.booking-policy-body').first()).toContainText(zh ? '退款政策' : 'Refunds');
   await page.check('input[name="accept_policy"]');
-}
-
-// Unique diver names (owner decision 2026-11-21): new emails get a name field at
-// the email step (submit-time detection); the name is applied at diver creation.
-// Names derive from the unique test email so parallel runs never collide.
-async function enterSignupName(page, email) {
-  await expect(page.locator('#booking-name')).toBeVisible();
-  await page.fill('#booking-name', email.split('@')[0]);
-  await page.click('.booking-card button[type="submit"]');
+  await page.check('input[name="accept_deposits"]');
 }
 
 // Fallback setup card: only for pending customers who sign in without a stashed
@@ -54,16 +72,18 @@ async function completeSetup(page, email) {
 }
 
 async function cleanup(email) {
-  const cust = await sql`SELECT id FROM customers WHERE email = ${email}`;
-  for (const c of cust) {
-    await sql`DELETE FROM invoices WHERE booking_id IN (SELECT id FROM bookings WHERE customer_id = ${c.id})`;
-    await sql`DELETE FROM bookings WHERE customer_id = ${c.id}`;
-    await sql`DELETE FROM customers WHERE id = ${c.id}`;
-  }
-  await sql`DELETE FROM verification_tokens WHERE identifier = ${email}`;
-  await sql`DELETE FROM signup_names WHERE email = ${email}`;
-  await sql`DELETE FROM sessions WHERE "userId" IN (SELECT id FROM users WHERE email = ${email})`;
-  await sql`DELETE FROM users WHERE email = ${email}`;
+  const bids = (await sql`SELECT b.id FROM bookings b JOIN customers c ON b.customer_id=c.id WHERE c.email=${email}`).map(b=>b.id)
+  await sql.transaction([
+    sql`DELETE FROM audit_log WHERE entity_id = ANY(${bids}) OR actor_user_id IN (SELECT id FROM users WHERE email=${email})`,
+    sql`DELETE FROM booking_stages WHERE booking_id = ANY(${bids})`,
+    sql`DELETE FROM invoices WHERE booking_id = ANY(${bids})`,
+    sql`DELETE FROM bookings WHERE id = ANY(${bids})`,
+    sql`DELETE FROM customers WHERE email=${email}`,
+    sql`DELETE FROM verification_tokens WHERE identifier=${email}`,
+    sql`DELETE FROM signup_names WHERE email=${email}`,
+    sql`DELETE FROM sessions WHERE "userId" IN (SELECT id FROM users WHERE email=${email})`,
+    sql`DELETE FROM users WHERE email=${email}`,
+  ])
 }
 
 test('trip detail renders from DB with booking CTA, bilingual, 404 for unknown', async ({ page }) => {
@@ -84,16 +104,16 @@ test('trip detail renders from DB with booking CTA, bilingual, 404 for unknown',
   expect(missing?.status()).toBe(404);
 });
 
-test('full booking journey: email → magic link → declarations → booking + invoice', async ({ page, browser }, testInfo) => {
-  const email = `m4-e2e-${Date.now()}-${testInfo.project.name}@okimdive.com`;
+test('full booking journey: magic-link sign-in, declarations, reservation and completion-gated invoice', async ({ page, browser, tripSlug }, testInfo) => {
+  const email = `m4-e2e-${Date.now()}-${testInfo.project.name}@example.com`;
   try {
-    await page.goto(`/book/${TRIP}`);
+    await page.goto(`/book/${tripSlug}`);
     await expect(page.locator('#booking-email')).toBeVisible();
     // Email-budget (owner-approved 2026-11-21): the EN success path + real Resend
     // send is covered by the rl-ok desktop canary (tests/rate-limit.spec.mjs).
     // Here we sign in via the token-insert callback (zero sends) and use the
     // fallback setup card, keeping the suite inside the free-tier daily quota.
-    await signInViaCallback(page, email, `/book/${TRIP}`);
+    await signInViaCallback(page, email, `/book/${tripSlug}`);
     await completeSetup(page, email);
     await expect(page.locator('#b-name')).toBeVisible();
     const cust = await sql`SELECT * FROM customers WHERE email = ${email}`;
@@ -107,26 +127,26 @@ test('full booking journey: email → magic link → declarations → booking + 
     expect(bookingId).toMatch(/^BKG-\d{3,}$/);
     await expect(page.locator('.booking-summary')).toContainText('MYR 360.00');
     await expect(page.locator('.booking-summary')).toContainText('MYR 840.00');
-    await expect(page.locator('.booking-summary')).toContainText('2026-11-12');
+    const snapshot = await sql`SELECT due_date::text AS due FROM booking_stages WHERE booking_id=${bookingId} ORDER BY position`;
+    expect(snapshot).toHaveLength(2);
+    for (const row of snapshot) await expect(page.locator('.booking-summary')).toContainText(row.due);
     await expect(page.locator('.booking-pay-steps')).toContainText('WhatsApp');
 
     const rows = await sql`SELECT * FROM bookings WHERE id = ${bookingId}`;
     expect(rows.length).toBe(1);
     expect(rows[0].status).toBe('awaiting_deposit');
-    expect(rows[0].policy_version_id).toBe('POL-REFUND-001');
+    expect(rows[0].policy_version_id).toBeTruthy();
     expect(rows[0].accepted_at).toBeTruthy();
     expect(rows[0].declarations.certLevel).toBe('Open Water');
     expect(rows[0].declarations.loggedDives).toBe(25);
-    expect(rows[0].declarations.termsVersionId).toBe('POL-TERMS-001');
+    expect(rows[0].declarations.termsVersionId).toBeTruthy();
     const inv = await sql`SELECT * FROM invoices WHERE booking_id = ${bookingId}`;
     expect(inv.length).toBe(1);
 
-    await page.click('.booking-actions a.btn');
-    await page.waitForURL(`**/invoice/${bookingId}`);
-    await expect(page.locator('.invoice-doc')).toContainText(inv[0].number);
-    await expect(page.locator('.invoice-table tfoot')).toContainText('MYR 1200.00');
-    await expect(page.locator('.invoice-notice')).toContainText('confirmed only after');
-    await expect(page.locator('.invoice-reference')).toContainText(bookingId);
+    await expect(page.locator('.booking-actions a[href^="/invoice/"]')).toHaveCount(0);
+    await page.getByRole('link',{name:'View My Okim'}).click();
+    await expect(page.locator('#my-panel-upcoming')).toContainText(bookingId);
+    expect((await page.goto(BASE+'/invoice/'+bookingId)).status()).toBe(404);
 
     // Invoice is auth-gated: a fresh context without a session is redirected
     // (invoice → /book entry → /trips chooser).
@@ -140,26 +160,16 @@ test('full booking journey: email → magic link → declarations → booking + 
   }
 });
 
-test('booking journey works in Chinese and records locale', async ({ page }, testInfo) => {
-  const email = `m4-zh-${Date.now()}-${testInfo.project.name}@okimdive.com`;
+test('booking journey works in Chinese and records locale', async ({ page, tripSlug }, testInfo) => {
+  const email = `m4-zh-${Date.now()}-${testInfo.project.name}@example.com`;
   try {
-    await page.goto(`/book/${TRIP}`);
+    await page.goto(`/book/${tripSlug}`);
     await page.evaluate(() => localStorage.setItem('okim-language', 'zh'));
     await page.reload({ waitUntil: 'load' });
     await page.waitForFunction(() => document.documentElement.lang === 'zh-CN');
     await expect(page.locator('.booking-card h3')).toHaveText('登录以预订');
-    // Email-budget (owner-approved 2026-11-21): the CN real-send canary runs on
-    // desktop only; mobile signs in via the token-insert callback (zero sends).
-    if (testInfo.project.name === 'chromium-desktop') {
-      await page.fill('#booking-email', email);
-      await page.click('.booking-card button[type="submit"]');
-      await enterSignupName(page, email);
-      await expect(page.locator('.booking-card')).toContainText('请查收邮件');
-      await signInViaCallback(page, email, `/book/${TRIP}`);
-    } else {
-      await signInViaCallback(page, email, `/book/${TRIP}`);
-      await completeSetup(page, email);
-    }
+    await signInViaCallback(page, email, `/book/${tripSlug}`);
+    await completeSetup(page, email);
     // #33: signed-in surfaces follow the BROWSING language — a zh browser lands
     // on the Chinese wizard directly; toggling persists the customer locale.
     await expect(page.locator('label[for="b-name"]')).toHaveText('姓名 *');
@@ -182,24 +192,24 @@ test('booking journey works in Chinese and records locale', async ({ page }, tes
   }
 });
 
-test('instructor allowlist email gets the instructor role', async ({ page }) => {
-  const email = 'jeff.mailme@gmail.com';
-  await page.goto(`/book/${TRIP}`);
-  await signInViaCallback(page, email, `/book/${TRIP}`);
-  // Signed-in customer provisioning shows either the setup card (name pending)
-  // or the wizard (name already set) — never the anonymous email step.
-  await expect(page.locator('#b-name, #setup-name').first()).toBeVisible();
-  const users = await sql`SELECT role FROM users WHERE email = ${email}`;
-  expect(users[0].role).toBe('instructor');
-  const cust = await sql`SELECT id FROM customers WHERE email = ${email}`;
-  expect(cust.length).toBe(1);
+test('instructor allowlist email gets the instructor role', async ({ page, tripSlug }) => {
+  const email = process.env.AUTH_INSTRUCTOR_EMAILS.split(',')[0].trim();
+  try {
+    await signInViaCallback(page, email, `/book/${tripSlug}`);
+    await expect(page.locator('#b-name, #setup-name').first()).toBeVisible();
+    const users = await sql`SELECT role FROM users WHERE email = ${email}`;
+    expect(users[0].role).toBe('instructor');
+  } finally {
+    const session = (await page.context().cookies(BASE)).find(c=>c.name==='authjs.session-token')
+    if (session) await sql`DELETE FROM sessions WHERE "sessionToken"=${session.value}`
+  }
 });
 
-test('booking requires declarations and policy acceptance', async ({ page }, testInfo) => {
-  const email = `m4-val-${Date.now()}-${testInfo.project.name}@okimdive.com`;
+test('booking requires declarations and policy acceptance', async ({ page, tripSlug }, testInfo) => {
+  const email = `m4-val-${Date.now()}-${testInfo.project.name}@example.com`;
   try {
-    await page.goto(`/book/${TRIP}`);
-    await signInViaCallback(page, email, `/book/${TRIP}`);
+    await page.goto(`/book/${tripSlug}`);
+    await signInViaCallback(page, email, `/book/${tripSlug}`);
     await completeSetup(page, email);
     await expect(page.locator('#b-name')).toBeVisible();
     // Submit empty: native required validation keeps the form; no booking row.

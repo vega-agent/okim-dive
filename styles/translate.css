@@ -1,0 +1,38 @@
+/* Translate assist (MVP-SPEC #36/#40): icon button at the end of each
+   bilingual field + instant tooltip (v1.8 pattern) + draft status line.
+   Bundled with the component so every surface looks identical. */
+.translate-field { display: grid; grid-template-columns: minmax(0, 1fr) 44px; gap: .4rem .5rem; align-items: center; }
+.translate-field > label { grid-column: 1 / -1; font-weight: 700; }
+.translate-field > textarea { align-self: stretch; }
+.translate-field.ta { align-items: start; }
+.translate-field > .translate-status { grid-column: 1 / -1; }
+.translate-icon-btn {
+  position: relative; width: 44px; height: 44px; padding: 0; grid-column: 2;
+  display: inline-flex; align-items: center; justify-content: center;
+  border: 1px solid rgba(38, 70, 83, .3); border-radius: 10px;
+  background-color: #fff; background-image: none; box-shadow: none; transform: none; cursor: pointer;
+}
+.translate-icon-btn img { width: 24px; height: 24px; }
+.translate-icon-btn:hover, .translate-icon-btn:focus-visible { background-color: var(--sand); border-color: var(--ocean-mid); transform: none; box-shadow: none; }
+.translate-icon-btn:focus-visible { outline: 2px solid var(--ocean-mid); outline-offset: 2px; }
+.translate-icon-btn:disabled { opacity: .55; cursor: not-allowed; }
+.translate-icon-btn::after {
+  content: attr(data-tip); position: absolute; bottom: calc(100% + 6px); right: 0; z-index: 70;
+  width: max-content; max-width: 200px; padding: .45rem .6rem; border-radius: 6px;
+  background: var(--ocean-deep); color: #fff; font-family: var(--font-body); font-size: .75rem;
+  font-weight: 600; line-height: 1.4; text-align: center; opacity: 0; pointer-events: none;
+  transition: opacity .12s ease;
+}
+.translate-icon-btn:hover::after, .translate-icon-btn:focus-visible::after { opacity: 1; }
+.translate-status { margin: 0; font-size: .75rem; color: var(--ink-soft); }
+.translate-status:empty { display: none; }
+.list-editor-head { display: flex; align-items: center; justify-content: space-between; gap: .5rem; }
+@media (prefers-reduced-motion: reduce) { .translate-icon-btn, .translate-icon-btn::after { transition: none; } }
+
+/* Location auto-display facts (MVP-SPEC #41): formatted read-only grid,
+   bundled here because the settings editor already loads this stylesheet. */
+.location-facts { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: .8rem 1.2rem; margin: .4rem 0 0; padding: .9rem 1.1rem; border: 1px solid var(--whisper-border); border-radius: 10px; background: rgba(168, 218, 220, .12); }
+.location-facts > div { min-width: 0; display: grid; gap: .15rem; }
+.location-facts dt { color: var(--ink-soft); font-size: .72rem; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; }
+.location-facts dd { margin: 0; font-weight: 700; font-size: .95rem; line-height: 1.4; color: var(--ocean-deep); overflow-wrap: anywhere; }
+@media (max-width: 640px) { .location-facts { grid-template-columns: 1fr; } }

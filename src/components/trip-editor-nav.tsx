@@ -1,9 +1,13 @@
 'use client'
+import type { ReactNode } from 'react'
 import { useLocale } from '@/lib/use-locale'
 import { contentCompleteness, tripDisplayState, type SerializedTrip } from '@/lib/trip-display'
 
-/** Persistent trip header linking Settings ↔ Content ↔ Messages with completion badges. */
-export default function TripEditorNav({ trip, active, consumed }: { trip: SerializedTrip; active: 'settings' | 'content' | 'messages'; consumed: number }) {
+/** Persistent trip header linking Settings ↔ Content ↔ Messages with completion
+    badges. The whole head is sticky (#45); `actions` (square icon buttons,
+    MVP-SPEC #44) render right-aligned in the nav so Save/launch stay reachable
+    while scrolling. */
+export default function TripEditorNav({ trip, active, consumed, actions }: { trip: SerializedTrip; active: 'settings' | 'content' | 'messages'; consumed: number; actions?: ReactNode }) {
   const locale = useLocale()
   const t = (en: string, zh: string) => locale === 'zh' ? zh : en
   const state = tripDisplayState(trip, consumed, trip.capacity)
@@ -22,11 +26,12 @@ export default function TripEditorNav({ trip, active, consumed }: { trip: Serial
       <a href={`/portal/trips/${trip.id}/content`} aria-current={active === 'content' ? 'page' : undefined}>
         {t('Content', '内容')}
         <span className="completion-badges">
-          <span className={`completion-badge${en.missingRequired.length ? ' incomplete' : ''}`}>EN {en.done}/{en.total}</span>
-          <span className={`completion-badge${zh.missingRequired.length ? ' incomplete' : ''}`}>中文 {zh.done}/{zh.total}</span>
+          <span className={`completion-badge${en.missingRequired.length ? ' incomplete' : ''}`}>{t('EN', '英文')} {en.done}/{en.total}</span>
+          <span className={`completion-badge${zh.missingRequired.length ? ' incomplete' : ''}`}>{t('ZH', '中文')} {zh.done}/{zh.total}</span>
         </span>
       </a>
       <a href={`/portal/trips/${trip.id}/messages`} aria-current={active === 'messages' ? 'page' : undefined}>{t('Messages', '消息')}</a>
+      {actions && <div className="trip-editor-actions-nav">{actions}</div>}
     </nav>
   </header>
 }

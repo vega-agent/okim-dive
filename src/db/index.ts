@@ -12,7 +12,10 @@ if (!connectionString) {
   console.warn('[db] DATABASE_URL not set — DB-backed features disabled until configured.')
 }
 
-const sql = connectionString ? neon(connectionString) : null
+// Next.js patches global fetch in production and can cache library-internal
+// requests (drizzle neon-http reads went stale across renders). DB reads must
+// never be cached — force no-store at the driver level.
+const sql = connectionString ? neon(connectionString, { fetchOptions: { cache: 'no-store' } }) : null
 
 export const db = sql ? drizzle(sql, { schema }) : null
 export { schema }

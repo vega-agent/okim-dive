@@ -39,9 +39,10 @@ export default function PortalSettings({ data }: { data: PortalSettingsData }) {
     </form>
 
     <form action={updateSettings} className="booking-form portal-form">
-      <h3 className="span-2">{t('Default RM rate', '默认 RM 汇率')}</h3>
+      <h3 className="span-2">{t('Points conversion rate', '积分换算汇率')}</h3>
       <input type="hidden" name="key" value="default_rm_rate" />
       <label>{t('RM per 1 unit of trip currency', '每 1 行程币种兑 RM')}<input name="rmRate" type="number" min="0.0001" step="0.0001" required defaultValue={data.defaultRmRate} /></label>
+      <p className="portal-hint span-2">{t('Applies to NEW trips only — existing trips keep the rate fixed at their creation.', '仅适用于新行程——已有行程保留创建时锁定的汇率。')}</p>
       <button className="btn btn-secondary span-2">{t('Save default rate', '保存默认汇率')}</button>
     </form>
 

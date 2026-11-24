@@ -4,6 +4,8 @@
 // via useLocale, unlike the DOM-dictionary marketing pages). Reuses the audited
 // trip-section presentation classes from the M2 dialog port.
 import Link from 'next/link'
+import TripPaymentRows from './trip-payment-rows'
+import type { StageInput } from '@/lib/payment-schedule'
 import { useLocale, pick } from '@/lib/use-locale'
 import { registerInterest } from '@/lib/seamless-actions'
 
@@ -13,11 +15,16 @@ export type TripDetailData = {
   status: string
   sample: boolean
   currency: string
+  stages: StageInput[]
+  today: string
+  bookable: boolean
   capacity: number
   consumed: number
   interestState: 'registered' | 'error' | null
   titleEn: string; titleZh: string | null
   locationEn: string | null; locationZh: string | null
+  airportEn: string | null; airportZh: string | null
+  jettyEn: string | null; jettyZh: string | null
   summaryEn: string | null; summaryZh: string | null
   travelDatesEn: string | null; travelDatesZh: string | null
   durationEn: string | null; durationZh: string | null
@@ -38,6 +45,13 @@ export type TripDetailData = {
 
 const L = {
   travelDates: ['Travel dates', '出发日期'],
+  nearestAirport: ['Nearest airport', '最近机场'],
+  jetty: ['Jetty & transfer', '码头与接驳'],
+  when: ['When', '时间'],
+  where: ['Where', '地点'],
+  costGroup: ['Cost', '费用'],
+  group: ['Group', '团队'],
+  diveSite: ['Dive site', '潜点'],
   duration: ['Duration', '时长'],
   difficulty: ['Difficulty', '难度'],
   groupSize: ['Group size', '团体人数'],
@@ -84,11 +98,12 @@ function Section({ title, items, className = '' }: { title: string; items: strin
 export default function TripDetail({ trip }: { trip: TripDetailData }) {
   const locale = useLocale()
   const t = (pair: readonly [string, string]) => pick(locale, pair[0], pair[1])
-  const bookable = trip.status === 'open'
-  const full = bookable && trip.consumed >= trip.capacity
+  const bookable = trip.bookable
+  const full = bookable && (trip.status === 'full' || trip.consumed >= trip.capacity)
   const badge = trip.sample ? t(L.sampleBadge)
     : full ? t(L.fullBadge)
-    : trip.status === 'open' ? t(L.openBadge)
+    : bookable ? t(L.openBadge)
+    : ['open', 'full'].includes(trip.status) ? (locale === 'zh' ? '已关闭预订' : 'Booking closed')
     : trip.status === 'on_request' ? t(L.onRequestBadge)
     : trip.status
 
@@ -108,13 +123,37 @@ export default function TripDetail({ trip }: { trip: TripDetailData }) {
           <div className="container">
             <p className="section-lede">{pick(locale, trip.summaryEn, trip.summaryZh)}</p>
             <div className="trip-dialog-sections">
-              <dl className="trip-facts trip-dialog-section trip-dialog-section-facts">
-                <div><dt>{t(L.travelDates)}</dt><dd>{pick(locale, trip.travelDatesEn, trip.travelDatesZh)}</dd></div>
-                <div><dt>{t(L.duration)}</dt><dd>{pick(locale, trip.durationEn, trip.durationZh)}</dd></div>
-                <div><dt>{t(L.difficulty)}</dt><dd>{pick(locale, trip.difficultyEn, trip.difficultyZh)}</dd></div>
-                <div><dt>{t(L.groupSize)}</dt><dd>{pick(locale, trip.groupSizeEn, trip.groupSizeZh)}</dd></div>
-                <div><dt>{t(L.cost)}</dt><dd>{pick(locale, trip.costDisplayEn, trip.costDisplayZh)} <small>{pick(locale, trip.costBasisEn, trip.costBasisZh)}</small></dd></div>
-              </dl>
+              <div className="trip-facts-groups">
+                <section className="trip-facts-group">
+                  <h3>{t(L.when)}</h3>
+                  <dl>
+                    <div><dt>{t(L.travelDates)}</dt><dd>{pick(locale, trip.travelDatesEn, trip.travelDatesZh) || '—'}</dd></div>
+                    <div><dt>{t(L.duration)}</dt><dd>{pick(locale, trip.durationEn, trip.durationZh) || '—'}</dd></div>
+                  </dl>
+                </section>
+                <section className="trip-facts-group">
+                  <h3>{t(L.where)}</h3>
+                  <dl>
+                    <div><dt>{t(L.diveSite)}</dt><dd>{pick(locale, trip.locationEn, trip.locationZh) || '—'}</dd></div>
+                    {trip.airportEn && <div><dt>{t(L.nearestAirport)}</dt><dd>{pick(locale, trip.airportEn, trip.airportZh)}</dd></div>}
+                    {trip.jettyEn && <div><dt>{t(L.jetty)}</dt><dd>{pick(locale, trip.jettyEn, trip.jettyZh)}</dd></div>}
+                  </dl>
+                </section>
+                <section className="trip-facts-group">
+                  <h3>{t(L.costGroup)}</h3>
+                  <dl>
+                    <div><dt>{t(L.cost)}</dt><dd>{pick(locale, trip.costDisplayEn, trip.costDisplayZh)} <small>{pick(locale, trip.costBasisEn, trip.costBasisZh)}</small></dd></div>
+                    <TripPaymentRows stages={trip.stages} currency={trip.currency} today={trip.today} locale={locale} />
+                  </dl>
+                </section>
+                <section className="trip-facts-group">
+                  <h3>{t(L.group)}</h3>
+                  <dl>
+                    <div><dt>{t(L.groupSize)}</dt><dd>{pick(locale, trip.groupSizeEn, trip.groupSizeZh)}</dd></div>
+                    <div><dt>{t(L.difficulty)}</dt><dd>{pick(locale, trip.difficultyEn, trip.difficultyZh)}</dd></div>
+                  </dl>
+                </section>
+              </div>
               <Section title={t(L.highlights)} items={pick(locale, trip.highlightsEn, trip.highlightsZh)} />
               <Section title={trip.sample ? t(L.sampleItinerary) : t(L.itinerary)} items={pick(locale, trip.itineraryEn, trip.itineraryZh)} />
               <Section title={t(L.included)} items={pick(locale, trip.includedEn, trip.includedZh)} />
@@ -122,8 +161,6 @@ export default function TripDetail({ trip }: { trip: TripDetailData }) {
               <section className="trip-dialog-section trip-dialog-section-rules">
                 <h3>{trip.sample ? t(L.samplePlanning) : t(L.planning)}</h3>
                 <ul className="trip-rules">
-                  <li><strong>{t(L.deposit)}</strong> {pick(locale, trip.depositTextEn, trip.depositTextZh)}</li>
-                  <li><strong>{t(L.balance)}</strong> {pick(locale, trip.balanceTextEn, trip.balanceTextZh)}</li>
                   <li><strong>{t(L.cancellation)}</strong> {pick(locale, trip.cancellationTextEn, trip.cancellationTextZh)}</li>
                   <li><strong>{t(L.requirements)}</strong> {pick(locale, trip.requirementsTextEn, trip.requirementsTextZh)}</li>
                 </ul>

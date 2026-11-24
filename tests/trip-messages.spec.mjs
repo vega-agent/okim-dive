@@ -1,3 +1,5 @@
+import { openReviewSession } from './support/review-session.mjs'
+import { stagedBookingRows, deleteStagedBookingRows } from './support/staged-booking.mjs'
 import { test, expect } from '@playwright/test';
 import { config } from 'dotenv';
 import { neon } from '@neondatabase/serverless';
@@ -25,16 +27,16 @@ async function login(page, email) {
 // impact, zero email sends). Messages inserted via SQL; feed + outbox verified.
 test('trip messages rendered: diver feed unread/read + CN, instructor outbox + composer switch, overflow and targets', async ({ page }) => {
   const prefix = `msgR-${randomUUID()}`;
-  const email = `${prefix.toLowerCase()}@okimdive.com`;
+  const email = `${prefix.toLowerCase()}@example.com`;
   const tripId = `${prefix}-trip`;
-  const instructor = process.env.AUTH_INSTRUCTOR_EMAILS.split(',')[0].trim();
   let customerId = null;
+  const instructorSessions = []
   try {
     await login(page, email);
     [customerId] = (await sql`SELECT id FROM customers WHERE email = ${email}`).map(c => c.id);
     await sql`UPDATE customers SET name = ${prefix + ' Diver'}, locale = 'en' WHERE id = ${customerId}`;
     await sql`INSERT INTO trips (id, slug, title_en, title_zh, status, published, price_amount, deposit_value, capacity, travel_start, travel_end, sample) VALUES (${tripId}, ${prefix.toLowerCase()}, 'Fictional Messages Trip', '虚构消息行程', 'open', false, 100, 30, 4, ${new Date(Date.now() + 10 * 86400000).toISOString()}, ${new Date(Date.now() + 12 * 86400000).toISOString()}, true)`;
-    await sql`INSERT INTO bookings (id, customer_id, product_id, status, currency, deposit_amount, balance_amount, declarations) VALUES (${prefix + '-b1'}, ${customerId}, ${tripId}, 'confirmed', 'MYR', 30, 70, '{}')`;
+    await sql.transaction(stagedBookingRows(sql,{id:prefix+'-b1',customerId,tripId,status:'confirmed'}))
     await sql`INSERT INTO trip_messages (id, trip_id, label, subject_en, subject_zh, body_en, body_zh, audience, published_by) VALUES
       (${prefix + '-m1'}, ${tripId}, 'Briefing', 'Meeting point and boat', '集合地点与船期', 'Meet at the jetty at 8am. Bring your cert card.', '早上8点在码头集合。请携带证书卡。', 'confirmed', 'fixture'),
       (${prefix + '-m2'}, ${tripId}, 'Checklist', 'What to bring', '携带物品', 'Swimwear, reef-safe sunscreen, seasickness meds.', '泳衣、珊瑚友好防晒霜、晕船药。', 'all_active', 'fixture')`;
@@ -67,7 +69,7 @@ test('trip messages rendered: diver feed unread/read + CN, instructor outbox + c
     expect(diverMetrics.small).toBe(0);
 
     // Instructor outbox: seen counts, label filter, composer language switch.
-    await login(page, instructor);
+    instructorSessions.push(await openReviewSession(page));
     await page.evaluate(() => localStorage.setItem('okim-language', 'en'));
     await page.goto(`/portal/trips/${tripId}/messages`);
     await expect(page.locator('.msg-outbox')).toContainText('Meeting point and boat');
@@ -90,9 +92,10 @@ test('trip messages rendered: diver feed unread/read + CN, instructor outbox + c
     expect(instructorMetrics.overflow).toBe(false);
     expect(instructorMetrics.small).toBe(0);
   } finally {
+    for (const dispose of instructorSessions) await dispose()
     await sql`DELETE FROM message_reads WHERE customer_id = ${customerId}`;
     await sql`DELETE FROM trip_messages WHERE trip_id = ${tripId}`;
-    await sql`DELETE FROM bookings WHERE id = ${prefix + '-b1'}`;
+    await sql.transaction(deleteStagedBookingRows(sql,[prefix+'-b1']))
     await sql`DELETE FROM trips WHERE id = ${tripId}`;
     await sql`DELETE FROM customers WHERE id = ${customerId}`;
     await sql`DELETE FROM sessions WHERE "userId" IN (SELECT id FROM users WHERE email = ${email})`;

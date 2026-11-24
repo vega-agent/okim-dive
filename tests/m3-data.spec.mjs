@@ -27,6 +27,9 @@ test('trips cards are server-rendered from the DB with no /data/trips fetch', as
   await expect(page.locator('.trip-card .trip-badge')).toHaveText(['On request', 'Sample trip', 'Sample trip', 'Sample trip']);
   expect(dataRequests).toEqual([]);
 
+  const bookable = page.locator('.trip-card').filter({ hasText: 'Tioman Reef Weekend' });
+  await expect(bookable.getByRole('link', { name: 'View Details' })).toHaveAttribute('href', '/trips/tioman-reef-weekend');
+
   // Dialog still works from DB-backed data.
   await page.locator('.trip-details-trigger').first().click();
   await expect(page.locator('.trip-dialog[open]')).toBeVisible();

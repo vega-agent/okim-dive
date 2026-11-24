@@ -27,7 +27,7 @@ export async function saveDiverProfile(form: FormData): Promise<string> {
       const previous = old.diverProfile ?? {}
       const changed = previous.agency !== agency || previous.level !== level || previous.dives !== dives
       await tx.update(customers).set({ name,phone,locale:locale as 'en'|'zh',diverProfile:profile }).where(eq(customers.id,old.id))
-      const affected = await tx.select({ booking:bookings,trip:trips }).from(bookings).innerJoin(trips,eq(bookings.productId,trips.id)).where(and(eq(bookings.customerId,old.id),eq(bookings.productType,'trip'))).for('update')
+      const affected = await tx.select({ booking:bookings,trip:trips }).from(bookings).innerJoin(trips,eq(bookings.productId,trips.id)).where(and(eq(bookings.customerId,old.id),eq(bookings.productType,'trip'))).orderBy(bookings.id).for('update', { of: bookings })
       for (const { booking,trip } of affected) {
         if (!activeUpcoming(booking.status,trip.status,trip.travelStart)) continue
         if (changed) {
@@ -54,7 +54,7 @@ export async function saveBookingEquipment(bookingId:string,raw:unknown):Promise
     const result = await transactionDb.transaction(async tx => {
       const [owner] = await tx.select().from(customers).where(and(eq(customers.id,session.user.customerId!),eq(customers.userId,session.user.id!),isNull(customers.mergedInto)))
       if (!owner) return 'unauthenticated'
-      const [row] = await tx.select({ booking:bookings,trip:trips }).from(bookings).innerJoin(trips,eq(bookings.productId,trips.id)).where(and(eq(bookings.id,bookingId),eq(bookings.customerId,owner.id),eq(bookings.productType,'trip'))).for('update')
+      const [row] = await tx.select({ booking:bookings,trip:trips }).from(bookings).innerJoin(trips,eq(bookings.productId,trips.id)).where(and(eq(bookings.id,bookingId),eq(bookings.customerId,owner.id),eq(bookings.productType,'trip'))).orderBy(bookings.id).for('update', { of: bookings })
       if (!row) return 'unauthenticated'
       if (!equipmentEditable(row.booking.status,row.trip.status,row.trip.travelStart)) return 'cutoff'
       await tx.update(bookings).set({ equipment:equipment as unknown as Record<string,unknown> }).where(eq(bookings.id,bookingId))

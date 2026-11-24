@@ -1,4 +1,4 @@
-// Only an explicitly opted-in local preview may suppress email and hold sweeps.
+// Only an explicitly opted-in local preview may suppress email.
 export function localEmailsDisabled(): boolean {
   if (process.env.OKIM_DISABLE_EMAILS !== '1') return false
   try {

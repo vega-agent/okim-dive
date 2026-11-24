@@ -1,25 +1,20 @@
 'use server'
 
-/**
- * M4 booking server actions (MVP-SPEC §5), updated for the seamless journey
- * (S1–S2, 2026-11-22): creating a booking soft-holds ONE slot for 14 days
- * (decision #22) and emails the transfer prompt; Iris's "Received" click in the
- * portal confirms against the bank record. No payment claim/upload here:
- * evidence travels via WhatsApp (decision #20).
- */
 import { auth, signIn } from '@/auth'
-import { db } from '@/db'
-import { auditLog, bookings, customers, invoices, policyVersions, signupNames, trips } from '@/db/schema'
-import { and, desc, eq, gt, ne, sql } from 'drizzle-orm'
+import { db, transactionDb } from '@/db'
+import { auditLog, bookings, customers, signupNames, trips } from '@/db/schema'
+import { and, eq, gt, isNull, ne, sql } from 'drizzle-orm'
 import { randomUUID } from 'crypto'
 import { parseEquipment } from './diver-equipment'
-import { slotsConsumed } from './trip-display'
+import { reserveTripBooking, type ReservationResult } from './booking-reservation'
+import { revalidatePath } from 'next/cache'
+import { attemptBookingAcknowledgment, type AcknowledgmentStatus } from './booking-notifications'
+import { localEmailsDisabled } from './local-email-gate'
 import { sendDepositPromptEmail } from './emails'
 
 export type MagicLinkResult = { status: 'sent' | 'cooldown' | 'rate_limited' | 'name_taken' | 'error' }
-export type BookingResult =
-  | { status: 'created'; bookingId: string; invoiceNumber: string; deposit: string; balance: string; currency: string; balanceDue: string | null; holdDue: string | null }
-  | { status: 'unauthenticated' | 'invalid' | 'trip_unavailable' | 'trip_full' | 'error' }
+type CreatedReservation = Extract<ReservationResult, { status: 'created' }>
+export type BookingResult = Exclude<ReservationResult, CreatedReservation> | (CreatedReservation & { acknowledgment: AcknowledgmentStatus }) | { status: 'error' }
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
 
@@ -58,15 +53,6 @@ export async function setCustomerName(formData: FormData): Promise<NameSetupResu
   }
   await db.insert(auditLog).values({ id: randomUUID(), actorUserId: session.user.id, action: 'customer_name_set', entity: 'customer', entityId: session.user.customerId })
   return { status: 'saved' }
-}
-
-// Sequential human-readable IDs can collide under concurrent inserts; retry once.
-async function insertWithRetry(fn: () => Promise<string>): Promise<string> {
-  try {
-    return await fn()
-  } catch {
-    return await fn()
-  }
 }
 
 // Email-step detection (owner decision 2026-11-21): new emails — and existing
@@ -112,23 +98,11 @@ export async function requestMagicLink(email: string, slug: string, name?: strin
   }
 }
 
-async function nextSequentialId(table: 'bookings' | 'invoices', prefix: string): Promise<string> {
-  const rows = table === 'bookings'
-    ? await db!.select({ id: bookings.id }).from(bookings)
-    : await db!.select({ id: invoices.id }).from(invoices)
-  const max = rows.reduce((acc, row) => {
-    const n = Number(row.id.replace(new RegExp(`^${prefix}-`), ''))
-    return Number.isFinite(n) ? Math.max(acc, n) : acc
-  }, 0)
-  return `${prefix}-${String(max + 1).padStart(3, '0')}`
-}
-
 export async function createBooking(slug: string, formData: FormData): Promise<BookingResult> {
   const session = await auth()
-  if (!session?.user?.customerId || !db) return { status: 'unauthenticated' }
-
-  const [owner] = await db.select().from(customers).where(and(eq(customers.id, session.user.customerId), eq(customers.userId, session.user.id!))).limit(1)
-  if (!owner || owner.mergedInto) return { status: 'unauthenticated' }
+  const userId = session?.user?.id
+  const customerId = session?.user?.customerId
+  if (!userId || !customerId || !db || !transactionDb) return { status: 'unauthenticated' }
   let equipment
   try { equipment = parseEquipment(JSON.parse(String(formData.get('equipment')))) } catch { return { status: 'invalid' } }
   if (!equipment) return { status: 'invalid' }
@@ -144,101 +118,58 @@ export async function createBooking(slug: string, formData: FormData): Promise<B
   const medical = formData.get('medical') === 'on'
   const accepted = formData.get('accept_policy') === 'on'
 
-  if (!name || !certLevel || !Number.isInteger(loggedDives) || loggedDives < 0 || loggedDives > 10000
-    || !emergencyName || !emergencyPhone || !dob || !insurance || !medical || !accepted) {
+  const operationKey = text('operationKey', 100)
+  if (!/^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(operationKey) ||
+      formData.get('accept_deposits') !== 'on' || !name || !certLevel || !Number.isInteger(loggedDives) ||
+      loggedDives < 0 || loggedDives > 10000 || !emergencyName || !emergencyPhone || !dob || !insurance || !medical || !accepted) {
     return { status: 'invalid' }
   }
-
+  const termsVersionId = text('terms_version_id', 200)
+  const locale = formData.get('locale') === 'zh' ? 'zh' : 'en'
+  let result: ReservationResult
   try {
-    const tripRows = await db.select().from(trips)
-      .where(and(eq(trips.slug, slug), eq(trips.published, true), eq(trips.status, 'open'))).limit(1)
-    const trip = tripRows[0]
-    if (!trip) return { status: 'trip_unavailable' }
-
-    // S2/#22: a booking soft-holds one slot for 14 days — block creation when
-    // the hold math says full; the trip page offers Register interest instead.
-    const existing = await db.select({ status: bookings.status }).from(bookings)
-      .where(and(eq(bookings.productId, trip.id), eq(bookings.productType, 'trip')))
-    if (slotsConsumed(existing.map(b => b.status)) >= trip.capacity) return { status: 'trip_full' }
-
-    const policies = await db.select().from(policyVersions).orderBy(desc(policyVersions.version))
-    const refund = policies.find((p) => p.kind === 'refund')
-    const terms = policies.find((p) => p.kind === 'terms')
-    if (!refund || !terms) return { status: 'error' }
-    if (formData.get('refund_version_id') !== refund.id || formData.get('terms_version_id') !== terms.id) {
-      return { status: 'invalid' }
-    }
-
-    const price = Number(trip.priceAmount)
-    const deposit = trip.depositType === 'percent'
-      ? Math.round(price * Number(trip.depositValue)) / 100
-      : Math.min(Number(trip.depositValue), price)
-    const balance = Math.round((price - deposit) * 100) / 100
-    const balanceDue = trip.travelStart
-      ? new Date(trip.travelStart.getTime() - trip.balanceDueDays * 86_400_000)
-      : null
-
-    const bookingId = await insertWithRetry(async () => {
-      const id = await nextSequentialId('bookings', 'BKG')
-      await db!.insert(bookings).values({
-        id,
-        customerId: session.user.customerId,
-        equipment: equipment as unknown as Record<string, unknown>,
-        productType: 'trip',
-        productId: trip.id,
-        status: 'awaiting_deposit',
-        // Self-declared with truthfulness disclaimer (owner 2026-11-22): no
-        // eligibility approval gate; the column stays for legacy rows.
-        eligibilityStatus: 'approved',
-        policyVersionId: refund.id,
-        acceptedAt: new Date(),
-        holdExpiresAt: new Date(Date.now() + 14 * 86_400_000),
-        depositAmount: deposit.toFixed(2),
-        balanceAmount: balance.toFixed(2),
-        currency: trip.currency,
-        pointsDiscountAmount: '0',
-        declarations: {
-          certLevel, certAgency: text('cert_agency',100), agencyOther:text('agency_other',100), levelOther:text('level_other',100), loggedDives, insurance, medical, emergencyName, emergencyPhone, dob,
-          whatsapp: text('whatsapp', 40) || null,
-          termsVersionId: terms.id,
-          locale: formData.get('locale') === 'zh' ? 'zh' : 'en',
-        },
-      })
-      return id
+    result = await reserveTripBooking(transactionDb, {
+      customerId, userId, slug, operationKey, acceptedOffer: text('acceptedOffer', 100), name,
+      refundVersionId: text('refund_version_id', 200), termsVersionId, equipment,
+      declarations: { certLevel, certAgency: text('cert_agency', 100), agencyOther: text('agency_other', 100),
+        levelOther: text('level_other', 100), loggedDives, insurance, medical, emergencyName, emergencyPhone, dob,
+        whatsapp: text('whatsapp', 40) || null, termsVersionId, locale },
     })
-
-    const invoiceId = await insertWithRetry(async () => {
-      const id = await nextSequentialId('invoices', 'INV')
-      await db!.insert(invoices).values({ id, bookingId, number: `INV-${new Date().getFullYear()}-${id.replace('INV-', '')}` })
-      return id
-    })
-    const invoiceNumber = `INV-${new Date().getFullYear()}-${invoiceId.replace('INV-', '')}`
-
-    // S1: transfer prompt email after commit; failure never fails the booking.
-    const holdDue = new Date(Date.now() + 14 * 86_400_000)
-    const [customer] = await db.select().from(customers).where(eq(customers.id, session.user.customerId!))
-    if (customer) {
-      const locale = customer.locale === 'zh' ? 'zh' : 'en'
-      const ok = await sendDepositPromptEmail({
-        to: customer.email, locale, customerName: customer.name,
-        tripTitle: locale === 'zh' ? trip.titleZh || trip.titleEn : trip.titleEn,
-        bookingId, amount: deposit.toFixed(2), currency: trip.currency, dueDate: holdDue.toISOString(),
-      })
-      await db.insert(auditLog).values({ id: randomUUID(), actorUserId: session.user.id, action: 'deposit_prompt_notified', entity: 'booking', entityId: bookingId, meta: { emailsSent: ok ? 1 : 0, emailsFailed: ok ? 0 : 1 } })
-    }
-
-    return {
-      status: 'created',
-      bookingId,
-      invoiceNumber,
-      deposit: deposit.toFixed(2),
-      balance: balance.toFixed(2),
-      currency: trip.currency,
-      balanceDue: balanceDue ? balanceDue.toISOString().slice(0, 10) : null,
-      holdDue: holdDue.toISOString().slice(0, 10),
-    }
-  } catch (error) {
-    console.error('[booking] create failed.', error)
+  } catch {
+    console.error('[booking] Reservation transaction failed')
     return { status: 'error' }
   }
+  if (result.status !== 'created') return result
+  const database = db
+  const acknowledgment = await attemptBookingAcknowledgment(result.bookingId, result, {
+    suppressed: localEmailsDisabled(),
+    async claimAttempt(id) {
+      const rows = await database.update(bookings).set({ acknowledgmentAttemptedAt: new Date() })
+        .where(and(eq(bookings.id, id), isNull(bookings.acknowledgmentAttemptedAt))).returning({ id: bookings.id })
+      return rows.length === 1
+    },
+    async previousOutcome(id) {
+      const [audit] = await database.select({ meta: auditLog.meta }).from(auditLog)
+        .where(and(eq(auditLog.action, 'booking_acknowledgment'), eq(auditLog.entityId, id))).limit(1)
+      const meta = audit?.meta as Record<string, unknown> | null
+      if (meta?.outcome === 'failed' || meta?.outcome === 'suppressed' || meta?.outcome === 'provider_accepted') return meta.outcome
+      return meta?.acceptedByProvider === true ? 'provider_accepted' : 'unconfirmed'
+    },
+    async send(booking) {
+      const [recipient] = await database.select({ email: customers.email, name: customers.name, storedLocale: customers.locale,
+        titleEn: trips.titleEn, titleZh: trips.titleZh }).from(customers).innerJoin(trips, eq(trips.slug, slug)).where(eq(customers.id, customerId))
+      const mailLocale = recipient.storedLocale === 'zh' ? 'zh' : 'en'
+      return sendDepositPromptEmail({ to: recipient.email, locale: mailLocale, customerName: recipient.name,
+        tripTitle: mailLocale === 'zh' ? recipient.titleZh || recipient.titleEn : recipient.titleEn,
+        bookingId: booking.bookingId, currency: booking.currency, stages: booking.stages })
+    },
+    async recordOutcome(id, outcome) {
+      await database.insert(auditLog).values({ id: randomUUID(), actorUserId: userId, action: 'booking_acknowledgment',
+        entity: 'booking', entityId: id, meta: { outcome, acceptedByProvider: outcome === 'provider_accepted', notifyIris: outcome === 'failed' } })
+    },
+  })
+  revalidatePath('/portal')
+  revalidatePath('/myokim')
+  revalidatePath('/trips/' + slug)
+  return { ...result, acknowledgment }
 }

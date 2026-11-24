@@ -109,7 +109,9 @@ export default function TripsGrid({ trips }: { trips: Trip[] }) {
               <li><strong>Difficulty:</strong> {trip.difficulty}</li>
               <li><strong>Group Size:</strong> {trip.groupSize}</li>
             </ul>
-            <button className="btn btn-primary trip-details-trigger" type="button" data-trip-id={trip.id}>View Details</button>
+            {trip.detailHref
+              ? <a className="btn btn-primary" href={trip.detailHref}>View Details</a>
+              : <button className="btn btn-primary trip-details-trigger" type="button" data-trip-id={trip.id}>View Details</button>}
           </div>
         </article>
       ))}

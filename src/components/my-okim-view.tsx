@@ -11,6 +11,8 @@ import { useLocale, pick, type Locale } from '@/lib/use-locale'
 import { setCustomerLocale } from '@/lib/booking-actions'
 import DiverProfile from '@/components/diver-profile'
 import { useEquipmentValue, EquipmentSizes } from '@/components/equipment-editor'
+import PaymentSchedule from './payment-schedule'
+import type { BookingPaymentSummary, CancellationKind } from '@/lib/payment-schedule'
 import EquipmentBoard from '@/components/equipment-board'
 import { saveBookingEquipment } from '@/lib/diver-actions'
 import { markMessageRead } from '@/lib/message-actions'
@@ -19,9 +21,11 @@ import { RENTAL_NOTICE, equipmentFromProfile, type Equipment } from '@/lib/diver
 type Receipt = { id: string; receiptNo: string; kind: string; amount: string; currency: string }
 type BookingMessage = { id: string; label: string; subjectEn: string; subjectZh: string; bodyEn: string; bodyZh: string; publishedAt: string; seen: boolean }
 type Booking = {
+  summary: BookingPaymentSummary | null
   id: string; status: string; eligibilityStatus: string; currency: string
-  depositAmount: string | null; balanceAmount: string | null; pointsDiscountAmount: string | null
-  createdAt: string; balanceDue: string | null; invoiceNumber: string | null
+  invoiceNumber: string | null
+  proposedDates: string | null
+  cancellation: { kind: CancellationKind; reason: string | null } | null
   trip: { slug: string; titleEn: string; titleZh: string; travelDatesEn: string | null; travelDatesZh: string | null; sample: boolean } | null
   equipment: { initial: Equipment | null; editable: boolean; cutoffAt: string | null; timezone: string | null } | null
   receipts: Receipt[]
@@ -46,6 +50,11 @@ const bookingStatus: Record<string, { en: string; zh: string; tone: Tone }> = {
   refund_flagged: { en: 'Refund review', zh: '退款审核', tone: 'bad' },
   cancelled: { en: 'Cancelled', zh: '已取消', tone: 'neutral' },
   eligibility_declined: { en: 'Withdrawn', zh: '已退出', tone: 'neutral' },
+}
+const cancellations: Record<CancellationKind, [string,string]> = {
+  diver_withdrawal: ['Diver withdrew','潜水员退出'], nonpayment: ['Cancelled for missed payment','因未付款取消'],
+  no_show: ['Did not attend','未出席'], operator_cancelled: ['Cancelled by Okim','Okim 取消行程'],
+  postponement_declined: ['New dates declined','未接受改期'],
 }
 const ledgerType: Record<string, { en: string; zh: string; tone: Tone }> = {
   earned: { en: 'Earned', zh: '已累积', tone: 'ok' },
@@ -75,20 +84,6 @@ type T = (en: string, zh: string) => string
 const label = (m: Record<string, { en: string; zh: string }>, key: string, t: T) => { const v = m[key]; return v ? t(v.en, v.zh) : key }
 const tone = (m: Record<string, { tone: Tone }>, key: string) => m[key]?.tone ?? 'neutral'
 
-function guidanceFor(b: Booking, t: T): string {
-  switch (b.status) {
-    case 'awaiting_deposit': return t(`Pay the deposit by bank transfer using ${b.id} as the reference, then send the screenshot to Iris on WhatsApp.`, `请以 ${b.id} 为转账备注支付订金，并将转账截图通过 WhatsApp 发送给 Iris。`)
-    case 'payment_claimed': return t('Iris has recorded your payment and is checking it against the bank record.', 'Iris 已记录你的付款，正在核对银行记录。')
-    case 'deposit_verified': return t('Deposit verified — Iris is confirming your slot.', '订金已核实——Iris 正在确认你的名额。')
-    case 'confirmed': return Number(b.balanceAmount ?? 0) > 0
-      ? t('Your slot is confirmed. Pay the balance by the due date.', '名额已确认。请在截止日期前支付尾款。')
-      : t('Your slot is confirmed. See you underwater.', '名额已确认。水下见。')
-    case 'refund_flagged': return t('A refund is under review — Iris will contact you.', '退款正在审核中——Iris 会与你联系。')
-    case 'eligibility_declined': return t('This booking was withdrawn — contact Iris to discuss options.', '此预订已退出——请联系 Iris 商量其他方案。')
-    default: return ''
-  }
-}
-
 // Owner revision 2026-11-21: each upcoming booking reads as three sub-cards —
 // Trip information / Equipment / Sizes & fit — closing with a small disclaimer.
 // The booking reference is explained once, where it first appears.
@@ -97,6 +92,7 @@ function BookingGroup({ b, profile, locale }: { b: Booking; profile: Record<stri
   const money = (currency: string, amount: string) => `${currency} ${Number(amount).toFixed(2)}`
   const date = (iso: string) => new Date(iso).toLocaleDateString(locale === 'zh' ? 'zh-CN' : 'en-GB', { day: 'numeric', month: 'short', year: 'numeric' })
   const badge = (text: string, tn: Tone) => <span className={`status-badge tone-${tn}`}>{text}</span>
+  const next = b.summary?.stages.find(s => s.id === b.summary?.nextStageId)
   const { value, update } = useEquipmentValue(b.equipment?.initial ?? undefined, profile?.equipment)
   const [notice, setNotice] = useState('')
   const [pending, setPending] = useState(false)
@@ -124,20 +120,16 @@ function BookingGroup({ b, profile, locale }: { b: Booking; profile: Record<stri
       <header className="my-subcard-head"><h3><img src="/assets/icons/ui-compass.webp" alt="" width={20} height={20} />{t('Trip information', '行程信息')}</h3></header>
       <div className="my-subcard-body">
         <p className="my-trip-title">{b.trip ? pick(locale, b.trip.titleEn, b.trip.titleZh) : b.id}</p>
-        <p className="my-meta">{b.trip ? pick(locale, b.trip.travelDatesEn, b.trip.travelDatesZh) ?? date(b.createdAt) : date(b.createdAt)}{b.trip?.sample ? ` · ${t('Sample trip', '示例行程')}` : ''}</p>
+        <p className="my-meta">{b.proposedDates && t('Agreed dates · ','原定日期 · ')}{b.trip ? pick(locale, b.trip.travelDatesEn, b.trip.travelDatesZh) : null}{b.trip?.sample ? ` · ${t('Sample trip', '示例行程')}` : ''}</p>
+        {b.proposedDates && <div className="my-guidance"><strong>{t('Proposed travel dates','建议改期日期')} · {b.proposedDates}</strong>
+          <p>{t('Tell Iris whether you accept the new dates or prefer a full refund. She will record your choice.', '请告诉 Iris 你是否接受新日期，或选择全额退款。她会登记你的决定。')}</p></div>}
         <p className="my-meta">{t('Booking reference', '预订编号')} <strong>{b.id}</strong> — {t('use it as your bank transfer reference.', '银行转账时请以此作为备注。')}</p>
         <div className="my-badges">
           {badge(label(bookingStatus, b.status, t), tone(bookingStatus, b.status))}
         </div>
-        <dl className="my-amounts">
-          <div><dt>{t('Deposit', '订金')}</dt><dd>{money(b.currency, b.depositAmount ?? '0')}</dd></div>
-          <div><dt>{t('Balance', '尾款')}</dt><dd>{money(b.currency, b.balanceAmount ?? '0')}</dd></div>
-          {Number(b.pointsDiscountAmount ?? 0) > 0 && <div><dt>{t('Points discount', '积分抵扣')}</dt><dd>−{money(b.currency, b.pointsDiscountAmount as string)}</dd></div>}
-          {Number(b.balanceAmount ?? 0) > 0 && b.balanceDue && ['awaiting_deposit', 'confirmed'].includes(b.status) && <div><dt>{t('Balance due', '尾款截止')}</dt><dd>{date(b.balanceDue)}</dd></div>}
-        </dl>
-        <p className="my-guidance">{guidanceFor(b, t)}</p>
+        {b.summary && <PaymentSchedule summary={b.summary} locale={locale} />}
+        {next && <p className="my-guidance">{t('Next payment', '下一笔应付')} · {next.kind === 'final' ? t('Final payment','尾款') : t('Deposit ','订金 ') + next.position} · {money(b.currency, (next.outstandingMinor / 100).toFixed(2))}{next.dueDate && <> · {next.dueDate}</>}</p>}
         <ul className="portal-receipts my-links">
-          {b.invoiceNumber && <li><a href={`/invoice/${encodeURIComponent(b.id)}`}>{t('Invoice', '发票')} {b.invoiceNumber}</a></li>}
           {b.receipts.map(r => <li key={r.id}><a href={`/receipt/${encodeURIComponent(r.id)}`}>{r.kind === 'refund' ? t('Refund record', '退款记录') : t('Receipt', '收据')} {r.receiptNo} · {money(r.currency, r.amount)}</a></li>)}
         </ul>
       </div>
@@ -210,7 +202,7 @@ export default function MyOkimView({ data }: { data: Data }) {
   const date = (iso: string) => new Date(iso).toLocaleDateString(locale === 'zh' ? 'zh-CN' : 'en-GB', { day: 'numeric', month: 'short', year: 'numeric' })
   const badge = (text: string, tn: Tone) => <span className={`status-badge tone-${tn}`}>{text}</span>
   const tripName = (b: Booking) => b.trip ? pick(locale, b.trip.titleEn, b.trip.titleZh) : b.id
-  const tripDates = (b: Booking) => b.trip ? pick(locale, b.trip.travelDatesEn, b.trip.travelDatesZh) ?? date(b.createdAt) : date(b.createdAt)
+  const tripDates = (b: Booking) => b.trip ? pick(locale, b.trip.travelDatesEn, b.trip.travelDatesZh) : null
 
   const upcoming = data.bookings.filter(b => !PAST_STATUSES.includes(b.status))
   const past = data.bookings.filter(b => PAST_STATUSES.includes(b.status))
@@ -252,7 +244,7 @@ export default function MyOkimView({ data }: { data: Data }) {
           <p>{t('Each booking moves through these stages:', '每个预订会经历以下阶段：')}</p>
           <ol>
             <li>{t('Awaiting deposit — pay by bank transfer with your booking ID as the reference, then send the screenshot to Iris on WhatsApp.', '待付订金——以预订编号为转账备注付款，再将截图通过 WhatsApp 发送给 Iris。')}</li>
-            <li>{t('Confirmed — Iris verified your deposit against the bank record and re-checked availability. Your slot is held.', '已确认——Iris 已核对银行到账并复查名额，你的名额已保留。')}</li>
+            <li>{t('Your place is reserved when you book. Iris confirms it once she verifies the full first deposit.', '预订成功后即为你保留名额。Iris 核实第一笔订金全部到账后，预订即获确认。')}</li>
             <li>{t('Completed trips move to the Past trips tab; their points unlock on the Points tab.', '已完成的行程会移入「往期行程」标签；其积分在「我的积分」标签解锁。')}</li>
             <li>{t('Changes and cancellations are handled by Iris personally — use the contact link above.', '更改与取消由 Iris 亲自处理——请使用上方联系链接。')}</li>
           </ol>
@@ -269,7 +261,7 @@ export default function MyOkimView({ data }: { data: Data }) {
       <div className="portal-card-head">
         <h2><img src="/assets/icons/ui-anchor.webp" alt="" width={20} height={20} />{t('Past trips', '往期行程')}</h2>
       </div>
-      <p className="portal-hint">{t('Completed and cancelled bookings, newest first. Invoice and receipt records stay available.', '已完成与已取消的预订，按时间倒序。发票与收据记录随时可查。')}</p>
+      <p className="portal-hint">{t('Completed and cancelled bookings, newest first. Invoices are available after individual completion.', '已完成与已取消的预订，按时间倒序排列。个人预订完成后即可查看发票。')}</p>
       {past.length === 0 ? <div className="portal-empty">
         <h3>{t('No past trips yet', '暂无往期行程')}</h3>
         <p>{t('Trips appear here after they are completed or cancelled.', '行程完成或取消后将显示在此处。')}</p>
@@ -278,14 +270,23 @@ export default function MyOkimView({ data }: { data: Data }) {
           {visiblePast.map(b => <li key={b.id} className="my-past-row">
             <div className="my-past-main">
               <strong>{tripName(b)}</strong>
-              <span className="portal-row-sub">{b.id} · {tripDates(b)}</span>
+              <span className="portal-row-sub">{b.id}{tripDates(b) && ' · ' + tripDates(b)}</span>
             </div>
             {badge(label(bookingStatus, b.status, t), tone(bookingStatus, b.status))}
             {b.trip?.sample && badge(t('Sample', '示例'), 'neutral')}
             <span className="my-past-links">
-              {b.invoiceNumber && <a href={`/invoice/${encodeURIComponent(b.id)}`} aria-label={`${t('Invoice', '发票')} ${b.invoiceNumber}`}>{t('Invoice', '发票')}</a>}
+              {b.status === 'completed' && b.invoiceNumber && <a href={`/invoice/${encodeURIComponent(b.id)}`} aria-label={`${t('Invoice', '发票')} ${b.invoiceNumber}`}>{t('Invoice', '发票')}</a>}
               {b.receipts.map(r => <a key={r.id} href={`/receipt/${encodeURIComponent(r.id)}`} aria-label={`${r.kind === 'refund' ? t('Refund record', '退款记录') : t('Receipt', '收据')} ${r.receiptNo} · ${money(r.currency, r.amount)}`}>{r.receiptNo}</a>)}
             </span>
+            {b.summary && <div className="my-past-payments">
+              {b.cancellation && <>
+                <p><strong>{t(...cancellations[b.cancellation.kind])}</strong>{b.cancellation.reason && <> · {b.cancellation.reason}</>}</p>
+                <p>{t('Deposits retained','保留订金')} {money(b.currency, String((b.summary.netReceivedMinor - b.summary.refundOutstandingMinor) / 100))} · {t('Refund agreed','应退总额')} {money(b.currency, String(b.summary.refundEntitlementMinor / 100))}</p>
+                <p>{t('Refunded since cancellation','取消后已退')} {money(b.currency, String((b.summary.refundedMinor - b.summary.refundBaselineMinor) / 100))} · <strong>{t('Still to refund','尚需退款')} {money(b.currency, String(b.summary.refundOutstandingMinor / 100))}</strong></p>
+                {b.summary.refundBaselineMinor > 0 && <p>{t('Refunded before cancellation','取消前已退')} {money(b.currency, String(b.summary.refundBaselineMinor / 100))}</p>}
+              </>}
+              <details><summary>{t('Payment details','付款明细')}</summary><PaymentSchedule summary={b.summary} locale={locale} completed={b.status === 'completed'} /></details>
+            </div>}
           </li>)}
         </ul>
         {past.length > PAST_LIMIT && <button type="button" className="btn btn-secondary my-show-all" onClick={() => setShowAllPast(v => !v)}>
@@ -302,7 +303,7 @@ export default function MyOkimView({ data }: { data: Data }) {
           <ol>
             <li>{t('Points are awarded once when Iris completes your individual booking: 1 point per RM1 of net verified cash, using payment rate snapshots. Payments alone earn nothing.', 'Iris 确认你的个人预订完成后，按净核实现金付款一次性发放积分：每 RM1 得 1 分，使用付款汇率快照。付款本身不获积分。')}</li>
             <li>{t('New awards are immediately usable and expire 12 calendar months from individual completion. Legacy entries retain their original rules and expiry.', '新积分发放后即可使用，自个人预订完成日起 12 个日历月后过期。旧记录保留原规则及到期日。')}</li>
-            <li>{t('Iris applies your points at invoice time, up to 20% of the trip price — ask her when booking.', 'Iris 会在开具发票时为你抵扣积分，最高为行程价格的 20%——预订时向她提出即可。')}</li>
+            <li>{t('Ask Iris to apply available points before your first payment. The discount reduces the final stage, up to 20% of the original price.', '首次付款前可请 Iris 使用可用积分抵扣尾款，抵扣上限为行程原价的 20%。')}</li>
             <li>{t('Refunds reverse the related points; the history below is append-only, so corrections appear as reversal entries.', '退款会冲正相关积分；下方明细只增不改，更正以冲正记录呈现。')}</li>
           </ol>
         </CardHelp>
@@ -317,7 +318,7 @@ export default function MyOkimView({ data }: { data: Data }) {
           <span className="my-stat-label">{t('Available to redeem', '可用积分')}</span>
         </div>
       </div>
-      <p className="portal-hint">{t('Not yet awarded before individual completion. No points for no-shows, withdrawals, cancelled or declined bookings. Iris applies available points at invoice time (up to 20% of the trip price).', '个人预订完成前尚未发放积分。未出席、退出、取消或被拒的预订不获积分。Iris 在开具发票时抵扣可用积分（最高为行程价格的 20%）。')}</p>
+      <p className="portal-hint">{t('Not yet awarded before individual completion. No points for no-shows, withdrawals, cancelled or declined bookings.', '个人预订完成前尚未发放积分。未出席、退出、取消或被拒的预订不获积分。')}</p>
       {data.ledger.length === 0 ? <div className="portal-empty">
         <h3>{t('No points activity yet', '暂无积分记录')}</h3>
         <p>{t('Points are not yet awarded until Iris completes your individual booking.', 'Iris 确认个人预订完成前，积分尚未发放。')}</p>

@@ -1,0 +1,44 @@
+/* ListEditor row controls (owner 2026-11-22): square × / + at the right of
+   each row, 44px, clean v2 language. Bundled with the component so the trip
+   content editor (no portal-tabs.css import) gets the same look. */
+.list-editor .list-editor-row { display: grid; grid-template-columns: minmax(0, 1fr) 44px 44px; gap: .5rem; align-items: center; }
+.list-editor .list-editor-row + .list-editor-row { margin-top: .5rem; }
+/* Translate icon sits INSIDE the row (#47) so the text field, ×, + and
+   Translate share one line. The 4th track appears only when the browser
+   renders the button (it is feature-detected away elsewhere). */
+.list-editor .list-editor-row:has(.translate-icon-btn) { grid-template-columns: minmax(0, 1fr) 44px 44px 44px; }
+.list-editor-row .translate-icon-btn { grid-column: auto; }
+.list-editor-row .translate-status { grid-column: 1 / -1; }
+@media (max-width: 640px) { .list-editor .list-editor-row { gap: .4rem; } }
+/* Phones: three 44px controls beside the field leave it too narrow to type in,
+   so the field goes full width and the × / + / Translate cluster wraps onto its
+   own right-aligned line. Tablet and desktop keep the single row. */
+@media (max-width: 480px) {
+  .list-editor .list-editor-row { display: flex; flex-wrap: wrap; justify-content: flex-end; }
+  .list-editor-row > input { flex: 1 1 100%; }
+  .list-editor-row .list-editor-btn, .list-editor-row .translate-icon-btn { flex: none; }
+  .list-editor-row .translate-status { flex: 1 1 100%; }
+}
+/* Shared by .list-editor rows AND .deposit-editor rows — keep unscoped so
+   both get the identical 44px square language as the translate icon. */
+.list-editor-btn {
+  width: 44px; height: 44px; padding: 0; display: inline-flex; align-items: center; justify-content: center;
+  border: 1px solid rgba(38, 70, 83, .3); border-radius: 10px; background-color: #fff; background-image: none;
+  box-shadow: none; transform: none; color: var(--ocean-deep); font-family: var(--font-body);
+  font-size: 1.25rem; font-weight: 700; line-height: 1; cursor: pointer;
+}
+.list-editor-btn:hover, .list-editor-btn:focus-visible {
+  background-color: var(--sand); border-color: var(--ocean-mid); color: var(--ocean-deep); transform: none; box-shadow: none;
+}
+.list-editor-btn:focus-visible { outline: 2px solid var(--ocean-mid); outline-offset: 2px; }
+.list-editor-btn:disabled { opacity: .55; cursor: not-allowed; }
+@media (prefers-reduced-motion: reduce) { .list-editor-btn { transition: none; } }
+/* Named payment stages share the settings form's two columns. */
+.deposit-editor { display: grid; gap: .75rem; }
+.deposit-editor > button { justify-self: start; }
+.deposit-row { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) 44px; gap: .75rem; align-items: end; }
+.deposit-row input { min-width: 0; width: 100%; }
+@media (max-width: 480px) {
+  .deposit-row { grid-template-columns: minmax(0, 1fr) 44px; }
+  .deposit-row > label:first-child { grid-column: 1 / -1; }
+}

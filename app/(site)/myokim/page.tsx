@@ -1,3 +1,4 @@
+import { spendablePoints } from '@/lib/points-accounting'
 // M6: My Okim — customer area (MVP-SPEC §10), tabbed per owner revision:
 // Upcoming trips (default) / Past trips (compact) / Points / Profile.
 // Bookings and points are read-only — changes go through Iris. Profile details
@@ -8,12 +9,14 @@ import { redirect } from 'next/navigation'
 import { and, desc, eq, inArray, isNull } from 'drizzle-orm'
 import { auth } from '@/auth'
 import { db } from '@/db'
-import { bookings, customers, invoices, messageReads, payments, pointsLedger, tripMessages, trips } from '@/db/schema'
+import { auditLog, customers, invoices, messageReads, pointsLedger, tripMessages, trips } from '@/db/schema'
 import SiteFooter from '@/components/site-footer'
 import MyOkimView from '@/components/my-okim-view'
 import { Equipment, equipmentEditable } from '@/lib/diver-equipment'
 import { messageAudienceStatuses } from '@/lib/trip-display'
-import { sweepHolds } from '@/lib/seamless-actions'
+import { receiptReference } from '@/lib/payment-documents'
+import { bookingTravelDates, travelDateRange, travelAuditFields, travelAuditScope } from '@/lib/booking-travel-dates'
+import { readPaymentBooks } from '@/lib/payment-queries'
 
 export const dynamic = 'force-dynamic'
 
@@ -21,25 +24,26 @@ export const metadata: Metadata = { title: 'My Okim - Okim Dive' }
 
 export default async function MyOkimPage() {
   const session = await auth()
-  if (!session?.user?.customerId) redirect('/book')
+  if (!session?.user?.id || !session.user.customerId) redirect('/book')
   if (!db) throw new Error('Database unavailable')
-  await sweepHolds()
   const customerId = session.user.customerId
 
-  const [customerRows, bookingRows, ledgerRows] = await Promise.all([
-    db.select().from(customers).where(eq(customers.id, customerId)).limit(1),
-    db.select().from(bookings).where(eq(bookings.customerId, customerId)).orderBy(desc(bookings.createdAt)),
+  const [customerRows, book, ledgerRows] = await Promise.all([
+    db.select().from(customers).where(and(eq(customers.id, customerId), eq(customers.userId, session.user.id), isNull(customers.mergedInto))).limit(1),
+    readPaymentBooks({ customerId, userId: session.user.id }),
     db.select().from(pointsLedger).where(eq(pointsLedger.customerId, customerId)).orderBy(desc(pointsLedger.createdAt)),
   ])
   const customer = customerRows[0]
   if (!customer) redirect('/book')
 
-  const bookingIds = bookingRows.map(b => b.id)
+  const { bookings: bookingRows, payments: paymentRows, summaries } = book
+  const bookingIds = bookingRows.filter(b => b.status === 'completed').map(b => b.id)
   const tripIds = Array.from(new Set(bookingRows.filter(b => b.productType === 'trip').map(b => b.productId)))
-  const [tripRows, invoiceRows, paymentRows] = await Promise.all([
+  const [tripRows, invoiceRows, dateAudits] = await Promise.all([
     tripIds.length ? db.select().from(trips).where(inArray(trips.id, tripIds)) : Promise.resolve([]),
     bookingIds.length ? db.select().from(invoices).where(inArray(invoices.bookingId, bookingIds)) : Promise.resolve([]),
-    bookingIds.length ? db.select().from(payments).where(inArray(payments.bookingId, bookingIds)) : Promise.resolve([]),
+    tripIds.length ? db.select(travelAuditFields).from(auditLog)
+      .where(travelAuditScope(tripIds, bookingRows.map(b => b.id))).orderBy(auditLog.at,auditLog.id) : Promise.resolve([]),
   ])
   // Trip messages (TRIP-MESSAGES-SPEC): on-platform feed, audience filtered at
   // view time so late bookers see earlier matching messages. Zero emails.
@@ -57,13 +61,7 @@ export default async function MyOkimPage() {
   const now = new Date()
   const completedIds = new Set(bookingRows.filter(b => b.status === 'completed').map(b => b.id))
   const totalPoints = ledgerRows.reduce((sum, e) => sum + e.points, 0)
-  let availablePoints = 0
-  for (const lot of ledgerRows.filter(e => e.type === 'earned')) {
-    const net = lot.points + ledgerRows.filter(e => e.sourceLotId === lot.id).reduce((sum, e) => sum + e.points, 0)
-    if (net <= 0 || !lot.expiresAt || lot.expiresAt <= now) continue
-    if (!lot.bookingId || !completedIds.has(lot.bookingId)) continue
-    availablePoints += net
-  }
+  const availablePoints=spendablePoints(ledgerRows,completedIds,now).available
 
   const data = {
     customer: { id: customer.id, name: customer.name, email: customer.email, phone: customer.phone, diverProfile: customer.diverProfile },
@@ -71,27 +69,26 @@ export default async function MyOkimPage() {
     availablePoints,
     bookings: bookingRows.map(b => {
       const trip = b.productType === 'trip' ? tripById.get(b.productId) : undefined
-      const balanceDue = trip?.travelStart
-        ? new Date(trip.travelStart.getTime() - trip.balanceDueDays * 86_400_000).toISOString().slice(0, 10)
-        : null
+      const summary = summaries.get(b.id) ?? null
+      const change = bookingTravelDates(dateAudits,b.id,b.productId)
+      const dates = change ? change.agreed : travelDateRange(trip?.travelStart,trip?.travelEnd,trip?.departureTimezone)
       return {
         id: b.id,
         status: b.status,
+        cancellation: b.status === 'cancelled' && b.cancellationKind ? { kind: b.cancellationKind, reason: b.cancelReason } : null,
         eligibilityStatus: b.eligibilityStatus,
         currency: b.currency,
-        depositAmount: b.depositAmount,
-        balanceAmount: b.balanceAmount,
-        pointsDiscountAmount: b.pointsDiscountAmount,
-        createdAt: b.createdAt.toISOString(),
+        proposedDates: b.status === 'cancelled' || b.status === 'completed' ? null : change?.proposed ?? null,
+
         trip: trip ? {
           slug: trip.slug,
           titleEn: trip.titleEn,
           titleZh: trip.titleZh,
-          travelDatesEn: trip.travelDatesEn,
-          travelDatesZh: trip.travelDatesZh,
+          travelDatesEn: change ? dates : dates ?? trip.travelDatesEn,
+          travelDatesZh: change ? dates : dates ?? trip.travelDatesZh,
           sample: trip.sample,
         } : null,
-        balanceDue,
+        summary,
         // Equipment is scoped to its booking card on the Upcoming tab only;
         // cutoff is formatted client-side so the language toggle stays live.
         equipment: trip ? {
@@ -111,8 +108,8 @@ export default async function MyOkimPage() {
             seen: seenSet.has(m.id),
           })),
         receipts: paymentRows
-          .filter(p => p.bookingId === b.id && p.receiptNo && p.verifiedAt)
-          .map(p => ({ id: p.id, receiptNo: p.receiptNo as string, kind: p.kind, amount: p.amount, currency: p.currency })),
+          .filter(p => p.bookingId === b.id && p.receiptNo && p.verifiedAt && p.receiptSnapshot)
+          .map(p => ({ id: p.id, receiptNo: receiptReference(p.receiptNo!), kind: p.kind, amount: p.amount, currency: p.currency })),
       }
     }),
     ledger: ledgerRows.map(e => ({

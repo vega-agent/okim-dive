@@ -4,9 +4,11 @@
 // acceptance → booking + invoice. Payment evidence is manual via WhatsApp
 // (decision #20) — the confirmation explains the next step, no upload UI.
 // Bilingual via useLocale (data-driven surface).
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import Link from 'next/link'
 import CertificationFields from './certification-fields'
+import TripPaymentRows from './trip-payment-rows'
+import type { StageInput } from '@/lib/payment-schedule'
 import EquipmentEditor from './equipment-editor'
 import { useLocale, pick } from '@/lib/use-locale'
 import { requestMagicLink, createBooking, setCustomerLocale, checkSignupEmail, type BookingResult } from '@/lib/booking-actions'
@@ -18,8 +20,10 @@ export type BookingWizardProps = {
   titleEn: string
   titleZh: string | null
   priceDisplay: string | null
-  depositTextEn: string | null
-  depositTextZh: string | null
+  stages: StageInput[]
+  currency: string
+  today: string
+  acceptedOffer: string
   authenticated: boolean
   customerName: string
   diverProfile?: { agency?:string; level?:string; dives?:number; phone?:string }
@@ -32,7 +36,7 @@ export type BookingWizardProps = {
 const L = {
   stepEmail: ['Email', '邮箱'],
   stepDetails: ['Your details', '填写资料'],
-  stepDone: ['Confirmed', '完成'],
+  stepDone: ['Booking received', '预订已收到'],
   emailTitle: ['Sign in to book', '登录以预订'],
   emailIntro: ['We will email you a secure sign-in link. No password needed.', '我们会通过电子邮件发送安全登录链接，无需密码。'],
   emailLabel: ['Email address', '电子邮件'],
@@ -85,22 +89,40 @@ const L = {
   fullMsg: ['This trip is full. Register your interest on the trip page and Iris will contact you if a slot opens.', '此行程已满。请在行程页登记意向，如有空位 Iris 会联系你。'],
   unauthMsg: ['Your sign-in expired. Start again with your email.', '登录已过期，请重新用邮箱开始。'],
   doneTitle: ['Booking received', '预订已收到'],
-  doneIntro: ['Your booking is holding a slot for 14 days. Transfer the deposit by the due date below — Iris confirms your booking once she matches your transfer in the bank record, and a confirmation email with your receipt follows.', '你的预订已保留名额 14 天。请在下方截止日期前转账订金——Iris 核对银行到账后即确认预订，确认邮件与收据随即送达。'],
-  bookingIdLabel: ['Booking ID (use as transfer reference)', '预订编号（用作转账备注）'],
-  invoiceLabel: ['Invoice', '发票'],
-  depositLabel: ['Deposit due now', '现在应付订金'],
-  holdDueLabel: ['Transfer deposit by', '订金转账截止'],
-  balanceLabel: ['Balance', '尾款'],
-  balanceDueLabel: ['Balance due by', '尾款截止日期'],
+  doneIntro: ['Your place is reserved. Iris will confirm it once she verifies the full first deposit.', '已为你保留名额。第一笔订金全部到账后，Iris 会确认你的预订。'],
+  bookingIdLabel: ['Booking reference', '预订编号'],
+  schedule: ['Payment schedule', '付款安排'],
   payTitle: ['How to pay', '如何付款'],
   payStep1: ['Transfer the deposit externally (bank transfer or PayNow), using your Booking ID as the reference.', '通过外部方式支付订金（银行转账或 PayNow），以预订编号作为转账备注。'],
   payStep2: ['Send the transfer screenshot to Iris via WhatsApp.', '通过 WhatsApp 将转账截图发给 Iris。'],
-  payStep3: ['Iris checks the bank record and confirms your slot. You will receive a receipt.', 'Iris 核对银行记录后确认你的名额，你将收到收据。'],
+  payStep3: ['Iris records your payment. You can find your receipt in My Okim.', 'Iris 核对并登记付款后，你可以在“我的 Okim”查看收据。'],
   contactLink: ['Contact details for WhatsApp', 'WhatsApp 联系方式'],
-  viewInvoice: ['View invoice', '查看发票'],
+  viewMyOkim: ['View My Okim', '前往我的 Okim'],
   backToTrip: ['Back to trip', '返回行程'],
   bankNote: ['Iris will share her receiving account details with you directly.', 'Iris 会直接向你提供收款账户信息。'],
 } as const
+
+export function BookingHero() {
+  const locale = useLocale()
+  return <section className="page-hero trips-hero" data-locale-managed>
+    <div className="hero-bg" /><div className="hero-content">
+      <h1 className="hero-title">{pick(locale, 'Book your trip', '预订行程')}</h1>
+      <p className="hero-subtitle">{pick(locale, 'One diver per booking. Iris confirms your place after the first deposit is paid in full.', '每次预订限一位潜水员。第一笔订金全部到账后，Iris 会确认你的名额。')}</p>
+    </div>
+  </section>
+}
+
+export function BookingAvailability({ full, reserved, slug, titleEn, titleZh }: {
+  full: boolean; reserved: boolean; slug: string; titleEn: string; titleZh: string
+}) {
+  const locale = useLocale()
+  const t = (en: string, zh: string) => pick(locale, en, zh)
+  return <div className="booking-shell" data-locale-managed><div className="booking-card">
+    <h2 className="booking-title">{t(titleEn, titleZh)}</h2>
+    <p className="booking-intro">{reserved ? t('You already have a reservation for this trip.', '你已预订此行程。') : full ? t('This trip is full.', '此行程已满员。') : t('Contact Iris to ask about this trip.', '请联系 Iris 咨询此行程。')}</p>
+    <Link className="btn btn-primary" href={reserved ? '/myokim' : full ? '/trips/' + slug : '/contact'}>{reserved ? t('View My Okim', '前往我的 Okim') : full ? t('Register interest', '登记意向') : t('Ask about this trip', '咨询此行程')}</Link>
+  </div></div>
+}
 
 export default function BookingWizard(props: BookingWizardProps) {
   // Decision #33: display follows the browsing language; toggling while
@@ -111,6 +133,7 @@ export default function BookingWizard(props: BookingWizardProps) {
   )
   const t = (pair: readonly [string, string]) => pick(locale, pair[0], pair[1])
   const [step, setStep] = useState<'email' | 'sent' | 'details' | 'confirmed'>(props.authenticated ? 'details' : 'email')
+  const operationKey = useRef('')
   const [email, setEmail] = useState('')
   const [needsName, setNeedsName] = useState(false)
   const [emailChecked, setEmailChecked] = useState(false)
@@ -163,11 +186,18 @@ export default function BookingWizard(props: BookingWizardProps) {
     ;(form.elements.namedItem('locale') as HTMLInputElement).value = locale
     setPending(true)
     setNotice(null)
-    const res = await createBooking(props.slug, new FormData(form))
-    setPending(false)
+    const data = new FormData(form)
+    operationKey.current ||= crypto.randomUUID()
+    data.set('operationKey', operationKey.current)
+    let res: BookingResult
+    try { res = await createBooking(props.slug, data) }
+    catch { setNotice(t(L.errorMsg)); return }
+    finally { setPending(false) }
     if (res.status === 'created') { setResult(res); setStep('confirmed') }
     else if (res.status === 'invalid') setNotice(t(L.invalidMsg))
     else if (res.status === 'trip_unavailable') setNotice(t(L.unavailableMsg))
+    else if (res.status === 'offer_changed') setNotice(t(['The payment schedule changed. Reload this page to review it before booking.', '付款安排已更新，请刷新本页，核对后再预订。']))
+    else if (res.status === 'already_booked') setNotice(t(['You already have a reservation for this trip. Find it in My Okim.', '你已预订此行程，请在“我的 Okim”中查看。']))
     else if (res.status === 'trip_full') setNotice(t(L.fullMsg))
     else if (res.status === 'unauthenticated') { setNotice(t(L.unauthMsg)); setStep('email') }
     else setNotice(t(L.errorMsg))
@@ -223,6 +253,7 @@ export default function BookingWizard(props: BookingWizardProps) {
 
         {step === 'details' && (
           <form onSubmit={submitDetails}>
+            <input type="hidden" name="acceptedOffer" value={props.acceptedOffer} />
             <input type="hidden" name="refund_version_id" value={props.refund.id} />
             <input type="hidden" name="terms_version_id" value={props.terms.id} />
             <input type="hidden" name="locale" defaultValue="en" />
@@ -261,6 +292,8 @@ export default function BookingWizard(props: BookingWizardProps) {
               <label htmlFor="b-dob">{t(L.dobLabel)} *</label>
               <input id="b-dob" name="dob" type="date" required />
             </div>
+            <h3>{t(L.schedule)}</h3>
+            <dl className="booking-summary"><TripPaymentRows stages={props.stages} currency={props.currency} today={props.today} locale={locale} /></dl>
             <details className="booking-policy">
               <summary>{t(L.policySummary)} *</summary>
               <h4>{t(L.refundHeading)} · {t(L.version)} {props.refund.version}</h4>
@@ -270,6 +303,10 @@ export default function BookingWizard(props: BookingWizardProps) {
             </details>
             <div className="form-group form-consent">
               <label><input type="checkbox" name="accept_policy" required /> {t(L.acceptLabel)} *</label>
+            </div>
+            <div className="form-group form-consent">
+              <label><input type="checkbox" name="accept_deposits" required /> {t(['I understand that paid deposits are retained if I withdraw, miss a payment and my booking is cancelled, or do not attend. If Okim cancels, or I decline a postponement, all paid amounts are refundable.', '我明白，若我退出、因未付款而被取消预订或未出席，已付订金将不予退还。若 Okim 取消行程，或我不接受改期，所有已付款项均可退还。'])} *</label>
+              <Link className="text-link" href="/refund-policy" target="_blank" rel="noreferrer">{t(L.refundHeading)}</Link>
             </div>
             {notice && <p className="form-status form-status-error" role="alert">{notice}</p>}
             <EquipmentEditor profile={props.equipmentProfile} locale={locale} />
@@ -284,12 +321,13 @@ export default function BookingWizard(props: BookingWizardProps) {
             <p className="booking-intro">{t(L.doneIntro)}</p>
             <dl className="booking-summary">
               <div><dt>{t(L.bookingIdLabel)}</dt><dd className="booking-id">{result.bookingId}</dd></div>
-              <div><dt>{t(L.invoiceLabel)}</dt><dd>{result.invoiceNumber}</dd></div>
-              <div><dt>{t(L.depositLabel)}</dt><dd>{result.currency} {result.deposit}</dd></div>
-              {result.holdDue && <div><dt>{t(L.holdDueLabel)}</dt><dd>{result.holdDue}</dd></div>}
-              <div><dt>{t(L.balanceLabel)}</dt><dd>{result.currency} {result.balance}</dd></div>
-              {result.balanceDue && <div><dt>{t(L.balanceDueLabel)}</dt><dd>{result.balanceDue}</dd></div>}
+              <TripPaymentRows stages={result.stages} currency={result.currency} today={props.today} locale={locale} />
             </dl>
+            {result.acknowledgment !== 'provider_accepted' && <p role="status" className="booking-intro">{
+              result.acknowledgment === 'suppressed' ? t(['Email is turned off in this preview.', '此预览已关闭邮件发送。']) :
+              result.acknowledgment === 'failed' ? t(['The booking email could not be sent. Your booking is saved. Contact Iris if you need a copy.', '预订邮件发送失败。你的预订已保存，如需副本请联系 Iris。']) :
+              t(['Your booking is saved. Email delivery is unconfirmed. Contact Iris if you need a copy.', '你的预订已保存，邮件发送情况尚未确认。如需副本请联系 Iris。'])
+            }</p>}
             <h4>{t(L.payTitle)}</h4>
             <ol className="booking-pay-steps">
               <li>{t(L.payStep1)}</li>
@@ -297,8 +335,9 @@ export default function BookingWizard(props: BookingWizardProps) {
               <li>{t(L.payStep3)}</li>
             </ol>
             <p className="booking-intro">{t(L.bankNote)}</p>
+            <p className="booking-intro">{t(['Paid deposits are retained if you withdraw, miss a payment and your booking is cancelled, or do not attend. All payments are refundable if Okim cancels or you decline a postponement.', '若你退出、因未付款被取消预订或未出席，已付订金不予退还。若 Okim 取消行程或你不接受改期，所有已付款项均可退还。'])}</p>
             <div className="booking-actions">
-              <Link className="btn btn-primary" href={`/invoice/${result.bookingId}`}>{t(L.viewInvoice)}</Link>
+              <Link className="btn btn-primary" href="/myokim">{t(L.viewMyOkim)}</Link>
               <Link className="text-link" href={`/trips/${props.slug}`}>{t(L.backToTrip)}</Link>
             </div>
           </div>

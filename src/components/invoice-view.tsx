@@ -1,107 +1,41 @@
 'use client'
 
-// M4: bilingual invoice document, print-ready (print CSS hides site chrome).
 import { useLocale, pick } from '@/lib/use-locale'
 import { setCustomerLocale } from '@/lib/booking-actions'
+import type { readInvoice } from '@/lib/payment-documents'
+import PaymentSchedule from './payment-schedule'
 
-export type InvoiceViewProps = {
-  invoiceNumber: string
-  issuedAt: string
-  bookingId: string
-  bookingStatus: string
-  customerName: string
-  customerEmail: string
-  tripTitleEn: string
-  tripTitleZh: string | null
-  travelDatesEn: string | null
-  travelDatesZh: string | null
-  currency: string
-  deposit: string
-  balance: string
-  discount: string
-  balanceDue: string | null
-  policyKind: string
-  policyVersion: number
+const statuses: Record<string, [string,string]> = {
+  awaiting_deposit: ['Reserved · awaiting first deposit', '已保留名额 · 待付首笔订金'], payment_claimed: ['Payment recorded','已记录付款'],
+  deposit_verified: ['Deposit verified','订金已核实'], confirmed: ['Confirmed','已确认'], completed: ['Completed','已完成'],
+  cancelled: ['Cancelled','已取消'], refund_flagged: ['Refund review','退款审核中'], eligibility_declined: ['Withdrawn','已退出'],
+  expired: ['Expired','已过期'],
 }
 
-const L = {
-  invoice: ['Invoice', '发票'],
-  issued: ['Issued', '开具日期'],
-  booking: ['Booking ID', '预订编号'],
-  status: ['Booking status', '预订状态'],
-  billedTo: ['Billed to', '客户'],
-  trip: ['Trip', '行程'],
-  dates: ['Travel dates', '出行日期'],
-  description: ['Description', '项目'],
-  amount: ['Amount', '金额'],
-  tripFee: ['Trip fee', '行程费用'],
-  pointsDiscount: ['Okim Points discount', 'Okim 积分抵扣'],
-  deposit: ['Deposit (due now)', '订金（现在应付）'],
-  balance: ['Balance', '尾款'],
-  balanceDue: ['Balance due by', '尾款截止日期'],
-  total: ['Total', '总计'],
-  reference: ['Payment reference', '转账备注'],
-  notice: ['Your slot is confirmed only after Iris verifies your deposit, subject to availability. Send your transfer screenshot to Iris via WhatsApp.', '只有在 Iris 核实订金后、且仍有名额时，名额才会确认。请通过 WhatsApp 将转账截图发给 Iris。'],
-  policy: ['Accepted refund policy version', '已接受的退款政策版本'],
-  print: ['Print / save as PDF', '打印／保存为 PDF'],
-  awaiting: ['Awaiting deposit', '等待订金'],
-} as const
-
-const STATUS_LABELS: Record<string, readonly [string, string]> = {
-  awaiting_deposit: L.awaiting,
-  payment_claimed: ['Payment claimed', '已申报付款'],
-  deposit_verified: ['Deposit verified', '订金已核实'],
-  confirmed: ['Confirmed', '已确认'],
-  completed: ['Completed', '已完成'],
-  refund_flagged: ['Refund flagged', '标记退款'],
-  cancelled: ['Cancelled', '已取消'],
-  eligibility_declined: ['Eligibility declined', '资格未获批'],
-}
-
-export default function InvoiceView(props: InvoiceViewProps) {
-  const locale = useLocale(undefined, (next) => void setCustomerLocale(next))
-  const t = (pair: readonly [string, string]) => pick(locale, pair[0], pair[1])
-  const tripFee = (Number(props.deposit) + Number(props.balance) + Number(props.discount)).toFixed(2)
-  const total = (Number(props.deposit) + Number(props.balance)).toFixed(2)
-  const statusPair = STATUS_LABELS[props.bookingStatus] ?? [props.bookingStatus, props.bookingStatus]
-
-  return (
-    <div className="invoice-doc" data-locale-managed>
-      <div className="invoice-head">
-        <div>
-          <p className="invoice-brand">Okim Dive</p>
-          <h1>{t(L.invoice)} {props.invoiceNumber}</h1>
-        </div>
-        <button type="button" className="btn btn-primary no-print" onClick={() => window.print()}>{t(L.print)}</button>
-      </div>
-
-      <dl className="invoice-meta">
-        <div><dt>{t(L.issued)}</dt><dd>{props.issuedAt}</dd></div>
-        <div><dt>{t(L.booking)}</dt><dd>{props.bookingId}</dd></div>
-        <div><dt>{t(L.status)}</dt><dd>{t(statusPair)}</dd></div>
-        <div><dt>{t(L.billedTo)}</dt><dd>{props.customerName}<br />{props.customerEmail}</dd></div>
-        <div><dt>{t(L.trip)}</dt><dd>{pick(locale, props.tripTitleEn, props.tripTitleZh)}</dd></div>
-        <div><dt>{t(L.dates)}</dt><dd>{pick(locale, props.travelDatesEn, props.travelDatesZh)}</dd></div>
-      </dl>
-
-      <table className="invoice-table">
-        <thead>
-          <tr><th>{t(L.description)}</th><th>{t(L.amount)}</th></tr>
-        </thead>
-        <tbody>
-          <tr><td>{t(L.tripFee)}</td><td>{props.currency} {tripFee}</td></tr>
-          {Number(props.discount) > 0 && <tr><td>{t(L.pointsDiscount)}</td><td>− {props.currency} {props.discount}</td></tr>}
-          <tr><td>{t(L.deposit)}</td><td>{props.currency} {props.deposit}</td></tr>
-          <tr><td>{t(L.balance)}{props.balanceDue ? ` · ${t(L.balanceDue)}: ${props.balanceDue}` : ''}</td><td>{props.currency} {props.balance}</td></tr>
-        </tbody>
-        <tfoot>
-          <tr><td>{t(L.total)}</td><td>{props.currency} {total}</td></tr>
-        </tfoot>
-      </table>
-
-      <p className="invoice-reference">{t(L.reference)}: <strong>{props.bookingId}</strong></p>
-      <p className="invoice-notice">{t(L.notice)}</p>
-      <p className="invoice-policy">{t(L.policy)}: {props.policyVersion}</p>
-    </div>
-  )
+export default function InvoiceView({ invoice }: { invoice: NonNullable<Awaited<ReturnType<typeof readInvoice>>> }) {
+  const locale = useLocale(undefined, next => void setCustomerLocale(next))
+  const t = (en: string, zh: string) => pick(locale,en,zh)
+  const dates = pick(locale, invoice.travelDatesEn, invoice.travelDatesZh)
+  const { summary } = invoice
+  const money = (minor: number) => summary.currency + ' ' + (minor / 100).toFixed(2)
+  return <div className="invoice-doc" data-locale-managed>
+    <div className="invoice-head"><div><p className="invoice-brand">Okim Dive</p><h1>{t('Invoice', '发票')} {invoice.number}</h1></div>
+      <button type="button" className="btn btn-primary no-print" onClick={() => window.print()}>{t('Print / save as PDF','打印／保存为 PDF')}</button></div>
+    <dl className="invoice-meta">
+      <div><dt>{t('Issued','开具日期')}</dt><dd>{invoice.issuedAt}</dd></div>
+      <div><dt>{t('Booking reference','预订编号')}</dt><dd>{summary.bookingId}</dd></div>
+      <div><dt>{t('Current booking status','当前预订状态')}</dt><dd>{t(...(statuses[invoice.bookingStatus] ?? ['Contact Iris','请联系 Iris']))}</dd></div>
+      <div><dt>{t('Billed to','客户')}</dt><dd>{invoice.customerName}<br />{invoice.customerEmail}</dd></div>
+      <div><dt>{t('Trip','行程')}</dt><dd>{pick(locale,invoice.tripTitleEn,invoice.tripTitleZh)}</dd></div>
+      {dates && <div><dt>{invoice.pendingDates ? t('Agreed travel dates','原定出行日期') : t('Travel dates','出行日期')}</dt><dd>{dates}</dd></div>}
+      {invoice.pendingDates && <div><dt>{t('Proposed dates · awaiting diver decision','建议日期 · 待潜水员决定')}</dt><dd>{invoice.pendingDates}</dd></div>}
+    </dl>
+    <table className="invoice-table"><tbody>
+      <tr><th scope="row">{t('Trip price','行程价格')}</th><td>{money(summary.originalPriceMinor)}</td></tr>
+      {summary.discountMinor > 0 && <tr><th scope="row">{t('Points discount','积分抵扣')}</th><td>− {money(summary.discountMinor)}</td></tr>}
+    </tbody><tfoot><tr><th scope="row">{t('Price after discount','折后价格')}</th><td>{money(summary.payableMinor)}</td></tr></tfoot></table>
+    <h2>{t('Payment schedule','付款安排')}</h2>
+    <PaymentSchedule locale={locale} summary={summary} completed={invoice.bookingStatus === 'completed'} />
+    {invoice.policyVersion != null && <p className="invoice-policy">{t('Accepted refund policy','已接受的退款政策')} · v{invoice.policyVersion}</p>}
+  </div>
 }

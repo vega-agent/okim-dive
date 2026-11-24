@@ -579,7 +579,7 @@ Object.assign(translations, {
   "Ask about this trip": "咨询此行程",
   // Booking page hero (M4)
   "Book your trip": "预订行程",
-  "One diver per booking. Your slot is confirmed after deposit verification.": "每次预订限一名潜水员。名额在订金核实后确认。",
+  "One diver per booking. Iris confirms your place after the first deposit is paid in full.": "每次预订限一位潜水员。第一笔订金全部到账后，Iris 会确认你的名额。",
   "This trip is arranged on request. Tell us your plans and we will confirm the options together.": "此行程按需安排。告诉我们你的计划，一起确认可选方案。",
   // Instructor portal nav (M5)
   "Portal": "教练工作台",

@@ -1,12 +1,4 @@
-/**
- * Trip management pure helpers (M5 item 6, TRIP-MANAGEMENT-SPEC).
- * Client-safe: no server imports. Shared by trip actions, portal list and editors.
- *
- * Capacity math follows MVP-SPEC decision #22 (14-day soft hold): active holds
- * (awaiting_deposit) + payment_claimed + deposit_verified + confirmed consume
- * slots. When the hold milestone lands hold_expires_at + sweep, expired holds
- * must be excluded here — keep this the single occupancy definition.
- */
+import { localCalendarDate, parseMoneyMinor, validatePaymentSchedule, type StageInput } from './payment-schedule'
 
 export type Locale = 'en' | 'zh'
 
@@ -28,9 +20,8 @@ export function slotsConsumed(bookingStatuses: string[]): number {
 export type TripFacts = {
   currency: string
   priceAmount: string | number
-  depositType: string
-  depositValue: string | number
-  balanceDueDays: number
+  balanceDueDate: string | null
+  departureTimezone: string
   capacity: number
   travelStart: string | Date | null
   travelEnd: string | Date | null
@@ -60,13 +51,26 @@ function utcDate(value: string | Date | null): Date | null {
 }
 
 /** Display lines auto-written from Settings facts, in the requested language. */
-export function deriveDisplay(facts: TripFacts, locale: Locale): DerivedDisplay {
+export type TripDeposit = { amount: string; dueDate: string | null }
+
+/** Stage IDs in this offer are positions. Reservation gives them booking-specific IDs. */
+export function buildTripStages(facts: TripFacts, deposits: TripDeposit[]): StageInput[] {
+  const price = parseMoneyMinor(String(facts.priceAmount))
+  const stages: StageInput[] = deposits.map((row, i) => ({
+    id: 'deposit-' + (i + 1), kind: 'deposit', position: i === 0 ? 1 : 2,
+    amountMinor: parseMoneyMinor(row.amount), dueDate: row.dueDate,
+  }))
+  const final = stages.reduce((remaining, stage) => remaining - stage.amountMinor, price)
+  stages.push({ id: 'final', kind: 'final', position: 3, amountMinor: final, dueDate: facts.balanceDueDate })
+  const start = utcDate(facts.travelStart)
+  if (!start) throw new RangeError('Missing departure date')
+  validatePaymentSchedule(price, stages, localCalendarDate(start, facts.departureTimezone))
+  return stages
+}
+
+export function deriveDisplay(facts: TripFacts, locale: Locale, deposits: TripDeposit[]): DerivedDisplay {
   const price = Number(facts.priceAmount)
-  const depositValue = Number(facts.depositValue)
-  const deposit = facts.depositType === 'percent'
-    ? Math.round(price * depositValue) / 100
-    : Math.min(depositValue, price)
-  const balance = Math.round((price - deposit) * 100) / 100
+  const balance = (parseMoneyMinor(String(facts.priceAmount)) - deposits.reduce((sum, row) => sum + parseMoneyMinor(row.amount), 0)) / 100
   const start = utcDate(facts.travelStart)
   const end = utcDate(facts.travelEnd)
 
@@ -89,17 +93,10 @@ export function deriveDisplay(facts: TripFacts, locale: Locale): DerivedDisplay 
     duration = locale === 'zh' ? `${days}天${nights}夜` : `${days} ${days === 1 ? 'day' : 'days'} / ${nights} ${nights === 1 ? 'night' : 'nights'}`
   }
 
-  const depositText = facts.depositType === 'percent'
-    ? locale === 'zh'
-      ? `订金 ${depositValue}%（${money(facts.currency, deposit)}）`
-      : `Deposit ${depositValue}% (${money(facts.currency, deposit)})`
-    : locale === 'zh'
-      ? `订金 ${money(facts.currency, deposit)}`
-      : `Deposit ${money(facts.currency, deposit)}`
-
-  const balanceText = locale === 'zh'
-    ? `尾款 ${money(facts.currency, balance)}，出发前 ${facts.balanceDueDays} 天缴清`
-    : `Balance ${money(facts.currency, balance)}, due ${facts.balanceDueDays} days before departure`
+  const due = (date: string | null) => date ? (locale === 'zh' ? '，截止 ' : ' · due ') + date : ''
+  const depositText = deposits.map((row, i) => (locale === 'zh' ? '订金 ' : 'Deposit ') + (i + 1) + ' · ' +
+    money(facts.currency, Number(row.amount)) + due(row.dueDate)).join(' · ')
+  const balanceText = money(facts.currency, balance) + (balance > 0 ? due(facts.balanceDueDate) : '')
 
   return {
     travelDates,
@@ -157,22 +154,24 @@ export function contentCompleteness(trip: TripContent, locale: Locale): { done: 
   return { done, total: CONTENT_TOTAL, missingRequired }
 }
 
-export type Blocker = { en: string; zh: string }
+export type Blocker = { en: string; zh: string; fields?: string[] }
 
 /** Server-side publish gate (TRIP-MANAGEMENT-SPEC §6): facts + both languages complete. */
-export function publishBlockers(trip: TripFacts & TripContent): Blocker[] {
+export function publishBlockers(trip: TripFacts & TripContent, deposits: TripDeposit[]): Blocker[] {
   const blockers: Blocker[] = []
   const price = Number(trip.priceAmount)
-  const depositValue = Number(trip.depositValue)
-  if (!(price > 0)) blockers.push({ en: 'Set a price above 0', zh: '请设置大于 0 的价格' })
-  if (!(depositValue > 0)) blockers.push({ en: 'Set a deposit above 0', zh: '请设置大于 0 的订金' })
-  if (trip.depositType === 'percent' && depositValue > 100) blockers.push({ en: 'Deposit percent cannot exceed 100', zh: '订金比例不能超过 100%' })
-  if (trip.depositType === 'fixed' && depositValue > price) blockers.push({ en: 'Fixed deposit cannot exceed the price', zh: '固定订金不能超过价格' })
-  if (!(trip.capacity >= 1)) blockers.push({ en: 'Capacity must be at least 1', zh: '名额至少为 1' })
+  if (!(price > 0)) blockers.push({ en: 'Set a price above 0', zh: '请设置大于 0 的价格', fields: ['price'] })
+  try {
+    buildTripStages(trip, deposits)
+  } catch {
+    blockers.push({ en: 'Set one or two positive deposits within the price. Give each payable stage a later due date before departure.',
+      zh: '请设置一至两笔订金，总额不超过行程价格。各笔应付款的截止日期须依次递增，并早于出发日。', fields: ['deposits', 'balanceDueDate'] })
+  }
+  if (!(trip.capacity >= 1)) blockers.push({ en: 'Capacity must be at least 1', zh: '名额至少为 1', fields: ['capacity'] })
   const start = utcDate(trip.travelStart)
   const end = utcDate(trip.travelEnd)
-  if (!start || !end) blockers.push({ en: 'Set travel start and end dates', zh: '请设置行程出发和结束日期' })
-  else if (end < start) blockers.push({ en: 'End date must be after start date', zh: '结束日期必须晚于出发日期' })
+  if (!start || !end) blockers.push({ en: 'Set travel start and end dates', zh: '请设置行程出发和结束日期', fields: ['travelStart', 'travelEnd'] })
+  else if (end < start) blockers.push({ en: 'End date must be after start date', zh: '结束日期必须晚于出发日期', fields: ['travelStart', 'travelEnd'] })
   for (const locale of ['en', 'zh'] as const) {
     const { missingRequired } = contentCompleteness(trip, locale)
     if (missingRequired.length) {
@@ -186,8 +185,8 @@ export function publishBlockers(trip: TripFacts & TripContent): Blocker[] {
       }
       const list = missingRequired.map(f => names[f][locale]).join(locale === 'zh' ? '、' : ', ')
       blockers.push(locale === 'zh'
-        ? { en: `Chinese content missing: ${missingRequired.map(f => names[f].en).join(', ')}`, zh: `中文内容缺少：${list}` }
-        : { en: `English content missing: ${list}`, zh: `英文内容缺少：${list}` })
+        ? { en: `Chinese content missing: ${missingRequired.map(f => names[f].en).join(', ')}`, zh: `中文内容缺少：${list}`, fields: missingRequired.map(f => `content:${f}:zh`) }
+        : { en: `English content missing: ${list}`, zh: `英文内容缺少：${list}`, fields: missingRequired.map(f => `content:${f}:en`) })
     }
   }
   return blockers
@@ -202,6 +201,13 @@ export function slugify(title: string): string {
 /** Full trip row as passed to client editors (dates ISO-serialized). */
 export type SerializedTrip = Omit<TripFacts, 'travelStart' | 'travelEnd'> & TripContent & {
   departureTimezone: string
+  locationKey: string
+  diveSiteEn: string | null
+  diveSiteZh: string | null
+  airportEn: string | null
+  airportZh: string | null
+  jettyEn: string | null
+  jettyZh: string | null
   travelStart: string | null
   travelEnd: string | null
   id: string
@@ -234,7 +240,7 @@ export function tripDisplayState(trip: { status: string; published: boolean }, c
   if (trip.status === 'cancelled') return { key: 'cancelled', en: 'Cancelled', zh: '已取消', tone: 'bad' }
   if (trip.status === 'draft') return { key: 'draft', en: 'Draft', zh: '草稿', tone: 'neutral' }
   if (!trip.published) return { key: 'closed', en: 'Closed', zh: '已关闭', tone: 'neutral' }
-  if (trip.status === 'on_request') return { key: 'on_request', en: 'Inquiries only', zh: '仅接受咨询', tone: 'pending' }
+  if (trip.status === 'on_request') return { key: 'on_request', en: 'On request', zh: '按需安排', tone: 'pending' }
   if (consumed >= capacity) return { key: 'full', en: 'Full', zh: '已满员', tone: 'pending' }
   return { key: 'open', en: 'Open for booking', zh: '开放预订', tone: 'ok' }
 }
