@@ -57,7 +57,7 @@ test('receipt and instructor gates protect bookings; cancelled, declined, no-sho
       replace('../src/components/' + name + '.tsx', { __esModule: true, default: view })
     }
     replace('../styles/portal-tabs.css', {})
-    for (const name of ['portal-actions', 'payment-actions', 'payment-queries', 'payment-documents', 'booking-lifecycle']) {
+    for (const name of ['portal-session', 'portal-actions', 'payment-actions', 'payment-queries', 'payment-documents', 'booking-lifecycle']) {
       replace('../src/lib/' + name + '.ts')
     }
     const modules = ['invoice/[bookingId]', 'receipt/[paymentId]', 'portal'].map(path => '../app/(site)/' + path + '/page.tsx')
@@ -118,10 +118,11 @@ test('receipt and instructor gates protect bookings; cancelled, declined, no-sho
 
     await expect(ReceiptPage(routeReceipt)).rejects.toThrow('redirect to /book')
     await expect(InvoicePage(routeInvoice)).rejects.toThrow('redirect to /book')
+    await expect(PortalPage()).rejects.toThrow('redirect to /portal/sign-in')
     session = login(other)
     await expect(ReceiptPage(routeReceipt)).rejects.toThrow('not found')
     await expect(InvoicePage(routeInvoice)).rejects.toThrow('not found')
-    await expect(PortalPage()).rejects.toThrow('Forbidden')
+    await expect(PortalPage()).rejects.toThrow('redirect to /portal/sign-in')
 
     const mutation = toForm({ bookingId: ownBooking, paymentId, participated: 'on', points: 100, amount: '1.00',
       expectedRevision: 0, expectedDiscountMinor: 500, reason: 'Synthetic test', paidOn: '2026-01-11',

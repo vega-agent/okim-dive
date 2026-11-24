@@ -20,6 +20,18 @@ const instructorEmails = (process.env.AUTH_INSTRUCTOR_EMAILS ?? '')
   .map((e) => e.trim().toLowerCase())
   .filter(Boolean)
 
+export async function isInstructorEmail(email: string) {
+  if (instructorEmails.includes(email)) return true
+  if (!db) return false
+  try {
+    const [row] = await db.select().from(settings).where(eq(settings.key, 'instructor_emails'))
+    const emails = (row?.value as { emails?: unknown } | undefined)?.emails
+    return Array.isArray(emails) && emails.some(value => String(value).toLowerCase() === email)
+  } catch {
+    return false
+  }
+}
+
 // Durable resend cooldown + hourly cap (M5 dry-run fix, owner-approved 2026-11-21).
 // Module-level Maps do not survive across server-action invocations in the Next
 // production runtime, so the verification_tokens table IS the send ledger:
@@ -118,13 +130,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       const email = user.email?.toLowerCase() ?? ''
       // Role from the instructor allowlist (idempotent). Settings-managed
       // (M5 item 6); the env list always keeps access as a safety fallback.
-      let storedEmails: string[] = []
-      try {
-        const [row] = await db.select().from(settings).where(eq(settings.key, 'instructor_emails'))
-        const emails = (row?.value as { emails?: unknown } | undefined)?.emails
-        if (Array.isArray(emails)) storedEmails = emails.map(e => String(e).toLowerCase())
-      } catch { /* settings unreadable — env fallback still applies */ }
-      const isInstructor = instructorEmails.includes(email) || storedEmails.includes(email)
+      const isInstructor = await isInstructorEmail(email)
       if (isInstructor && user.role !== 'instructor') {
         await db.update(users).set({ role: 'instructor' }).where(eq(users.id, user.id))
       }

@@ -1,5 +1,5 @@
 import { notFound } from 'next/navigation'
-import { requireInstructor } from '@/lib/portal-actions'
+import { requirePortalSession } from '@/lib/portal-session'
 import { db } from '@/db'
 import { bookings, trips, tripDeposits } from '@/db/schema'
 import { and, eq } from 'drizzle-orm'
@@ -9,7 +9,7 @@ import '../../../../../styles/portal-tabs.css'
 
 export const dynamic = 'force-dynamic'
 export default async function TripSettingsPage({ params }: { params: { id: string } }) {
-  await requireInstructor()
+  await requirePortalSession()
   if (!db) throw new Error('Database unavailable')
   const [trip] = await db.select().from(trips).where(eq(trips.id, params.id))
   if (!trip) notFound()

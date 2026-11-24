@@ -1,4 +1,4 @@
-import { requireInstructor } from '@/lib/portal-actions'
+import { requirePortalSession } from '@/lib/portal-session'
 import { missingAcknowledgment } from '@/lib/booking-notifications'
 import { readPaymentBooks } from '@/lib/payment-queries'
 import { maximumRedeemablePoints, spendablePoints } from '@/lib/points-accounting'
@@ -14,7 +14,7 @@ import '../../../styles/portal-tabs.css'
 
 export const dynamic = 'force-dynamic'
 export default async function PortalPage() {
-  await requireInstructor()
+  await requirePortalSession()
   if (!db) throw new Error('Database unavailable')
   const [book, queue, ledger, customerRows, tripRows, settingRows, policyRows, messageRows, readRows, auditRows] = await Promise.all([
     readPaymentBooks({ instructor: true }), db.select().from(inquiries), db.select().from(pointsLedger),
