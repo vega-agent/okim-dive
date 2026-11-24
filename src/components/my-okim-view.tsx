@@ -6,6 +6,7 @@
 // own tabs so the page stays short as history grows.
 // Self-localized via useLocale, following the browsing language (#33);
 // the global toggle persists the choice through setCustomerLocale (emails).
+import AccountHeading from './account-heading'
 import { useEffect, useState, type KeyboardEvent, type ReactNode } from 'react'
 import { useLocale, pick, type Locale } from '@/lib/use-locale'
 import { setCustomerLocale } from '@/lib/booking-actions'
@@ -223,7 +224,7 @@ export default function MyOkimView({ data }: { data: Data }) {
 
   return <div className="container">
     <header className="my-head">
-      <h1>{t('My Okim', '我的 Okim')}</h1>
+      <AccountHeading title={t('My Okim', '我的 Okim')} logoutLabel={t('Log out', '退出登录')} />
       <p className="my-lede">{t('Your bookings and Okim Points in one place. Bookings and points are read-only — contact Iris to make changes; profile details are self-declared.', '你的预订与 Okim 积分尽在于此。预订与积分只读——如需更改请联系 Iris；个人资料为自行申报。')}</p>
     </header>
     <div className="my-tabs" role="tablist" aria-label={t('My Okim sections', '我的 Okim 栏目')}>

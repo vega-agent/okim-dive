@@ -7,6 +7,7 @@
 // from the card (never re-enter known data). Buttons restyled portal-scoped:
 // Deep Sea primary, white secondary, coral only on destructive confirms.
 // Identifiers explained once; payment UUIDs never displayed (§13/§14).
+import AccountHeading from './account-heading'
 import { useEffect, useState, type ReactNode } from 'react'
 import { useLocale } from '@/lib/use-locale'
 import { completeBooking, handleInquiry } from '@/lib/portal-actions'
@@ -220,8 +221,7 @@ export default function PortalView({ data, updates }: { data: Data; updates?: Re
 
   return <main className="ocean-journey portal" data-locale-managed><div className="container">
     <header className="portal-head">
-      <h1>{t('Instructor portal', '教练工作台')}</h1>
-
+      <AccountHeading title={t('Instructor portal', '教练工作台')} logoutLabel={t('Log out', '退出登录')} />
     </header>
     <div className="portal-tabs" role="tablist" aria-label={t('Portal sections', '工作台栏目')}>
       {tabs.map(([id, en, zh, count, icon], i) => <button

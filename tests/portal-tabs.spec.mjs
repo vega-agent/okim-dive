@@ -110,3 +110,18 @@ test('Trip editor has no Inquiries-only launch; Tioman stays On request', async 
     await expect(page.getByRole('link', { name: 'Book this trip', exact: true })).toHaveCount(0);
   })
 })
+
+for (const surface of ['/myokim', '/portal']) {
+  test(`Logging out from ${surface} ends the shared Okim session`, async ({ page }) => {
+    await withReviewSession(page, async () => {
+      await page.goto(surface)
+      await page.getByRole('button', { name: 'Log out', exact: true }).click()
+      await expect(page).toHaveURL(new URL('/', process.env.PLAYWRIGHT_BASE_URL).href)
+      expect(await (await page.request.get('/api/auth/session')).json()).toBeNull()
+      await page.goto('/portal')
+      await expect(page).toHaveURL(/\/portal\/sign-in$/)
+      await page.goto('/myokim')
+      await expect(page).toHaveURL(/\/trips$/)
+    })
+  })
+}

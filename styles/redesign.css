@@ -800,6 +800,9 @@ main[data-locale-managed] .btn-primary, .invoice-doc .btn-primary { background: 
 /* main.portal specificity beats .ocean-journey::before (opacity .08) in styles.css */
 main.portal::before { content: ""; position: fixed; inset: 0; z-index: -1; opacity: 1; pointer-events: none; background: linear-gradient(rgba(239, 249, 246, .5), rgba(235, 247, 244, .55)), url('../assets/backgrounds/ocean/portal-shallows.webp') center / cover no-repeat; }
 .portal .container { display: grid; gap: 1.5rem; }
+.account-heading { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: .5rem 1rem; margin-bottom: .4rem; }
+.account-heading .btn { min-height: 44px; }
+.portal-head .account-heading h1, .my-head .account-heading h1 { margin: 0; }
 .portal-head h1 { font-size: clamp(1.9rem, 3.5vw, 2.6rem); margin: 0 0 .4rem; }
 .portal-lede { margin: 0; max-width: 62ch; color: var(--ocean-deep); }
 .portal-nav { position: sticky; top: 88px; z-index: 50; display: flex; flex-wrap: wrap; gap: .4rem; padding: .5rem; background: rgba(255, 255, 255, .96); border: 1px solid var(--whisper-border); border-radius: 12px; box-shadow: var(--soft-shadow); }
