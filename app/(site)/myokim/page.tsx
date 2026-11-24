@@ -1,3 +1,4 @@
+import AccountSignIn from '@/components/account-sign-in'
 import { spendablePoints } from '@/lib/points-accounting'
 // M6: My Okim — customer area (MVP-SPEC §10), tabbed per owner revision:
 // Upcoming trips (default) / Past trips (compact) / Points / Profile.
@@ -24,7 +25,8 @@ export const metadata: Metadata = { title: 'My Okim - Okim Dive' }
 
 export default async function MyOkimPage() {
   const session = await auth()
-  if (!session?.user?.id || !session.user.customerId) redirect('/book')
+  if (!session?.user?.id) return <AccountSignIn area="myokim" />
+  if (!session.user.customerId) redirect('/book')
   if (!db) throw new Error('Database unavailable')
   const customerId = session.user.customerId
 

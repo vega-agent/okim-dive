@@ -121,7 +121,22 @@ for (const surface of ['/myokim', '/portal']) {
       await page.goto('/portal')
       await expect(page).toHaveURL(/\/portal\/sign-in$/)
       await page.goto('/myokim')
-      await expect(page).toHaveURL(/\/trips$/)
+      await expect(page.getByRole('heading', { name: 'Sign in to My Okim' })).toBeVisible()
     })
   })
 }
+
+test('signed-out visitors reach both sign-in forms from the homepage', async ({ page }) => {
+  await page.goto('/')
+  for (const [linkName, heading] of [
+    ['My Okim', 'Sign in to My Okim'],
+    ['Portal', 'Instructor sign-in'],
+  ]) {
+    const menu = page.locator('.nav-toggle')
+    if (await menu.isVisible()) await menu.click()
+    await page.locator('#primary-navigation').getByRole('link', { name: linkName, exact: true }).click()
+    await expect(page.getByRole('heading', { name: heading, exact: true })).toBeVisible()
+    await expect(page.getByRole('textbox')).toBeVisible()
+    await page.goto('/')
+  }
+})

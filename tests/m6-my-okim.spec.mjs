@@ -57,8 +57,7 @@ test('M6 My Okim: auth gate, read-only upcoming bookings, invoice/receipt links,
     const anon = await browser.newContext();
     const anonPage = await anon.newPage();
     await anonPage.goto('http://localhost:3100/myokim');
-    // /myokim redirects to /book (sign-in entry), which forwards to trip selection.
-    await expect(anonPage).toHaveURL(/\/trips$/);
+    await expect(anonPage.getByRole('heading', { name: 'Sign in to My Okim' })).toBeVisible();
     await anon.close();
     const a = await f.booking('confirmed');
     const rival = `${f.prefix}-rival`;
