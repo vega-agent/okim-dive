@@ -3,7 +3,11 @@
   display: grid;
   place-items: center;
   padding: calc(80px + clamp(1.5rem, 5vh, 4rem)) clamp(1rem, 4vw, 3rem) clamp(2rem, 7vh, 5rem);
-  background: linear-gradient(150deg, #faf9f1, #edf5f2);
+  background-color: #c1e4df;
+  background-image: linear-gradient(rgba(247, 250, 244, .38), rgba(239, 247, 244, .34)),
+    url('/assets/backgrounds/ocean/open-water-wash.webp');
+  background-size: cover;
+  background-position: center;
 }
 
 .card {
