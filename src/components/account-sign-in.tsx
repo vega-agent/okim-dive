@@ -3,10 +3,11 @@
 import { useFormState, useFormStatus } from 'react-dom'
 import { requestDiverLink, requestPortalLink } from '@/lib/account-sign-in-actions'
 import { useLocale } from '@/lib/use-locale'
+import styles from './account-sign-in.module.css'
 
-function SendButton({ label }: { label: string }) {
+function SendButton({ label, pendingLabel }: { label: string; pendingLabel: string }) {
   const { pending } = useFormStatus()
-  return <button className="btn btn-primary" type="submit" disabled={pending}>{label}</button>
+  return <button className={styles.submit} type="submit" disabled={pending} aria-busy={pending}>{pending ? pendingLabel : label}</button>
 }
 
 export default function AccountSignIn({ area }: { area: 'portal' | 'myokim' }) {
@@ -24,17 +25,23 @@ export default function AccountSignIn({ area }: { area: 'portal' | 'myokim' }) {
   }
   const heading = instructor ? t('Instructor sign-in', '教练登录') : t('Sign in to My Okim', '登录我的 Okim')
   const emailLabel = instructor ? t('Instructor email', '教练邮箱') : t('Email address', '邮箱')
-  return <main className="ocean-journey"><section className="trips-section"><div className="container">
-    <div className="booking-shell" data-locale-managed><div className="booking-card">
-      <h1>{heading}</h1>
-      <form action={action} className="booking-form">
-        <div className="form-group">
+  const instruction = instructor
+    ? t('Use your approved instructor email to access the portal.', '请使用已获授权的教练邮箱登录工作台。')
+    : t('Use your booking email to view your trips and Okim Points.', '使用预订时的邮箱查看行程与 Okim 积分。')
+
+  return <main className={styles.page} data-locale-managed>
+    <div className={styles.card}>
+      <div className={instructor ? styles.instructorArt : styles.diverArt} aria-hidden="true" />
+      <div className={styles.panel}>
+        <h1>{heading}</h1>
+        <p className={styles.intro}>{instruction}</p>
+        <form action={action} className={styles.form}>
           <label htmlFor={area + '-email'}>{emailLabel}</label>
           <input id={area + '-email'} name="email" type="email" autoComplete="email" required />
-        </div>
-        <SendButton label={zh ? '发送登录链接' : 'Email me a sign-in link'} />
-        <p role="status">{messages[state]}</p>
-      </form>
-    </div></div>
-  </div></section></main>
+          <SendButton label={t('Email me a sign-in link', '发送登录链接')} pendingLabel={t('Sending…', '正在发送…')} />
+          <p role="status" className={styles.status} data-state={state}>{messages[state]}</p>
+        </form>
+      </div>
+    </div>
+  </main>
 }

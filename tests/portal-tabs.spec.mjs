@@ -137,6 +137,8 @@ test('signed-out visitors reach both sign-in forms from the homepage', async ({ 
     await page.locator('#primary-navigation').getByRole('link', { name: linkName, exact: true }).click()
     await expect(page.getByRole('heading', { name: heading, exact: true })).toBeVisible()
     await expect(page.getByRole('textbox')).toBeVisible()
+    expect(await page.getByRole('main').innerText()).not.toMatch(/[㐀-鿿]/)
+    await expect(page.getByRole('button', { name: 'Email me a sign-in link' })).toBeInViewport()
     await page.goto('/')
   }
 })

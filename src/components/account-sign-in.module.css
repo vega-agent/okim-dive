@@ -1,0 +1,82 @@
+.page {
+  min-height: 100svh;
+  display: grid;
+  place-items: center;
+  padding: calc(80px + clamp(1.5rem, 5vh, 4rem)) clamp(1rem, 4vw, 3rem) clamp(2rem, 7vh, 5rem);
+  background: linear-gradient(150deg, #faf9f1, #edf5f2);
+}
+
+.card {
+  display: grid;
+  grid-template-columns: minmax(0, .92fr) minmax(0, 1fr);
+  width: min(100%, 60rem);
+  min-height: 27rem;
+  overflow: hidden;
+  border: 1px solid var(--whisper-border);
+  border-radius: 14px;
+  background: white;
+  box-shadow: 0 12px 36px rgba(38, 70, 83, .08);
+}
+
+.instructorArt, .diverArt { background-size: cover; }
+.instructorArt {
+  background-image: url('/assets/backgrounds/generated/courses-hero-watercolor.webp');
+  background-position: 74% center;
+}
+.diverArt {
+  background-image: url('/assets/backgrounds/generated/trips-hero-watercolor.webp');
+  background-position: 75% center;
+}
+
+.panel { align-self: center; min-width: 0; padding: clamp(2rem, 4vw, 3.25rem); }
+.panel h1 {
+  margin: 0;
+  font-size: clamp(1.75rem, 2.65vw, 2.25rem);
+  line-height: 1.16;
+  font-weight: 500;
+  letter-spacing: -.02em;
+  color: var(--ocean-deep);
+}
+.intro { margin: .75rem 0 1.75rem; font-size: 1rem; line-height: 1.55; color: var(--ink-soft); }
+.form { display: grid; }
+.form label { margin-bottom: .4rem; font-size: .94rem; font-weight: 700; color: var(--ocean-deep); }
+.form input {
+  width: 100%;
+  min-width: 0;
+  min-height: 48px;
+  padding: .65rem .85rem;
+  border: 1px solid #82979d;
+  border-radius: 8px;
+  background: white;
+  color: var(--ocean-deep);
+  font: inherit;
+}
+.submit {
+  margin-top: 1rem;
+  min-height: 48px;
+  padding: .65rem 1rem;
+  border: 0;
+  border-radius: 8px;
+  background: #1b4965;
+  color: white;
+  font: inherit;
+  font-weight: 700;
+  cursor: pointer;
+}
+.submit:hover { background: #173b4a; }
+.submit:active { background: #102e3b; }
+.submit:disabled { opacity: .7; cursor: wait; }
+.form input:focus-visible, .submit:focus-visible { outline: 2px solid #457b9d; outline-offset: 3px; }
+.status { margin: 0; font-size: .9rem; line-height: 1.5; color: var(--ocean-deep); }
+.status:not(:empty) { margin-top: 1rem; }
+.status[data-state='error'], .status[data-state='invalid'] { color: #96373d; }
+
+@media (max-width: 700px) {
+  .page { align-items: start; padding: 6.5rem 1rem 2rem; }
+  .card { grid-template-columns: 1fr; max-width: 28rem; min-height: 0; }
+  .instructorArt, .diverArt { height: clamp(6.5rem, 31vw, 9rem); }
+  .instructorArt { background-position: center 62%; }
+  .diverArt { background-position: center 56%; }
+  .panel { padding: 1.5rem clamp(1.1rem, 5vw, 2rem) 1.75rem; }
+  .intro { margin-bottom: 1.35rem; }
+}
